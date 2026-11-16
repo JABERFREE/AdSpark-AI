@@ -1,18 +1,17 @@
 // ==================== OWNER / ADMIN CONFIGURATION ====================
-// ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط ويختفي عن الزوار
-const ADMIN_EMAILS = [emadjaber23@gmail.com
+// ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط
+const ADMIN_EMAILS = [
   'admin@gmail.com',
   'owner@gmail.com',
   'jaber@gmail.com'
 ];
 
-// State Management
 const GENERATION_COST = 250;
 let user = JSON.parse(localStorage.getItem('adspark_user')) || null;
 let uploadedProductImg = null;
 let lastGeneratedBlobUrl = null;
 
-// Page Navigation Logic (Bottom Footer Navigation)
+// التنقل بين الصفحات في التذييل السفلي (الرئيسية، التعليمات، الخصوصية، الشروط)
 function switchPage(pageName) {
   document.querySelectorAll('.page-view').forEach(page => {
     page.classList.add('hidden');
@@ -38,7 +37,7 @@ document.querySelectorAll('.footer-link').forEach(btn => {
   });
 });
 
-// Default Viral Templates
+// القوالب الافتراضية
 const defaultTemplates = [
   {
     id: 1,
@@ -99,7 +98,7 @@ const defaultTemplates = [
 let templates = JSON.parse(localStorage.getItem('adspark_templates')) || defaultTemplates;
 let selectedTemplate = templates[0];
 
-// DOM Elements
+// عناصر الواجهة
 const gmailLoginBtn = document.getElementById('gmailLoginBtn');
 const userLabel = document.getElementById('userLabel');
 const creditPill = document.getElementById('creditPill');
@@ -114,7 +113,7 @@ const generateBtn = document.getElementById('generateBtn');
 const resultSection = document.getElementById('resultSection');
 const outputVideo = document.getElementById('outputVideo');
 
-// Check if current logged-in user is the Page Owner / Admin
+// التحقق هل المستخدم الحالي هو مالك الصفحة
 function isOwnerLoggedIn() {
   if (!user || !user.email) return false;
   const emailLower = user.email.toLowerCase().trim();
@@ -122,7 +121,6 @@ function isOwnerLoggedIn() {
   return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower) || isSecretAdminUrl;
 }
 
-// Initialize Auth & Admin Visibility UI
 function updateAuthUI() {
   if (user) {
     userLabel.textContent = user.email;
@@ -130,7 +128,6 @@ function updateAuthUI() {
     creditBalance.textContent = user.credits;
   }
 
-  // إظهار زر لوحة المشرف للمالك فقط وإخفاؤه تماماً عن الزوار العاديين
   if (isOwnerLoggedIn()) {
     openAdminBtn.classList.remove('hidden');
   } else {
@@ -143,10 +140,10 @@ function saveUser() {
   updateAuthUI();
 }
 
-// Gmail Login (Grants 1000 Free Points)
+// تسجيل الدخول عبر Gmail
 gmailLoginBtn.addEventListener('click', () => {
   if (user) {
-    const logout = confirm(`أنت مسجل الدخول بحساب: ${user.email}\nهل ترغب بتسجيل الخروج؟`);
+    const logout = confirm(`أنت مسجل الدخول بحساب: ${user.email} - هل ترغب بتسجيل الخروج؟`);
     if (logout) {
       user = null;
       localStorage.removeItem('adspark_user');
@@ -175,7 +172,7 @@ gmailLoginBtn.addEventListener('click', () => {
   }
 });
 
-// Render Templates (Supports both Image Covers and Video Templates)
+// عرض القوالب
 function renderTemplates(filterCat = 'all') {
   templatesGrid.innerHTML = '';
   const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
@@ -210,7 +207,7 @@ function renderTemplates(filterCat = 'all') {
   });
 }
 
-// Category Tabs
+// تصنيفات القوالب
 document.querySelectorAll('.cat-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
@@ -219,7 +216,7 @@ document.querySelectorAll('.cat-tab').forEach(tab => {
   });
 });
 
-// Product Image Upload
+// رفع صورة المنتج
 productImageInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -233,7 +230,7 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// Generate Real Video (Canvas + MediaRecorder + Web Audio)
+// توليد الفيديو الإعلاني الحقيقي (صوت + صورة)
 async function generateRealAdVideo() {
   if (!user) {
     alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة مجانية!');
@@ -254,7 +251,6 @@ async function generateRealAdVideo() {
   const adText = promptInput.value.trim() || selectedTemplate.prompt;
   const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
 
-  // Load cover fallback image if template is image
   let activeImg = uploadedProductImg;
   if (!activeImg && selectedTemplate.mediaType !== 'video') {
     const bgImg = new Image();
@@ -264,7 +260,6 @@ async function generateRealAdVideo() {
     activeImg = bgImg;
   }
 
-  // Audio Synthesizer Stream
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const dest = audioCtx.createMediaStreamDestination();
   const osc = audioCtx.createOscillator();
@@ -373,7 +368,7 @@ async function generateRealAdVideo() {
 generateBtn.addEventListener('click', generateRealAdVideo);
 document.getElementById('regenerateBtn').addEventListener('click', generateRealAdVideo);
 
-// Download & Share Video
+// تحميل ومشاركة الفيديو
 document.getElementById('downloadVideoBtn').addEventListener('click', () => {
   if (!lastGeneratedBlobUrl) return;
   const a = document.createElement('a');
@@ -387,7 +382,7 @@ document.getElementById('shareVideoBtn').addEventListener('click', () => {
   alert('تم نسخ رابط مشاركة الإعلان إلى الحافظة!');
 });
 
-// Pricing Modal & Plan Purchase
+// نافذة الباقات والاشتراكات
 creditPill.addEventListener('click', () => {
   document.getElementById('pricingModal').classList.remove('hidden');
 });
@@ -407,7 +402,7 @@ document.querySelectorAll('.select-plan-btn').forEach(btn => {
   });
 });
 
-// Admin Panel Logic (Owner Only + Supports Video & Image Upload)
+// لوحة المشرف (للمالك فقط)
 openAdminBtn.addEventListener('click', () => {
   if (!isOwnerLoggedIn()) {
     alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
@@ -440,7 +435,7 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
     try {
       localStorage.setItem('adspark_templates', JSON.stringify(templates));
     } catch (err) {
-      console.warn('حجم الملف كبير للتخزين الدائم في المتصفح، سيبقى متاحاً في الجلسة الحالية.');
+      console.warn('حجم الملف كبير للتخزين الدائم، سيبقى متاحاً في الجلسة الحالية.');
     }
     renderTemplates('all');
     document.getElementById('adminModal').classList.add('hidden');
@@ -463,14 +458,14 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
   }
 });
 
-// Close Modals
+// إغلاق النوافذ المنبثقة
 document.querySelectorAll('.close-modal').forEach(btn => {
   btn.addEventListener('click', () => {
     document.getElementById(btn.dataset.close).classList.add('hidden');
   });
 });
 
-// Boot
+// تشغيل التطبيق
 promptInput.value = selectedTemplate.prompt;
 updateAuthUI();
 renderTemplates('all');
