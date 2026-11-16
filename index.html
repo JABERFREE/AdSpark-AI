@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdSpark AI — استوديو توليد الفيديوهات الإعلانية بالذكاء الاصطناعي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="brand" onclick="switchPage('home')" style="cursor: pointer;">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <span class="brand-name">AdSpark <span class="accent">AI</span></span>
+        <span class="brand-tag">1-Click Viral Video Studio</span>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="nav-links">
+      <button class="nav-link active" data-page="home">🏠 الرئيسية (Home)</button>
+      <button class="nav-link" data-page="guide">📖 تعليمات التطبيق</button>
+      <button class="nav-link" data-page="privacy">🔒 سياسة الخصوصية</button>
+      <button class="nav-link" data-page="terms">📜 الشروط والأحكام</button>
+    </nav>
+
+    <div class="nav-actions">
+      <button id="openAdminBtn" class="btn btn-secondary">
+        <span>🛠️</span> لوحة المشرف (إضافة قوالب)
+      </button>
+
+      <div id="creditPill" class="credit-pill hidden" title="اضغط لشحن الرصيد">
+        <span>💎</span>
+        <strong id="creditBalance">1000</strong>
+        <span>نقطة</span>
+        <span class="plus-badge">+</span>
+      </div>
+
+      <button id="gmailLoginBtn" class="btn btn-gmail">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+        <span id="userLabel">تسجيل الدخول عبر Gmail (1000 نقطة مجاناً)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== PAGE 1: HOME (STUDIO & TEMPLATES) ==================== -->
+  <div id="page-home" class="page-view active">
+    <main class="container">
+      <!-- Top Studio Prompt & Generator Box -->
+      <section class="studio-box">
+        <div class="studio-sidebar">
+          <button class="mode-btn active" data-mode="video">
+            <span>🎬</span>
+            <small>فيديو</small>
+          </button>
+          <button class="mode-btn" data-mode="image">
+            <span>🖼️</span>
+            <small>صورة</small>
+          </button>
+        </div>
+
+        <div class="studio-main">
+          <div class="prompt-area">
+            <div id="selectedTemplateBanner" class="template-badge-bar">
+              <span>القالب المختار: <strong id="activeTemplateTitle">إعلان منتج عناية بالبشرة فائق الانتشار</strong></span>
+              <span class="badge-viral">1-Click Viral Remake</span>
+            </div>
+            <textarea id="promptInput" rows="3" placeholder="اكتب وصف المنتج أو عدّل سيناريو القالب الإعلاني هنا..."></textarea>
+          </div>
+
+          <div class="studio-controls">
+            <div class="control-group">
+              <label class="upload-trigger" for="productImageInput">
+                <span>➕</span>
+                <span id="uploadFileName">رفع صورة المنتج / الشخصية</span>
+                <input type="file" id="productImageInput" accept="image/*" hidden />
+              </label>
+
+              <select id="aspectSelect" class="studio-select">
+                <option value="9:16">Seedance 2.0 • 9:16 • 6s • 1080P</option>
+                <option value="16:9">Seedance 2.0 • 16:9 • 6s • 1080P</option>
+                <option value="1:1">Seedance 2.0 • 1:1 • 6s • 1080P</option>
+              </select>
+
+              <input type="text" id="ctaInput" class="cta-text-input" value="اطلبه الآن • خصم لفترة محدودة" placeholder="نص زر الشراء في نهاية الفيديو" />
+            </div>
+
+            <div class="generate-wrapper">
+              <button id="generateBtn" class="btn btn-primary btn-generate">
+                <span>✨ توليد الفيديو الإعلاني</span>
+              </button>
+              <span class="cost-hint">التكلفة: 250 نقطة</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Generated Video Result Preview Section -->
+      <section id="resultSection" class="result-section hidden">
+        <div class="result-header">
+          <h3>🎥 الفيديو الإعلاني الجاهز</h3>
+          <span class="status-tag">تم التوليد بالذكاء الاصطناعي • صوت + صورة</span>
+        </div>
+        <div class="result-body">
+          <div class="video-frame">
+            <video id="outputVideo" controls playsinline></video>
+          </div>
+          <div class="result-actions">
+            <button id="downloadVideoBtn" class="btn btn-primary">⬇️ تحميل الفيديو (WebM/MP4)</button>
+            <button id="shareVideoBtn" class="btn btn-secondary">🔗 مشاركة الرابط</button>
+            <button id="regenerateBtn" class="btn btn-outline">🔄 إعادة التوليد (250 نقطة)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Explore Templates Section -->
+      <section class="templates-section">
+        <div class="section-title-row">
+          <h2>استكشف القوالب الإعلانية <span class="pill-hot">1-Click Viral Remake</span></h2>
+        </div>
+
+        <div class="category-tabs" id="categoryTabs">
+          <button class="cat-tab active" data-cat="all">الكل</button>
+          <button class="cat-tab" data-cat="beauty">العناية والجمال</button>
+          <button class="cat-tab" data-cat="fashion">الأزياء والحقائب</button>
+          <button class="cat-tab" data-cat="tech">الإلكترونيات والمنتجات</button>
+          <button class="cat-tab" data-cat="lifestyle">أسلوب الحياة</button>
+        </div>
+
+        <div id="templatesGrid" class="templates-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== PAGE 2: APP GUIDE (تعليمات التطبيق) ==================== -->
+  <div id="page-guide" class="page-view hidden">
+    <main class="container info-page">
+      <div class="info-header">
+        <h1>📖 تعليمات استخدام منصة AdSpark AI</h1>
+        <p>دليلك السريع لتحويل صور منتجاتك إلى إعلانات فيديو احترافية جاهزة للنشر في دقائق.</p>
+      </div>
+
+      <div class="guide-steps">
+        <div class="guide-card">
+          <div class="step-num">1</div>
+          <h3>تسجيل الدخول والحصول على الرصيد المجاني</h3>
+          <p>اضغط على زر <strong>تسجيل الدخول عبر Gmail</strong> في الأعلى لتفعيل حسابك والحصول تلقائياً على <strong>1,000 نقطة مجانية</strong> تتيح لك تجربة المنصة وتوليد 4 فيديوهات إعلانية مجاناً.</p>
+        </div>
+
+        <div class="guide-card">
+          <div class="step-num">2</div>
+          <h3>اختيار القالب الإعلاني المناسب</h3>
+          <p>تصفح مكتبة القوالب في الصفحة الرئيسية (العناية والجمال، الأزياء، الإلكترونيات، أسلوب الحياة) واضغط على القالب الذي يناسب طبيعة منتجك ليتم تحميل السيناريو الإعلاني تلقائياً.</p>
+        </div>
+
+        <div class="guide-card">
+          <div class="step-num">3</div>
+          <h3>رفع صورة المنتج وتخصيص النص</h3>
+          <p>اضغط على زر <strong>رفع صورة المنتج / الشخصية</strong> لإدراج صورتك الخاصة، ثم عدّل النص الإعلاني وعبارة الدعوة لاتخاذ إجراء (CTA) مثل "اطلبه الآن" وحدد المقاس المناسب (9:16 لـ TikTok و Reels).</p>
+        </div>
+
+        <div class="guide-card">
+          <div class="step-num">4</div>
+          <h3>التوليد والتحميل والمشاركة</h3>
+          <p>اضغط على زر <strong>توليد الفيديو الإعلاني</strong> (يستهلك 250 نقطة). خلال ثوانٍ سيقوم الذكاء الاصطناعي بدمج الصورة مع الحركة والموسيقى، لتتمكن بعدها من تحميل الفيديو أو مشاركته أو إعادة توليده.</p>
+        </div>
+      </div>
+
+      <div class="info-cta-box">
+        <button class="btn btn-primary" onclick="switchPage('home')">⚡ ابدأ صناعة إعلانك الآن</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== PAGE 3: PRIVACY POLICY (سياسة الخصوصية) ==================== -->
+  <div id="page-privacy" class="page-view hidden">
+    <main class="container info-page">
+      <div class="info-header">
+        <h1>🔒 سياسة الخصوصية (Privacy Policy)</h1>
+        <p>آخر تحديث: نوفمبر 2026 — نحن نحترم خصوصيتك ونلتزم بحماية بياناتك.</p>
+      </div>
+
+      <div class="legal-content">
+        <section>
+          <h3>1. المعلومات التي نقوم بجمعها</h3>
+          <p>عند تسجيل الدخول باستخدام حساب <strong>Gmail</strong>، نجمع فقط عنوان بريدك الإلكتروني الأساسي لغرض إنشاء ملفك الشخصي، وحفظ رصيد النقاط الخاص بك (1,000 نقطة مجانية أو الباقات المشترك بها)، وتخصيص تجربتك داخل المنصة.</p>
+        </section>
+
+        <section>
+          <h3>2. الصور والملفات المرفوعة</h3>
+          <p>تُستخدم الصور التي ترفعها (صور المنتجات أو الشخصيات) حصرياً لغرض معالجتها وتوليد الفيديو الإعلاني الخاص بك. لا نقوم ببيع صورك أو مشاركتها مع أي أطراف خارجية لأغراض تسويقية.</p>
+        </section>
+
+        <section>
+          <h3>3. التخزين المحلي وملفات تعريف الارتباط</h3>
+          <p>تستخدم المنصة تقنيات التخزين المحلي في المتصفح (Local Storage) لحفظ حالة تسجيل الدخول، رصيد النقاط، والقوالب المضافة لضمان سرعة الأداء وسهولة الوصول دون الحاجة لإعادة إدخال البيانات في كل زيارة.</p>
+        </section>
+
+        <section>
+          <h3>4. أمان البيانات وحقوق المستخدم</h3>
+          <p>يحق لك في أي وقت طلب حذف بيانات حسابك أو مسح بيانات التخزين المحلي من متصفحك. نطبق معايير حماية صارمة لمنع الوصول غير المصرح به إلى حسابك أو محتواك الإعلاني.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== PAGE 4: TERMS & CONDITIONS (الشروط والأحكام) ==================== -->
+  <div id="page-terms" class="page-view hidden">
+    <main class="container info-page">
+      <div class="info-header">
+        <h1>📜 الشروط والأحكام (Terms & Conditions)</h1>
+        <p>يرجى قراءة هذه الشروط بعناية قبل استخدام خدمات منصة AdSpark AI.</p>
+      </div>
+
+      <div class="legal-content">
+        <section>
+          <h3>1. قبول الشروط</h3>
+          <p>باستخدامك لمنصة <strong>AdSpark AI</strong> أو تسجيل الدخول إليها، فإنك توافق على الالتزام بجميع البنود الواردة في هذه الاتفاقية والامتثال للقوانين المعمول بها.</p>
+        </section>
+
+        <section>
+          <h3>2. نظام النقاط والاشتراكات</h3>
+          <ul>
+            <li>يحصل كل مستخدم جديد يسجل عبر Gmail على <strong>1,000 نقطة مجانية</strong> لمرة واحدة.</li>
+            <li>تستهلك كل عملية توليد فيديو إعلاني (أو إعادة توليد) <strong>250 نقطة</strong> من الرصيد المتاح.</li>
+            <li>عند نفاد الرصيد، يمكن للمستخدم الترقية إلى إحدى الباقات الشهرية ($20، $30، أو $50) للحصول على نقاط إضافية ومزايا متقدمة.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>3. حقوق الملكية الفكرية والاستخدام التجاري</h3>
+          <p>يمتلك المستخدم كامل حقوق الاستخدام التجاري والترويجي للفيديوهات الإعلانية التي يقوم بتوليدها عبر المنصة ونشرها على منصات التواصل الاجتماعي، شريطة أن يكون مالكاً لحقوق الصور التي يقوم برفعها.</p>
+        </section>
+
+        <section>
+          <h3>4. الاستخدام المقبول</h3>
+          <p>يُحظر استخدام المنصة لتوليد محتوى ينتهك حقوق الملكية الفكرية للآخرين، أو محتوى مضلل، أو غير قانوني، أو مسيء. يحتفظ مشرفو المنصة بالحق في إيقاف أي حساب يخالف هذه الضوابط.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>⚡ AdSpark AI</strong>
+        <span>منصة توليد الفيديوهات الإعلانية بالذكاء الاصطناعي</span>
+      </div>
+      <div class="footer-links">
+        <a href="javascript:void(0)" onclick="switchPage('home')">الرئيسية</a>
+        <a href="javascript:void(0)" onclick="switchPage('guide')">تعليمات التطبيق</a>
+        <a href="javascript:void(0)" onclick="switchPage('privacy')">سياسة الخصوصية</a>
+        <a href="javascript:void(0)" onclick="switchPage('terms')">الشروط والأحكام</a>
+      </div>
+      <div class="footer-copy">© 2026 AdSpark AI. جميع الحقوق محفوظة.</div>
+    </div>
+  </footer>
+
+  <!-- Pricing Plans Modal -->
+  <div id="pricingModal" class="modal hidden">
+    <div class="modal-card pricing-card-modal">
+      <button class="close-modal" data-close="pricingModal">✕</button>
+      <div class="modal-header-center">
+        <h2>اشحن رصيدك وتابع صناعة الإعلانات 🚀</h2>
+        <p>انتهى رصيد النقاط المجاني أو ترغب بمزايا احترافية أعلى. اختر الباقة الشهرية المناسبة:</p>
+      </div>
+
+      <div class="plans-grid">
+        <!-- Plan 1: $20 -->
+        <div class="plan-box">
+          <div class="plan-badge">البداية</div>
+          <h3>الخطة الأساسية</h3>
+          <div class="plan-price">$20<span>/شهرياً</span></div>
+          <div class="plan-points">3,000 نقطة (12 فيديو إعلاني)</div>
+          <ul class="plan-features">
+            <li>✅ دقة تصدير 1080P Full HD</li>
+            <li>✅ الوصول لجميع القوالب الإعلانية</li>
+            <li>✅ موسيقى ومؤثرات صوتية مدمجة</li>
+            <li>✅ تحميل مباشر بدون علامة مائية</li>
+          </ul>
+          <button class="btn btn-secondary full-width select-plan-btn" data-points="3000" data-plan="الأساسية ($20)">اشترك الآن</button>
+        </div>
+
+        <!-- Plan 2: $30 -->
+        <div class="plan-box featured">
+          <div class="plan-badge popular">الأكثر طلباً</div>
+          <h3>الخطة الاحترافية</h3>
+          <div class="plan-price">$30<span>/شهرياً</span></div>
+          <div class="plan-points">6,000 نقطة (24 فيديو إعلاني)</div>
+          <ul class="plan-features">
+            <li>✅ كل مميزات الخطة الأساسية</li>
+            <li>✅ أولوية وسرعة مضاعفة في التوليد</li>
+            <li>✅ قوالب UGC الحصرية عالية التحويل</li>
+            <li>✅ دعم مقاسات TikTok و Reels و YouTube</li>
+          </ul>
+          <button class="btn btn-primary full-width select-plan-btn" data-points="6000" data-plan="الاحترافية ($30)">اشترك الآن</button>
+        </div>
+
+        <!-- Plan 3: $50 -->
+        <div class="plan-box super">
+          <div class="plan-badge vip">سوبر VIP</div>
+          <h3>خطة السوبر</h3>
+          <div class="plan-price">$50<span>/شهرياً</span></div>
+          <div class="plan-points">15,000 نقطة (60 فيديو إعلاني)</div>
+          <ul class="plan-features">
+            <li>✅ جودة تصدير فائقة 4K Ultra HD</li>
+            <li>✅ توليد غير محدود للصور الإعلانية</li>
+            <li>✅ ميزة استنساخ هوية العلامة التجارية</li>
+            <li>✅ دعم فني VIP مباشر على مدار الساعة</li>
+          </ul>
+          <button class="btn btn-primary full-width select-plan-btn" data-points="15000" data-plan="السوبر ($50)">اشترك في السوبر</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-card admin-modal-card">
+      <button class="close-modal" data-close="adminModal">✕</button>
+      <h2>🛠️ لوحة تحكم المشرف — إضافة قالب إعلاني جديد</h2>
+      <p class="muted">أضف قوالب جديدة لتظهر فوراً للمستخدمين في الواجهة الرئيسية.</p>
+
+      <form id="adminTemplateForm" class="admin-form">
+        <label>عنوان القالب الإعلاني</label>
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر مع إضاءة سينمائية" />
+
+        <div class="form-row">
+          <div>
+            <label>التصنيف</label>
+            <select id="tplCategory">
+              <option value="beauty">العناية والجمال</option>
+              <option value="fashion">الأزياء والحقائب</option>
+              <option value="tech">الإلكترونيات والمنتجات</option>
+              <option value="lifestyle">أسلوب الحياة</option>
+            </select>
+          </div>
+          <div>
+            <label>شارة الأداء (Badge)</label>
+            <input type="text" id="tplBadge" value="GMV $15,000+" required />
+          </div>
+        </div>
+
+        <label>صورة غلاف القالب (رفع من جهازك أو رابط)</label>
+        <input type="file" id="tplCoverFile" accept="image/*" />
+
+        <label>سيناريو القالب (Prompt الافتراضي)</label>
+        <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني الذي سيظهر في الفيديو..."></textarea>
+
+        <button type="submit" class="btn btn-primary full-width">➕ نشر القالب في المنصة</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Canvas for Real Video Rendering -->
+  <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
