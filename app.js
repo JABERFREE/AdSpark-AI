@@ -1,6 +1,6 @@
 // ==================== OWNER / ADMIN CONFIGURATION ====================
 // ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط
-const ADMIN_EMAILS = [
+const ADMIN_EMAILS = [emadjaber23@gmail.com 
   'admin@gmail.com',
   'owner@gmail.com',
   'jaber@gmail.com'
