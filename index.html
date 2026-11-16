@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Top Navbar -->
+  <!-- Top Navbar (Clean: Brand + Credits + Gmail Login + Hidden Admin Button for Owner Only) -->
   <header class="navbar">
     <div class="brand" onclick="switchPage('home')" style="cursor: pointer;">
       <div class="brand-logo">⚡</div>
@@ -20,16 +20,9 @@
       </div>
     </div>
 
-    <!-- Navigation Links -->
-    <nav class="nav-links">
-      <button class="nav-link active" data-page="home">🏠 الرئيسية (Home)</button>
-      <button class="nav-link" data-page="guide">📖 تعليمات التطبيق</button>
-      <button class="nav-link" data-page="privacy">🔒 سياسة الخصوصية</button>
-      <button class="nav-link" data-page="terms">📜 الشروط والأحكام</button>
-    </nav>
-
     <div class="nav-actions">
-      <button id="openAdminBtn" class="btn btn-secondary">
+      <!-- يظهر هذا الزر فقط لمالك الموقع / المشرف عند تسجيل الدخول بحسابه -->
+      <button id="openAdminBtn" class="btn btn-secondary hidden">
         <span>🛠️</span> لوحة المشرف (إضافة قوالب)
       </button>
 
@@ -42,7 +35,7 @@
 
       <button id="gmailLoginBtn" class="btn btn-gmail">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
-        <span id="userLabel">تسجيل الدخول عبر Gmail (1000 نقطة مجاناً)</span>
+        <span id="userLabel">تسجيل الدخول عبر Gmail (1000 نقطة)</span>
       </button>
     </div>
   </header>
@@ -171,7 +164,7 @@
       </div>
 
       <div class="info-cta-box">
-        <button class="btn btn-primary" onclick="switchPage('home')">⚡ ابدأ صناعة إعلانك الآن</button>
+        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
@@ -204,6 +197,10 @@
           <h3>4. أمان البيانات وحقوق المستخدم</h3>
           <p>يحق لك في أي وقت طلب حذف بيانات حسابك أو مسح بيانات التخزين المحلي من متصفحك. نطبق معايير حماية صارمة لمنع الوصول غير المصرح به إلى حسابك أو محتواك الإعلاني.</p>
         </section>
+      </div>
+
+      <div class="info-cta-box">
+        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
@@ -241,22 +238,28 @@
           <p>يُحظر استخدام المنصة لتوليد محتوى ينتهك حقوق الملكية الفكرية للآخرين، أو محتوى مضلل، أو غير قانوني، أو مسيء. يحتفظ مشرفو المنصة بالحق في إيقاف أي حساب يخالف هذه الضوابط.</p>
         </section>
       </div>
+
+      <div class="info-cta-box">
+        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
+      </div>
     </main>
   </div>
 
-  <!-- Global Footer -->
+  <!-- Global Footer (Bottom Navigation Options) -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
         <strong>⚡ AdSpark AI</strong>
         <span>منصة توليد الفيديوهات الإعلانية بالذكاء الاصطناعي</span>
       </div>
-      <div class="footer-links">
-        <a href="javascript:void(0)" onclick="switchPage('home')">الرئيسية</a>
-        <a href="javascript:void(0)" onclick="switchPage('guide')">تعليمات التطبيق</a>
-        <a href="javascript:void(0)" onclick="switchPage('privacy')">سياسة الخصوصية</a>
-        <a href="javascript:void(0)" onclick="switchPage('terms')">الشروط والأحكام</a>
-      </div>
+
+      <nav class="footer-nav">
+        <button class="footer-link active" data-page="home">🏠 الرئيسية</button>
+        <button class="footer-link" data-page="guide">📖 تعليمات التطبيق</button>
+        <button class="footer-link" data-page="privacy">🔒 سياسة الخصوصية</button>
+        <button class="footer-link" data-page="terms">📜 الشروط والأحكام</button>
+      </nav>
+
       <div class="footer-copy">© 2026 AdSpark AI. جميع الحقوق محفوظة.</div>
     </div>
   </footer>
@@ -319,12 +322,12 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal -->
+  <!-- Admin Panel Modal (Owner Only + Video/Image Template Upload) -->
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ لوحة تحكم المشرف — إضافة قالب إعلاني جديد</h2>
-      <p class="muted">أضف قوالب جديدة لتظهر فوراً للمستخدمين في الواجهة الرئيسية.</p>
+      <h2>🛠️ لوحة تحكم المالك — إضافة قالب إعلاني</h2>
+      <p class="muted">يمكنك رفع فيديو استعراضي للقالب أو صورة غلاف ليظهر في الواجهة الرئيسية.</p>
 
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
@@ -346,8 +349,8 @@
           </div>
         </div>
 
-        <label>صورة غلاف القالب (رفع من جهازك أو رابط)</label>
-        <input type="file" id="tplCoverFile" accept="image/*" />
+        <label>ملف معاينة القالب (فيديو MP4/WebM أو صورة)</label>
+        <input type="file" id="tplMediaFile" accept="video/*,image/*" />
 
         <label>سيناريو القالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني الذي سيظهر في الفيديو..."></textarea>
