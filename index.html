@@ -55,7 +55,6 @@
     .legal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 22px; }
     .legal-content section h3 { color: var(--primary); font-size: 18px; margin-bottom: 8px; }
     .legal-content section p, .legal-content section li { color: #d1d5db; font-size: 14px; line-height: 1.8; }
-    .legal-content section ul { padding-right: 20px; display: flex; flex-direction: column; gap: 6px; }
     .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; }
     .studio-sidebar { display: flex; flex-direction: column; gap: 10px; }
     .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
@@ -183,8 +182,9 @@
             <div class="control-group">
               <label class="upload-trigger" for="productImageInput">
                 <span>➕</span>
-                <span id="uploadFileName">رفع صورة المنتج / الشخصية</span>
-                <input type="file" id="productImageInput" accept="image/*" hidden />
+                <span id="uploadFileName">رفع صورة أو فيديو المنتج</span>
+                <!-- تم التعديل ليقبل الصور والفيديوهات معاً -->
+                <input type="file" id="productImageInput" accept="image/*,video/*" hidden />
               </label>
 
               <select id="aspectSelect" class="studio-select">
@@ -247,7 +247,7 @@
     <main class="container info-page">
       <div class="info-header">
         <h1>📖 تعليمات استخدام منصة AdSpark AI</h1>
-        <p>دليلك السريع لتحويل صور منتجاتك إلى إعلانات فيديو احترافية جاهزة للنشر في دقائق.</p>
+        <p>دليلك السريع لتحويل صور وفيديوهات منتجاتك إلى إعلانات احترافية في دقائق.</p>
       </div>
       <div class="guide-steps">
         <div class="guide-card">
@@ -262,8 +262,8 @@
         </div>
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>رفع الصورة والنصوص</h3>
-          <p>ارفع صورة منتجك، وعدل نص الإعلان وعبارة الدعوة للشراء (CTA).</p>
+          <h3>رفع الصورة أو الفيديو والنصوص</h3>
+          <p>ارفع ملف المنتج، وعدل نص الإعلان وعبارة الدعوة للشراء (CTA).</p>
         </div>
         <div class="guide-card">
           <div class="step-num">4</div>
@@ -290,8 +290,8 @@
           <p>نجمع فقط بريدك الإلكتروني لإنشاء حسابك وإدارة رصيد النقاط الخاص بك.</p>
         </section>
         <section>
-          <h3>2. الصور المرفوعة</h3>
-          <p>تُستخدم صور منتجاتك لتوليد الإعلانات فقط ولا يتم مشاركتها.</p>
+          <h3>2. الملفات المرفوعة</h3>
+          <p>تُستخدم ملفات منتجاتك لتوليد الإعلانات فقط ولا يتم مشاركتها.</p>
         </section>
       </div>
       <div class="info-cta-box">
@@ -414,15 +414,22 @@
         <input type="file" id="tplMediaFile" accept="video/*,image/*" />
         <label>سيناريو القالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني..."></textarea>
-        <button type="submit" class="btn btn-primary full-width">➕ نشر القالب في المنصة</button>
+        <button type="submit" class="btn btn-primary full-width">➕ نشر القالب الجديد</button>
       </form>
     </div>
   </div>
 
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
+  <video id="uploadedVideoSource" class="hidden" muted playsinline></video>
 
   <script>
-    const ADMIN_EMAILS = ['admin@gmail.com', 'owner@gmail.com', 'jaber@gmail.com'];
+    // تم إضافة إيميلك بالشكل الصحيح داخل المصفوفة
+    const ADMIN_EMAILS = [
+      'emadjaber23@gmail.com',
+      'admin@gmail.com',
+      'owner@gmail.com',
+      'jaber@gmail.com'
+    ];
 
     function safeGetStorage(key, fallback) {
       try {
@@ -436,6 +443,7 @@
     let currentMode = 'video';
     let user = safeGetStorage('adspark_user', null);
     let uploadedProductImg = null;
+    let uploadedProductVideo = null;
     let lastGeneratedBlobUrl = null;
     let lastGeneratedExt = 'webm';
 
@@ -487,6 +495,7 @@
     const resultSection = document.getElementById('resultSection');
     const outputVideo = document.getElementById('outputVideo');
     const outputImage = document.getElementById('outputImage');
+    const uploadedVideoSource = document.getElementById('uploadedVideoSource');
 
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -539,7 +548,7 @@
         }
         return;
       }
-      const email = prompt('أدخل بريدك الإلكتروني (Gmail) للحصول على 1000 نقطة مجانية:', 'creator@gmail.com');
+      const email = prompt('أدخل بريدك الإلكتروني (Gmail) للحصول على 1000 نقطة مجانية:', 'emadjaber23@gmail.com');
       if (email && email.includes('@')) {
         user = { email: email.trim(), credits: 1000, plan: 'مجانية' };
         saveUser();
@@ -580,17 +589,28 @@
       });
     });
 
+    // التعامل مع رفع صورة أو فيديو المنتج
     productImageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       uploadFileName.textContent = file.name.slice(0, 18);
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => { uploadedProductImg = img; };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+
+      if (file.type.startsWith('video/')) {
+        uploadedProductVideo = file;
+        uploadedProductImg = null;
+        const videoUrl = URL.createObjectURL(file);
+        uploadedVideoSource.src = videoUrl;
+        uploadedVideoSource.load();
+      } else {
+        uploadedProductVideo = null;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => { uploadedProductImg = img; };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     });
 
     async function generateAd() {
@@ -614,7 +634,7 @@
       const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
 
       let activeImg = uploadedProductImg;
-      if (!activeImg && selectedTemplate.mediaType !== 'video') {
+      if (!activeImg && !uploadedProductVideo && selectedTemplate.mediaType !== 'video') {
         const bgImg = new Image();
         bgImg.crossOrigin = 'anonymous';
         bgImg.src = selectedTemplate.cover;
@@ -625,7 +645,12 @@
       function renderScene(scaleFactor, pulseFactor) {
         ctx.fillStyle = '#0e0f13';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
+
+        if (uploadedProductVideo && uploadedProductVideo.readyState >= 2) {
+          ctx.globalAlpha = 0.9;
+          ctx.drawImage(uploadedVideoSource, 0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1;
+        } else if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
           const w = canvas.width * scaleFactor;
           const h = canvas.height * scaleFactor;
           const x = (canvas.width - w) / 2;
@@ -634,6 +659,7 @@
           ctx.drawImage(activeImg, x, y, w, h);
           ctx.globalAlpha = 1;
         }
+
         const grad = ctx.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height);
         grad.addColorStop(0, 'rgba(0,0,0,0)');
         grad.addColorStop(1, 'rgba(0,0,0,0.92)');
@@ -685,6 +711,11 @@
         return;
       }
 
+      if (uploadedProductVideo) {
+        uploadedVideoSource.currentTime = 0;
+        await uploadedVideoSource.play().catch(e => {});
+      }
+
       let audioCtx = null;
       let osc = null;
       let combinedStream = canvas.captureStream(30);
@@ -712,6 +743,7 @@
       recorder.onstop = () => {
         if (osc) osc.stop();
         if (audioCtx) audioCtx.close();
+        if (uploadedProductVideo) uploadedVideoSource.pause();
         user.credits -= cost;
         saveUser();
 
@@ -790,7 +822,6 @@
         alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
         return;
       }
-      document.getElementById('adminModal').classList.add('hidden');
       document.getElementById('adminModal').classList.remove('hidden');
     });
 
