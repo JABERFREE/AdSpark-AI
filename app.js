@@ -1,10 +1,18 @@
+// ==================== OWNER / ADMIN CONFIGURATION ====================
+// ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط ويختفي عن الزوار
+const ADMIN_EMAILS = [
+  'admin@gmail.com',
+  'owner@gmail.com',
+  'jaber@gmail.com'
+];
+
 // State Management
 const GENERATION_COST = 250;
 let user = JSON.parse(localStorage.getItem('adspark_user')) || null;
 let uploadedProductImg = null;
 let lastGeneratedBlobUrl = null;
 
-// Page Navigation Logic (Home, Guide, Privacy, Terms)
+// Page Navigation Logic (Bottom Footer Navigation)
 function switchPage(pageName) {
   document.querySelectorAll('.page-view').forEach(page => {
     page.classList.add('hidden');
@@ -17,14 +25,14 @@ function switchPage(pageName) {
     targetPage.classList.add('active');
   }
 
-  document.querySelectorAll('.nav-link').forEach(btn => {
+  document.querySelectorAll('.footer-link').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.page === pageName);
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.querySelectorAll('.nav-link').forEach(btn => {
+document.querySelectorAll('.footer-link').forEach(btn => {
   btn.addEventListener('click', () => {
     switchPage(btn.dataset.page);
   });
@@ -38,6 +46,7 @@ const defaultTemplates = [
     category: 'beauty',
     badge: 'GMV $20,000',
     prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'
   },
   {
@@ -46,6 +55,7 @@ const defaultTemplates = [
     category: 'fashion',
     badge: '20k+ Likes',
     prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80'
   },
   {
@@ -54,6 +64,7 @@ const defaultTemplates = [
     category: 'tech',
     badge: '$30,000 GMV',
     prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'
   },
   {
@@ -62,6 +73,7 @@ const defaultTemplates = [
     category: 'beauty',
     badge: '5000+ Likes',
     prompt: 'عبير يدوم طويلاً ويترك بصمتك الخاصة في كل مكان تذهب إليه',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80'
   },
   {
@@ -70,6 +82,7 @@ const defaultTemplates = [
     category: 'fashion',
     badge: '1000+ Sales',
     prompt: 'لمسة من الفخامة تكتمل بها أناقتك • إصدار محدود متوفر الآن',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80'
   },
   {
@@ -78,6 +91,7 @@ const defaultTemplates = [
     category: 'lifestyle',
     badge: '350k+ Views',
     prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة',
+    mediaType: 'image',
     cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80'
   }
 ];
@@ -90,6 +104,7 @@ const gmailLoginBtn = document.getElementById('gmailLoginBtn');
 const userLabel = document.getElementById('userLabel');
 const creditPill = document.getElementById('creditPill');
 const creditBalance = document.getElementById('creditBalance');
+const openAdminBtn = document.getElementById('openAdminBtn');
 const templatesGrid = document.getElementById('templatesGrid');
 const promptInput = document.getElementById('promptInput');
 const activeTemplateTitle = document.getElementById('activeTemplateTitle');
@@ -99,12 +114,27 @@ const generateBtn = document.getElementById('generateBtn');
 const resultSection = document.getElementById('resultSection');
 const outputVideo = document.getElementById('outputVideo');
 
-// Initialize UI
+// Check if current logged-in user is the Page Owner / Admin
+function isOwnerLoggedIn() {
+  if (!user || !user.email) return false;
+  const emailLower = user.email.toLowerCase().trim();
+  const isSecretAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
+  return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower) || isSecretAdminUrl;
+}
+
+// Initialize Auth & Admin Visibility UI
 function updateAuthUI() {
   if (user) {
     userLabel.textContent = user.email;
     creditPill.classList.remove('hidden');
     creditBalance.textContent = user.credits;
+  }
+
+  // إظهار زر لوحة المشرف للمالك فقط وإخفاؤه تماماً عن الزوار العاديين
+  if (isOwnerLoggedIn()) {
+    openAdminBtn.classList.remove('hidden');
+  } else {
+    openAdminBtn.classList.add('hidden');
   }
 }
 
@@ -113,12 +143,20 @@ function saveUser() {
   updateAuthUI();
 }
 
-// Gmail Simulated OAuth Login (Grants 1000 Free Points)
+// Gmail Login (Grants 1000 Free Points)
 gmailLoginBtn.addEventListener('click', () => {
   if (user) {
-    alert(`أنت مسجل الدخول بالفعل بحساب: ${user.email}`);
+    const logout = confirm(`أنت مسجل الدخول بحساب: ${user.email}\nهل ترغب بتسجيل الخروج؟`);
+    if (logout) {
+      user = null;
+      localStorage.removeItem('adspark_user');
+      userLabel.textContent = 'تسجيل الدخول عبر Gmail (1000 نقطة)';
+      creditPill.classList.add('hidden');
+      openAdminBtn.classList.add('hidden');
+    }
     return;
   }
+
   const email = prompt('أدخل بريدك الإلكتروني (Gmail) للحصول على 1000 نقطة مجانية:', 'creator@gmail.com');
   if (email && email.includes('@')) {
     user = {
@@ -127,13 +165,17 @@ gmailLoginBtn.addEventListener('click', () => {
       plan: 'مجانية'
     };
     saveUser();
-    alert('تم تسجيل الدخول بنجاح! حصلت على 1000 نقطة مجانية في رصيدك.');
+    if (isOwnerLoggedIn()) {
+      alert('مرحباً بك بصفتك مالك المنصة! تم تفعيل زر لوحة المشرف لك.');
+    } else {
+      alert('تم تسجيل الدخول بنجاح! حصلت على 1000 نقطة مجانية في رصيدك.');
+    }
   } else if (email) {
     alert('يرجى إدخال عنوان بريد إلكتروني صحيح.');
   }
 });
 
-// Render Templates
+// Render Templates (Supports both Image Covers and Video Templates)
 function renderTemplates(filterCat = 'all') {
   templatesGrid.innerHTML = '';
   const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
@@ -141,14 +183,21 @@ function renderTemplates(filterCat = 'all') {
   filtered.forEach(tpl => {
     const card = document.createElement('div');
     card.className = `template-card ${selectedTemplate && selectedTemplate.id === tpl.id ? 'selected' : ''}`;
+
+    const isVideo = tpl.mediaType === 'video';
+    const mediaHtml = isVideo
+      ? `<span class="video-tag-badge">🎬 فيديو</span><video src="${tpl.cover}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`
+      : `<img src="${tpl.cover}" alt="${tpl.title}" crossorigin="anonymous" />`;
+
     card.innerHTML = `
       <span class="card-badge">${tpl.badge}</span>
-      <img src="${tpl.cover}" alt="${tpl.title}" crossorigin="anonymous" />
+      ${mediaHtml}
       <div class="card-overlay">
         <h4>${tpl.title}</h4>
         <span>اضغط لاختيار القالب</span>
       </div>
     `;
+
     card.addEventListener('click', () => {
       selectedTemplate = tpl;
       activeTemplateTitle.textContent = tpl.title;
@@ -156,6 +205,7 @@ function renderTemplates(filterCat = 'all') {
       renderTemplates(filterCat);
       switchPage('home');
     });
+
     templatesGrid.appendChild(card);
   });
 }
@@ -204,13 +254,15 @@ async function generateRealAdVideo() {
   const adText = promptInput.value.trim() || selectedTemplate.prompt;
   const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
 
-  // Load cover fallback image
-  const bgImg = new Image();
-  bgImg.crossOrigin = 'anonymous';
-  bgImg.src = selectedTemplate.cover;
-  await new Promise(r => { bgImg.onload = r; bgImg.onerror = r; });
-
-  const activeImg = uploadedProductImg || bgImg;
+  // Load cover fallback image if template is image
+  let activeImg = uploadedProductImg;
+  if (!activeImg && selectedTemplate.mediaType !== 'video') {
+    const bgImg = new Image();
+    bgImg.crossOrigin = 'anonymous';
+    bgImg.src = selectedTemplate.cover;
+    await new Promise(r => { bgImg.onload = r; bgImg.onerror = r; });
+    activeImg = bgImg;
+  }
 
   // Audio Synthesizer Stream
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -240,7 +292,6 @@ async function generateRealAdVideo() {
     osc.stop();
     audioCtx.close();
 
-    // Deduct 250 points
     user.credits -= GENERATION_COST;
     saveUser();
 
@@ -259,7 +310,6 @@ async function generateRealAdVideo() {
 
   recorder.start();
 
-  // Animate 5 Seconds (150 frames at 30fps)
   let frame = 0;
   const totalFrames = 150;
 
@@ -268,7 +318,6 @@ async function generateRealAdVideo() {
     ctx.fillStyle = '#0e0f13';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Dynamic Zoom Effect on Product/Template Image
     if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
       const scale = 1 + progress * 0.18;
       const w = canvas.width * scale;
@@ -280,27 +329,23 @@ async function generateRealAdVideo() {
       ctx.globalAlpha = 1;
     }
 
-    // Dark Gradient Overlay for Text Readability
     const grad = ctx.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
     grad.addColorStop(1, 'rgba(0,0,0,0.92)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Top Viral Badge
     ctx.fillStyle = '#ff5b5b';
     ctx.fillRect(40, 50, 230, 44);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 22px Cairo, sans-serif';
     ctx.fillText(selectedTemplate.badge, 60, 80);
 
-    // Ad Copy Text
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 34px Cairo, sans-serif';
     const shortText = adText.slice(0, 48);
     ctx.fillText(shortText, 40, canvas.height - 230);
 
-    // Animated CTA Button at Bottom
     const pulse = 1 + Math.sin(frame * 0.2) * 0.04;
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height - 120);
@@ -362,30 +407,41 @@ document.querySelectorAll('.select-plan-btn').forEach(btn => {
   });
 });
 
-// Admin Panel Logic
-document.getElementById('openAdminBtn').addEventListener('click', () => {
+// Admin Panel Logic (Owner Only + Supports Video & Image Upload)
+openAdminBtn.addEventListener('click', () => {
+  if (!isOwnerLoggedIn()) {
+    alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
+    return;
+  }
   document.getElementById('adminModal').classList.remove('hidden');
 });
 
 document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
   e.preventDefault();
+  if (!isOwnerLoggedIn()) return;
+
   const title = document.getElementById('tplTitle').value.trim();
   const category = document.getElementById('tplCategory').value;
   const badge = document.getElementById('tplBadge').value.trim();
   const promptText = document.getElementById('tplPrompt').value.trim();
-  const file = document.getElementById('tplCoverFile').files[0];
+  const file = document.getElementById('tplMediaFile').files[0];
 
-  const finalizeAdd = (coverUrl) => {
+  const finalizeAdd = (mediaUrl, mediaType) => {
     const newTpl = {
       id: Date.now(),
       title,
       category,
       badge,
       prompt: promptText,
-      cover: coverUrl
+      mediaType,
+      cover: mediaUrl
     };
     templates.unshift(newTpl);
-    localStorage.setItem('adspark_templates', JSON.stringify(templates));
+    try {
+      localStorage.setItem('adspark_templates', JSON.stringify(templates));
+    } catch (err) {
+      console.warn('حجم الملف كبير للتخزين الدائم في المتصفح، سيبقى متاحاً في الجلسة الحالية.');
+    }
     renderTemplates('all');
     document.getElementById('adminModal').classList.add('hidden');
     e.target.reset();
@@ -393,11 +449,17 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
   };
 
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (ev) => finalizeAdd(ev.target.result);
-    reader.readAsDataURL(file);
+    const isVideo = file.type.startsWith('video/');
+    if (isVideo) {
+      const videoUrl = URL.createObjectURL(file);
+      finalizeAdd(videoUrl, 'video');
+    } else {
+      const reader = new FileReader();
+      reader.onload = (ev) => finalizeAdd(ev.target.result, 'image');
+      reader.readAsDataURL(file);
+    }
   } else {
-    finalizeAdd('https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80');
+    finalizeAdd('https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80', 'image');
   }
 });
 
