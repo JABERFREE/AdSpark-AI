@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Top Navbar (Clean: Brand + Credits + Gmail Login + Hidden Admin Button for Owner Only) -->
+  <!-- Top Navbar -->
   <header class="navbar">
     <div class="brand" onclick="switchPage('home')" style="cursor: pointer;">
       <div class="brand-logo">⚡</div>
@@ -46,11 +46,11 @@
       <!-- Top Studio Prompt & Generator Box -->
       <section class="studio-box">
         <div class="studio-sidebar">
-          <button class="mode-btn active" data-mode="video">
+          <button type="button" class="mode-btn active" data-mode="video">
             <span>🎬</span>
             <small>فيديو</small>
           </button>
-          <button class="mode-btn" data-mode="image">
+          <button type="button" class="mode-btn" data-mode="image">
             <span>🖼️</span>
             <small>صورة</small>
           </button>
@@ -83,29 +83,30 @@
             </div>
 
             <div class="generate-wrapper">
-              <button id="generateBtn" class="btn btn-primary btn-generate">
+              <button type="button" id="generateBtn" class="btn btn-primary btn-generate">
                 <span>✨ توليد الفيديو الإعلاني</span>
               </button>
-              <span class="cost-hint">التكلفة: 250 نقطة</span>
+              <span id="costHint" class="cost-hint">التكلفة: 250 نقطة</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Generated Video Result Preview Section -->
+      <!-- Generated Video/Image Result Preview Section -->
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
-          <h3>🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">تم التوليد بالذكاء الاصطناعي • صوت + صورة</span>
+          <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
+          <span class="status-tag">تم التوليد بالذكاء الاصطناعي • جاهز للنشر</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
             <video id="outputVideo" controls playsinline></video>
+            <img id="outputImage" class="hidden" style="width:270px;max-width:100%;border-radius:14px;border:1px solid var(--border);" alt="الإعلان المُولد" />
           </div>
           <div class="result-actions">
-            <button id="downloadVideoBtn" class="btn btn-primary">⬇️ تحميل الفيديو (WebM/MP4)</button>
-            <button id="shareVideoBtn" class="btn btn-secondary">🔗 مشاركة الرابط</button>
-            <button id="regenerateBtn" class="btn btn-outline">🔄 إعادة التوليد (250 نقطة)</button>
+            <button type="button" id="downloadVideoBtn" class="btn btn-primary">⬇️ تحميل الملف الجاهز</button>
+            <button type="button" id="shareVideoBtn" class="btn btn-secondary">🔗 مشاركة الرابط</button>
+            <button type="button" id="regenerateBtn" class="btn btn-outline">🔄 إعادة التوليد</button>
           </div>
         </div>
       </section>
@@ -117,11 +118,11 @@
         </div>
 
         <div class="category-tabs" id="categoryTabs">
-          <button class="cat-tab active" data-cat="all">الكل</button>
-          <button class="cat-tab" data-cat="beauty">العناية والجمال</button>
-          <button class="cat-tab" data-cat="fashion">الأزياء والحقائب</button>
-          <button class="cat-tab" data-cat="tech">الإلكترونيات والمنتجات</button>
-          <button class="cat-tab" data-cat="lifestyle">أسلوب الحياة</button>
+          <button type="button" class="cat-tab active" data-cat="all">الكل</button>
+          <button type="button" class="cat-tab" data-cat="beauty">العناية والجمال</button>
+          <button type="button" class="cat-tab" data-cat="fashion">الأزياء والحقائب</button>
+          <button type="button" class="cat-tab" data-cat="tech">الإلكترونيات والمنتجات</button>
+          <button type="button" class="cat-tab" data-cat="lifestyle">أسلوب الحياة</button>
         </div>
 
         <div id="templatesGrid" class="templates-grid"></div>
@@ -164,7 +165,7 @@
       </div>
 
       <div class="info-cta-box">
-        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
+        <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
@@ -200,7 +201,7 @@
       </div>
 
       <div class="info-cta-box">
-        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
+        <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
@@ -240,7 +241,7 @@
       </div>
 
       <div class="info-cta-box">
-        <button class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
+        <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
@@ -254,10 +255,10 @@
       </div>
 
       <nav class="footer-nav">
-        <button class="footer-link active" data-page="home">🏠 الرئيسية</button>
-        <button class="footer-link" data-page="guide">📖 تعليمات التطبيق</button>
-        <button class="footer-link" data-page="privacy">🔒 سياسة الخصوصية</button>
-        <button class="footer-link" data-page="terms">📜 الشروط والأحكام</button>
+        <button type="button" class="footer-link active" data-page="home">🏠 الرئيسية</button>
+        <button type="button" class="footer-link" data-page="guide">📖 تعليمات التطبيق</button>
+        <button type="button" class="footer-link" data-page="privacy">🔒 سياسة الخصوصية</button>
+        <button type="button" class="footer-link" data-page="terms">📜 الشروط والأحكام</button>
       </nav>
 
       <div class="footer-copy">© 2026 AdSpark AI. جميع الحقوق محفوظة.</div>
@@ -267,14 +268,13 @@
   <!-- Pricing Plans Modal -->
   <div id="pricingModal" class="modal hidden">
     <div class="modal-card pricing-card-modal">
-      <button class="close-modal" data-close="pricingModal">✕</button>
+      <button type="button" class="close-modal" data-close="pricingModal">✕</button>
       <div class="modal-header-center">
         <h2>اشحن رصيدك وتابع صناعة الإعلانات 🚀</h2>
         <p>انتهى رصيد النقاط المجاني أو ترغب بمزايا احترافية أعلى. اختر الباقة الشهرية المناسبة:</p>
       </div>
 
       <div class="plans-grid">
-        <!-- Plan 1: $20 -->
         <div class="plan-box">
           <div class="plan-badge">البداية</div>
           <h3>الخطة الأساسية</h3>
@@ -286,10 +286,9 @@
             <li>✅ موسيقى ومؤثرات صوتية مدمجة</li>
             <li>✅ تحميل مباشر بدون علامة مائية</li>
           </ul>
-          <button class="btn btn-secondary full-width select-plan-btn" data-points="3000" data-plan="الأساسية ($20)">اشترك الآن</button>
+          <button type="button" class="btn btn-secondary full-width select-plan-btn" data-points="3000" data-plan="الأساسية ($20)">اشترك الآن</button>
         </div>
 
-        <!-- Plan 2: $30 -->
         <div class="plan-box featured">
           <div class="plan-badge popular">الأكثر طلباً</div>
           <h3>الخطة الاحترافية</h3>
@@ -301,10 +300,9 @@
             <li>✅ قوالب UGC الحصرية عالية التحويل</li>
             <li>✅ دعم مقاسات TikTok و Reels و YouTube</li>
           </ul>
-          <button class="btn btn-primary full-width select-plan-btn" data-points="6000" data-plan="الاحترافية ($30)">اشترك الآن</button>
+          <button type="button" class="btn btn-primary full-width select-plan-btn" data-points="6000" data-plan="الاحترافية ($30)">اشترك الآن</button>
         </div>
 
-        <!-- Plan 3: $50 -->
         <div class="plan-box super">
           <div class="plan-badge vip">سوبر VIP</div>
           <h3>خطة السوبر</h3>
@@ -316,7 +314,7 @@
             <li>✅ ميزة استنساخ هوية العلامة التجارية</li>
             <li>✅ دعم فني VIP مباشر على مدار الساعة</li>
           </ul>
-          <button class="btn btn-primary full-width select-plan-btn" data-points="15000" data-plan="السوبر ($50)">اشترك في السوبر</button>
+          <button type="button" class="btn btn-primary full-width select-plan-btn" data-points="15000" data-plan="السوبر ($50)">اشترك في السوبر</button>
         </div>
       </div>
     </div>
@@ -325,7 +323,7 @@
   <!-- Admin Panel Modal (Owner Only + Video/Image Template Upload) -->
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
-      <button class="close-modal" data-close="adminModal">✕</button>
+      <button type="button" class="close-modal" data-close="adminModal">✕</button>
       <h2>🛠️ لوحة تحكم المالك — إضافة قالب إعلاني</h2>
       <p class="muted">يمكنك رفع فيديو استعراضي للقالب أو صورة غلاف ليظهر في الواجهة الرئيسية.</p>
 
@@ -360,9 +358,227 @@
     </div>
   </div>
 
-  <!-- Hidden Canvas for Real Video Rendering -->
+  <!-- Hidden Canvas for Rendering -->
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
 
-  <script src="app.js"></script>
-</body>
-</html>
+  <script>
+    // ==================== OWNER / ADMIN CONFIGURATION ====================
+    const ADMIN_EMAILS = [
+      'admin@gmail.com',
+      'owner@gmail.com',
+      'jaber@gmail.com'
+    ];
+
+    function safeGetStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    let currentMode = 'video'; // 'video' or 'image'
+    let user = safeGetStorage('adspark_user', null);
+    let uploadedProductImg = null;
+    let lastGeneratedBlobUrl = null;
+    let lastGeneratedExt = 'webm';
+
+    // التنقل بين الصفحات في التذييل السفلي
+    function switchPage(pageName) {
+      document.querySelectorAll('.page-view').forEach(page => {
+        page.classList.add('hidden');
+        page.classList.remove('active');
+      });
+
+      const targetPage = document.getElementById('page-' + pageName);
+      if (targetPage) {
+        targetPage.classList.remove('hidden');
+        targetPage.classList.add('active');
+      }
+
+      document.querySelectorAll('.footer-link').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === pageName);
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.footer-link').forEach(btn => {
+      btn.addEventListener('click', () => switchPage(btn.dataset.page));
+    });
+
+    // القوالب الافتراضية
+    const defaultTemplates = [
+      {
+        id: 1,
+        title: 'إعلان سيروم العناية بالبشرة الفاخر',
+        category: 'beauty',
+        badge: 'GMV $20,000',
+        prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        id: 2,
+        title: 'ترويج حقائب وأزياء عصرية 1-Click',
+        category: 'fashion',
+        badge: '20k+ Likes',
+        prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        id: 3,
+        title: 'مراجعة UGC منزلية لمنتج ذكي',
+        category: 'tech',
+        badge: '$30,000 GMV',
+        prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        id: 4,
+        title: 'إعلان عطر كلاسيكي بإضاءة ذهبية',
+        category: 'beauty',
+        badge: '5000+ Likes',
+        prompt: 'عبير يدوم طويلاً ويترك بصمتك الخاصة في كل مكان تذهب إليه',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        id: 5,
+        title: 'إعلان إكسسوارات ومجوهرات فاخرة',
+        category: 'fashion',
+        badge: '1000+ Sales',
+        prompt: 'لمسة من الفخامة تكتمل بها أناقتك • إصدار محدود متوفر الآن',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        id: 6,
+        title: 'منتج أسلوب حياة صحي وقهوة مختصة',
+        category: 'lifestyle',
+        badge: '350k+ Views',
+        prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة',
+        mediaType: 'image',
+        cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80'
+      }
+    ];
+
+    let templates = safeGetStorage('adspark_templates', null);
+    if (!Array.isArray(templates) || templates.length === 0) {
+      templates = defaultTemplates;
+    }
+    let selectedTemplate = templates[0];
+
+    // عناصر الواجهة
+    const gmailLoginBtn = document.getElementById('gmailLoginBtn');
+    const userLabel = document.getElementById('userLabel');
+    const creditPill = document.getElementById('creditPill');
+    const creditBalance = document.getElementById('creditBalance');
+    const openAdminBtn = document.getElementById('openAdminBtn');
+    const templatesGrid = document.getElementById('templatesGrid');
+    const promptInput = document.getElementById('promptInput');
+    const activeTemplateTitle = document.getElementById('activeTemplateTitle');
+    const productImageInput = document.getElementById('productImageInput');
+    const uploadFileName = document.getElementById('uploadFileName');
+    const generateBtn = document.getElementById('generateBtn');
+    const costHint = document.getElementById('costHint');
+    const resultSection = document.getElementById('resultSection');
+    const outputVideo = document.getElementById('outputVideo');
+    const outputImage = document.getElementById('outputImage');
+
+    // التبديل بين وضع الفيديو ووضع الصورة
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+
+        if (currentMode === 'video') {
+          generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
+          costHint.textContent = 'التكلفة: 250 نقطة';
+        } else {
+          generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
+          costHint.textContent = 'التكلفة: 100 نقطة';
+        }
+      });
+    });
+
+    function isOwnerLoggedIn() {
+      const isSecretAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
+      if (isSecretAdminUrl) return true;
+      if (!user || !user.email) return false;
+      const emailLower = user.email.toLowerCase().trim();
+      return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower);
+    }
+
+    function updateAuthUI() {
+      if (user) {
+        userLabel.textContent = user.email;
+        creditPill.classList.remove('hidden');
+        creditBalance.textContent = user.credits;
+      }
+      if (isOwnerLoggedIn()) {
+        openAdminBtn.classList.remove('hidden');
+      } else {
+        openAdminBtn.classList.add('hidden');
+      }
+    }
+
+    function saveUser() {
+      try {
+        localStorage.setItem('adspark_user', JSON.stringify(user));
+      } catch (e) {}
+      updateAuthUI();
+    }
+
+    // تسجيل الدخول عبر Gmail
+    gmailLoginBtn.addEventListener('click', () => {
+      if (user) {
+        const logout = confirm('أنت مسجل الدخول بحساب: ' + user.email + ' - هل ترغب بتسجيل الخروج؟');
+        if (logout) {
+          user = null;
+          localStorage.removeItem('adspark_user');
+          userLabel.textContent = 'تسجيل الدخول عبر Gmail (1000 نقطة)';
+          creditPill.classList.add('hidden');
+          updateAuthUI();
+        }
+        return;
+      }
+
+      const email = prompt('أدخل بريدك الإلكتروني (Gmail) للحصول على 1000 نقطة مجانية:', 'creator@gmail.com');
+      if (email && email.includes('@')) {
+        user = {
+          email: email.trim(),
+          credits: 1000,
+          plan: 'مجانية'
+        };
+        saveUser();
+        if (isOwnerLoggedIn()) {
+          alert('مرحباً بك بصفتك مالك المنصة! تم تفعيل زر لوحة المشرف لك.');
+        } else {
+          alert('تم تسجيل الدخول بنجاح! حصلت على 1000 نقطة مجانية في رصيدك.');
+        }
+      } else if (email) {
+        alert('يرجى إدخال عنوان بريد إلكتروني صحيح.');
+      }
+    });
+
+    // رسم القوالب في الشبكة
+    function renderTemplates(filterCat = 'all') {
+      templatesGrid.innerHTML = '';
+      const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
+
+      filtered.forEach(tpl => {
+        const card = document.createElement('div');
+        card.className = 'template-card ' + (selectedTemplate && selectedTemplate.id === tpl.id ? 'selected' : '');
+
+        const isVideo = tpl.mediaType === 'video';
+        const mediaHtml = isVideo
+          ? '<span class="video-tag-badge">🎬 فيديو</span><video src="' + tpl.cover + '" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>'
+          : '<img src="' + tpl.cover + '" alt="' + tpl.title + '" crossorigin="anonymous" />';
+
+        card.innerHTML =
+          '<span class="card-badge">' + tpl.badge
