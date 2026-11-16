@@ -7,12 +7,128 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --bg-dark: #0e0f13;
+      --bg-card: #16181f;
+      --bg-elevated: #1f222c;
+      --border: #2b2f3d;
+      --primary: #7c5cff;
+      --primary-hover: #6845ff;
+      --accent-coral: #ff5b5b;
+      --text-main: #f3f4f8;
+      --text-muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    .hidden { display: none !important; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #121318; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; flex-wrap: wrap; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #b05cff); display: grid; place-items: center; font-size: 20px; }
+    .brand-name { font-size: 20px; font-weight: 800; display: block; }
+    .brand-name .accent { color: var(--primary); }
+    .brand-tag { font-size: 11px; color: var(--text-muted); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .credit-pill { display: flex; align-items: center; gap: 6px; background: var(--bg-elevated); border: 1px solid var(--primary); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
+    .plus-badge { background: var(--primary); color: #fff; width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-weight: bold; }
+    .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--primary); }
+    .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-gmail { background: #ffffff; color: #1f2937; }
+    .btn-gmail:hover { background: #f3f4f6; }
+    .full-width { width: 100%; }
+    .page-view { flex: 1; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
+    .info-page { max-width: 920px; }
+    .info-header { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; margin-bottom: 24px; text-align: center; }
+    .info-header h1 { font-size: 26px; margin-bottom: 8px; }
+    .info-header p { color: var(--text-muted); font-size: 15px; }
+    .guide-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .guide-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+    .step-num { width: 36px; height: 36px; border-radius: 10px; background: var(--primary); color: #fff; font-weight: 800; display: grid; place-items: center; margin-bottom: 12px; }
+    .guide-card h3 { font-size: 17px; margin-bottom: 8px; }
+    .guide-card p { color: #d1d5db; font-size: 14px; line-height: 1.7; }
+    .info-cta-box { margin-top: 28px; text-align: center; }
+    .legal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 22px; }
+    .legal-content section h3 { color: var(--primary); font-size: 18px; margin-bottom: 8px; }
+    .legal-content section p, .legal-content section li { color: #d1d5db; font-size: 14px; line-height: 1.8; }
+    .legal-content section ul { padding-right: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; }
+    .studio-sidebar { display: flex; flex-direction: column; gap: 10px; }
+    .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+    .mode-btn.active { border-color: var(--primary); color: #fff; background: rgba(124, 92, 255, 0.16); }
+    .studio-main { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .template-badge-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-elevated); padding: 8px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 8px; }
+    .badge-viral { background: var(--accent-coral); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    textarea, input[type="text"], select { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 12px; padding: 12px; font-size: 14px; outline: none; }
+    textarea:focus, input:focus, select:focus { border-color: var(--primary); }
+    .studio-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .control-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .studio-select { width: auto; padding: 9px 12px; }
+    .cta-text-input { max-width: 240px; padding: 9px 12px; }
+    .generate-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; }
+    .cost-hint { font-size: 11px; color: var(--text-muted); }
+    .result-section { background: var(--bg-card); border: 1px solid var(--primary); border-radius: 18px; padding: 20px; margin-bottom: 32px; }
+    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .status-tag { background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 4px 12px; border-radius: 999px; font-size: 12px; }
+    .result-body { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+    .video-frame video, .video-frame img { width: 270px; max-width: 100%; border-radius: 14px; border: 1px solid var(--border); background: #000; }
+    .result-actions { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+    .section-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .pill-hot { background: var(--accent-coral); color: #fff; font-size: 12px; padding: 3px 10px; border-radius: 999px; vertical-align: middle; }
+    .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; }
+    .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+    .cat-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+    .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .template-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .template-card.selected { border-color: var(--primary); }
+    .template-card img, .template-card video { width: 100%; height: 100%; object-fit: cover; }
+    .card-badge { position: absolute; top: 10px; right: 10px; background: var(--accent-coral); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 2; }
+    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.9); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; z-index: 2; }
+    .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.92)); z-index: 2; }
+    .card-overlay h4 { font-size: 14px; margin-bottom: 4px; }
+    .card-overlay span { font-size: 11px; color: #d1d5db; }
+    .site-footer { background: #121318; border-top: 1px solid var(--border); padding: 24px; margin-top: auto; }
+    .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
+    .footer-brand { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+    .footer-brand span { font-size: 12px; color: var(--text-muted); }
+    .footer-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .footer-link { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .footer-link:hover { color: var(--text-main); border-color: var(--primary); }
+    .footer-link.active { background: rgba(124, 92, 255, 0.2); border-color: var(--primary); color: #fff; }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); display: grid; place-items: center; padding: 20px; z-index: 100; }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
+    .admin-modal-card { max-width: 540px; }
+    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+    .modal-header-center { text-align: center; margin-bottom: 24px; }
+    .modal-header-center p { color: var(--text-muted); margin-top: 6px; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+    .plan-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    .plan-box.featured { border: 2px solid var(--primary); }
+    .plan-box.super { border: 2px solid #f59e0b; }
+    .plan-badge { align-self: flex-start; background: #374151; padding: 3px 10px; border-radius: 999px; font-size: 12px; }
+    .plan-badge.popular { background: var(--primary); }
+    .plan-badge.vip { background: #d97706; }
+    .plan-price { font-size: 32px; font-weight: 800; }
+    .plan-price span { font-size: 14px; color: var(--text-muted); }
+    .plan-points { color: #34d399; font-weight: 700; font-size: 14px; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #d1d5db; flex: 1; }
+    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 700px) { .studio-box { flex-direction: column; } .studio-sidebar { flex-direction: row; } }
+  </style>
 </head>
 <body>
   <!-- Top Navbar -->
   <header class="navbar">
-    <div class="brand" onclick="switchPage('home')" style="cursor: pointer;">
+    <div class="brand" onclick="switchPage('home')">
       <div class="brand-logo">⚡</div>
       <div>
         <span class="brand-name">AdSpark <span class="accent">AI</span></span>
@@ -21,7 +137,6 @@
     </div>
 
     <div class="nav-actions">
-      <!-- يظهر هذا الزر فقط لمالك الموقع / المشرف عند تسجيل الدخول بحسابه -->
       <button id="openAdminBtn" class="btn btn-secondary hidden">
         <span>🛠️</span> لوحة المشرف (إضافة قوالب)
       </button>
@@ -40,10 +155,9 @@
     </div>
   </header>
 
-  <!-- ==================== PAGE 1: HOME (STUDIO & TEMPLATES) ==================== -->
+  <!-- PAGE 1: HOME -->
   <div id="page-home" class="page-view active">
     <main class="container">
-      <!-- Top Studio Prompt & Generator Box -->
       <section class="studio-box">
         <div class="studio-sidebar">
           <button type="button" class="mode-btn active" data-mode="video">
@@ -79,7 +193,7 @@
                 <option value="1:1">Seedance 2.0 • 1:1 • 6s • 1080P</option>
               </select>
 
-              <input type="text" id="ctaInput" class="cta-text-input" value="اطلبه الآن • خصم لفترة محدودة" placeholder="نص زر الشراء في نهاية الفيديو" />
+              <input type="text" id="ctaInput" class="cta-text-input" value="اطلبه الآن • خصم لفترة محدودة" placeholder="نص زر الشراء" />
             </div>
 
             <div class="generate-wrapper">
@@ -92,7 +206,6 @@
         </div>
       </section>
 
-      <!-- Generated Video/Image Result Preview Section -->
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
@@ -101,7 +214,7 @@
         <div class="result-body">
           <div class="video-frame">
             <video id="outputVideo" controls playsinline></video>
-            <img id="outputImage" class="hidden" style="width:270px;max-width:100%;border-radius:14px;border:1px solid var(--border);" alt="الإعلان المُولد" />
+            <img id="outputImage" class="hidden" alt="الإعلان المُولد" />
           </div>
           <div class="result-actions">
             <button type="button" id="downloadVideoBtn" class="btn btn-primary">⬇️ تحميل الملف الجاهز</button>
@@ -111,7 +224,6 @@
         </div>
       </section>
 
-      <!-- Explore Templates Section -->
       <section class="templates-section">
         <div class="section-title-row">
           <h2>استكشف القوالب الإعلانية <span class="pill-hot">1-Click Viral Remake</span></h2>
@@ -130,189 +242,143 @@
     </main>
   </div>
 
-  <!-- ==================== PAGE 2: APP GUIDE (تعليمات التطبيق) ==================== -->
+  <!-- PAGE 2: GUIDE -->
   <div id="page-guide" class="page-view hidden">
     <main class="container info-page">
       <div class="info-header">
         <h1>📖 تعليمات استخدام منصة AdSpark AI</h1>
         <p>دليلك السريع لتحويل صور منتجاتك إلى إعلانات فيديو احترافية جاهزة للنشر في دقائق.</p>
       </div>
-
       <div class="guide-steps">
         <div class="guide-card">
           <div class="step-num">1</div>
-          <h3>تسجيل الدخول والحصول على الرصيد المجاني</h3>
-          <p>اضغط على زر <strong>تسجيل الدخول عبر Gmail</strong> في الأعلى لتفعيل حسابك والحصول تلقائياً على <strong>1,000 نقطة مجانية</strong> تتيح لك تجربة المنصة وتوليد 4 فيديوهات إعلانية مجاناً.</p>
+          <h3>تسجيل الدخول والرصيد المجاني</h3>
+          <p>اضغط على زر <strong>تسجيل الدخول عبر Gmail</strong> في الأعلى للحصول على <strong>1,000 نقطة مجانية</strong>.</p>
         </div>
-
         <div class="guide-card">
           <div class="step-num">2</div>
-          <h3>اختيار القالب الإعلاني المناسب</h3>
-          <p>تصفح مكتبة القوالب في الصفحة الرئيسية (العناية والجمال، الأزياء، الإلكترونيات، أسلوب الحياة) واضغط على القالب الذي يناسب طبيعة منتجك ليتم تحميل السيناريو الإعلاني تلقائياً.</p>
+          <h3>اختيار القالب المناسب</h3>
+          <p>تصفح القوالب في الرئيسية واضغط على القالب الذي يناسب منتجك ليتم تحميل السيناريو.</p>
         </div>
-
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>رفع صورة المنتج وتخصيص النص</h3>
-          <p>اضغط على زر <strong>رفع صورة المنتج / الشخصية</strong> لإدراج صورتك الخاصة، ثم عدّل النص الإعلاني وعبارة الدعوة لاتخاذ إجراء (CTA) مثل "اطلبه الآن" وحدد المقاس المناسب (9:16 لـ TikTok و Reels).</p>
+          <h3>رفع الصورة والنصوص</h3>
+          <p>ارفع صورة منتجك، وعدل نص الإعلان وعبارة الدعوة للشراء (CTA).</p>
         </div>
-
         <div class="guide-card">
           <div class="step-num">4</div>
-          <h3>التوليد والتحميل والمشاركة</h3>
-          <p>اضغط على زر <strong>توليد الفيديو الإعلاني</strong> (يستهلك 250 نقطة). خلال ثوانٍ سيقوم الذكاء الاصطناعي بدمج الصورة مع الحركة والموسيقى، لتتمكن بعدها من تحميل الفيديو أو مشاركته أو إعادة توليده.</p>
+          <h3>التوليد والتحميل</h3>
+          <p>اضغط توليد الفيديو (250 نقطة) وحمله مباشرة أو شاركه.</p>
         </div>
       </div>
-
       <div class="info-cta-box">
         <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
 
-  <!-- ==================== PAGE 3: PRIVACY POLICY (سياسة الخصوصية) ==================== -->
+  <!-- PAGE 3: PRIVACY -->
   <div id="page-privacy" class="page-view hidden">
     <main class="container info-page">
       <div class="info-header">
-        <h1>🔒 سياسة الخصوصية (Privacy Policy)</h1>
-        <p>آخر تحديث: نوفمبر 2026 — نحن نحترم خصوصيتك ونلتزم بحماية بياناتك.</p>
+        <h1>🔒 سياسة الخصوصية</h1>
+        <p>نحن نحترم خصوصيتك ونلتزم بحماية بياناتك.</p>
       </div>
-
       <div class="legal-content">
         <section>
-          <h3>1. المعلومات التي نقوم بجمعها</h3>
-          <p>عند تسجيل الدخول باستخدام حساب <strong>Gmail</strong>، نجمع فقط عنوان بريدك الإلكتروني الأساسي لغرض إنشاء ملفك الشخصي، وحفظ رصيد النقاط الخاص بك (1,000 نقطة مجانية أو الباقات المشترك بها)، وتخصيص تجربتك داخل المنصة.</p>
+          <h3>1. البيانات المجمعة</h3>
+          <p>نجمع فقط بريدك الإلكتروني لإنشاء حسابك وإدارة رصيد النقاط الخاص بك.</p>
         </section>
-
         <section>
-          <h3>2. الصور والملفات المرفوعة</h3>
-          <p>تُستخدم الصور التي ترفعها (صور المنتجات أو الشخصيات) حصرياً لغرض معالجتها وتوليد الفيديو الإعلاني الخاص بك. لا نقوم ببيع صورك أو مشاركتها مع أي أطراف خارجية لأغراض تسويقية.</p>
-        </section>
-
-        <section>
-          <h3>3. التخزين المحلي وملفات تعريف الارتباط</h3>
-          <p>تستخدم المنصة تقنيات التخزين المحلي في المتصفح (Local Storage) لحفظ حالة تسجيل الدخول، رصيد النقاط، والقوالب المضافة لضمان سرعة الأداء وسهولة الوصول دون الحاجة لإعادة إدخال البيانات في كل زيارة.</p>
-        </section>
-
-        <section>
-          <h3>4. أمان البيانات وحقوق المستخدم</h3>
-          <p>يحق لك في أي وقت طلب حذف بيانات حسابك أو مسح بيانات التخزين المحلي من متصفحك. نطبق معايير حماية صارمة لمنع الوصول غير المصرح به إلى حسابك أو محتواك الإعلاني.</p>
+          <h3>2. الصور المرفوعة</h3>
+          <p>تُستخدم صور منتجاتك لتوليد الإعلانات فقط ولا يتم مشاركتها.</p>
         </section>
       </div>
-
       <div class="info-cta-box">
         <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
 
-  <!-- ==================== PAGE 4: TERMS & CONDITIONS (الشروط والأحكام) ==================== -->
+  <!-- PAGE 4: TERMS -->
   <div id="page-terms" class="page-view hidden">
     <main class="container info-page">
       <div class="info-header">
-        <h1>📜 الشروط والأحكام (Terms & Conditions)</h1>
-        <p>يرجى قراءة هذه الشروط بعناية قبل استخدام خدمات منصة AdSpark AI.</p>
+        <h1>📜 الشروط والأحكام</h1>
+        <p>يرجى قراءة الشروط قبل استخدام المنصة.</p>
       </div>
-
       <div class="legal-content">
         <section>
-          <h3>1. قبول الشروط</h3>
-          <p>باستخدامك لمنصة <strong>AdSpark AI</strong> أو تسجيل الدخول إليها، فإنك توافق على الالتزام بجميع البنود الواردة في هذه الاتفاقية والامتثال للقوانين المعمول بها.</p>
+          <h3>1. نظام النقاط</h3>
+          <p>تحصل على 1000 نقطة مجانية عند التسجيل، وكل عملية توليد تستهلك رصيداً.</p>
         </section>
-
         <section>
-          <h3>2. نظام النقاط والاشتراكات</h3>
-          <ul>
-            <li>يحصل كل مستخدم جديد يسجل عبر Gmail على <strong>1,000 نقطة مجانية</strong> لمرة واحدة.</li>
-            <li>تستهلك كل عملية توليد فيديو إعلاني (أو إعادة توليد) <strong>250 نقطة</strong> من الرصيد المتاح.</li>
-            <li>عند نفاد الرصيد، يمكن للمستخدم الترقية إلى إحدى الباقات الشهرية ($20، $30، أو $50) للحصول على نقاط إضافية ومزايا متقدمة.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3>3. حقوق الملكية الفكرية والاستخدام التجاري</h3>
-          <p>يمتلك المستخدم كامل حقوق الاستخدام التجاري والترويجي للفيديوهات الإعلانية التي يقوم بتوليدها عبر المنصة ونشرها على منصات التواصل الاجتماعي، شريطة أن يكون مالكاً لحقوق الصور التي يقوم برفعها.</p>
-        </section>
-
-        <section>
-          <h3>4. الاستخدام المقبول</h3>
-          <p>يُحظر استخدام المنصة لتوليد محتوى ينتهك حقوق الملكية الفكرية للآخرين، أو محتوى مضلل، أو غير قانوني، أو مسيء. يحتفظ مشرفو المنصة بالحق في إيقاف أي حساب يخالف هذه الضوابط.</p>
+          <h3>2. حقوق الاستخدام</h3>
+          <p>تملك كامل الحقوق التجارية للفيديوهات التي تولدها لنشرها على منصات التواصل.</p>
         </section>
       </div>
-
       <div class="info-cta-box">
         <button type="button" class="btn btn-primary" onclick="switchPage('home')">⚡ العودة إلى الرئيسية</button>
       </div>
     </main>
   </div>
 
-  <!-- Global Footer (Bottom Navigation Options) -->
+  <!-- Footer Navigation -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
         <strong>⚡ AdSpark AI</strong>
         <span>منصة توليد الفيديوهات الإعلانية بالذكاء الاصطناعي</span>
       </div>
-
       <nav class="footer-nav">
         <button type="button" class="footer-link active" data-page="home">🏠 الرئيسية</button>
         <button type="button" class="footer-link" data-page="guide">📖 تعليمات التطبيق</button>
         <button type="button" class="footer-link" data-page="privacy">🔒 سياسة الخصوصية</button>
         <button type="button" class="footer-link" data-page="terms">📜 الشروط والأحكام</button>
       </nav>
-
       <div class="footer-copy">© 2026 AdSpark AI. جميع الحقوق محفوظة.</div>
     </div>
   </footer>
 
-  <!-- Pricing Plans Modal -->
+  <!-- Pricing Modal -->
   <div id="pricingModal" class="modal hidden">
     <div class="modal-card pricing-card-modal">
       <button type="button" class="close-modal" data-close="pricingModal">✕</button>
       <div class="modal-header-center">
         <h2>اشحن رصيدك وتابع صناعة الإعلانات 🚀</h2>
-        <p>انتهى رصيد النقاط المجاني أو ترغب بمزايا احترافية أعلى. اختر الباقة الشهرية المناسبة:</p>
+        <p>اختر الباقة الشهرية المناسبة لشحن رصيدك:</p>
       </div>
-
       <div class="plans-grid">
         <div class="plan-box">
           <div class="plan-badge">البداية</div>
           <h3>الخطة الأساسية</h3>
           <div class="plan-price">$20<span>/شهرياً</span></div>
-          <div class="plan-points">3,000 نقطة (12 فيديو إعلاني)</div>
+          <div class="plan-points">3,000 نقطة</div>
           <ul class="plan-features">
-            <li>✅ دقة تصدير 1080P Full HD</li>
-            <li>✅ الوصول لجميع القوالب الإعلانية</li>
-            <li>✅ موسيقى ومؤثرات صوتية مدمجة</li>
-            <li>✅ تحميل مباشر بدون علامة مائية</li>
+            <li>✅ دقة تصدير 1080P</li>
+            <li>✅ الوصول لجميع القوالب</li>
           </ul>
           <button type="button" class="btn btn-secondary full-width select-plan-btn" data-points="3000" data-plan="الأساسية ($20)">اشترك الآن</button>
         </div>
-
         <div class="plan-box featured">
           <div class="plan-badge popular">الأكثر طلباً</div>
           <h3>الخطة الاحترافية</h3>
           <div class="plan-price">$30<span>/شهرياً</span></div>
-          <div class="plan-points">6,000 نقطة (24 فيديو إعلاني)</div>
+          <div class="plan-points">6,000 نقطة</div>
           <ul class="plan-features">
-            <li>✅ كل مميزات الخطة الأساسية</li>
-            <li>✅ أولوية وسرعة مضاعفة في التوليد</li>
-            <li>✅ قوالب UGC الحصرية عالية التحويل</li>
-            <li>✅ دعم مقاسات TikTok و Reels و YouTube</li>
+            <li>✅ أولوية وسرعة في التوليد</li>
+            <li>✅ قوالب UGC الحصرية</li>
           </ul>
           <button type="button" class="btn btn-primary full-width select-plan-btn" data-points="6000" data-plan="الاحترافية ($30)">اشترك الآن</button>
         </div>
-
         <div class="plan-box super">
           <div class="plan-badge vip">سوبر VIP</div>
           <h3>خطة السوبر</h3>
           <div class="plan-price">$50<span>/شهرياً</span></div>
-          <div class="plan-points">15,000 نقطة (60 فيديو إعلاني)</div>
+          <div class="plan-points">15,000 نقطة</div>
           <ul class="plan-features">
-            <li>✅ جودة تصدير فائقة 4K Ultra HD</li>
-            <li>✅ توليد غير محدود للصور الإعلانية</li>
-            <li>✅ ميزة استنساخ هوية العلامة التجارية</li>
-            <li>✅ دعم فني VIP مباشر على مدار الساعة</li>
+            <li>✅ جودة 4K Ultra HD</li>
+            <li>✅ دعم فني VIP</li>
           </ul>
           <button type="button" class="btn btn-primary full-width select-plan-btn" data-points="15000" data-plan="السوبر ($50)">اشترك في السوبر</button>
         </div>
@@ -320,17 +386,15 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal (Owner Only + Video/Image Template Upload) -->
+  <!-- Admin Panel Modal -->
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
       <h2>🛠️ لوحة تحكم المالك — إضافة قالب إعلاني</h2>
-      <p class="muted">يمكنك رفع فيديو استعراضي للقالب أو صورة غلاف ليظهر في الواجهة الرئيسية.</p>
-
+      <p class="muted">رفع فيديو أو صورة غلاف ليظهر في الواجهة الرئيسية.</p>
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
-        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر مع إضاءة سينمائية" />
-
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر" />
         <div class="form-row">
           <div>
             <label>التصنيف</label>
@@ -346,28 +410,19 @@
             <input type="text" id="tplBadge" value="GMV $15,000+" required />
           </div>
         </div>
-
-        <label>ملف معاينة القالب (فيديو MP4/WebM أو صورة)</label>
+        <label>ملف معاينة القالب (فيديو أو صورة)</label>
         <input type="file" id="tplMediaFile" accept="video/*,image/*" />
-
         <label>سيناريو القالب (Prompt الافتراضي)</label>
-        <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني الذي سيظهر في الفيديو..."></textarea>
-
+        <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني..."></textarea>
         <button type="submit" class="btn btn-primary full-width">➕ نشر القالب في المنصة</button>
       </form>
     </div>
   </div>
 
-  <!-- Hidden Canvas for Rendering -->
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
 
   <script>
-    // ==================== OWNER / ADMIN CONFIGURATION ====================
-    const ADMIN_EMAILS = [
-      'admin@gmail.com',
-      'owner@gmail.com',
-      'jaber@gmail.com'
-    ];
+    const ADMIN_EMAILS = ['admin@gmail.com', 'owner@gmail.com', 'jaber@gmail.com'];
 
     function safeGetStorage(key, fallback) {
       try {
@@ -378,29 +433,25 @@
       }
     }
 
-    let currentMode = 'video'; // 'video' or 'image'
+    let currentMode = 'video';
     let user = safeGetStorage('adspark_user', null);
     let uploadedProductImg = null;
     let lastGeneratedBlobUrl = null;
     let lastGeneratedExt = 'webm';
 
-    // التنقل بين الصفحات في التذييل السفلي
     function switchPage(pageName) {
       document.querySelectorAll('.page-view').forEach(page => {
         page.classList.add('hidden');
         page.classList.remove('active');
       });
-
       const targetPage = document.getElementById('page-' + pageName);
       if (targetPage) {
         targetPage.classList.remove('hidden');
         targetPage.classList.add('active');
       }
-
       document.querySelectorAll('.footer-link').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.page === pageName);
       });
-
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -408,71 +459,19 @@
       btn.addEventListener('click', () => switchPage(btn.dataset.page));
     });
 
-    // القوالب الافتراضية
     const defaultTemplates = [
-      {
-        id: 1,
-        title: 'إعلان سيروم العناية بالبشرة الفاخر',
-        category: 'beauty',
-        badge: 'GMV $20,000',
-        prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 2,
-        title: 'ترويج حقائب وأزياء عصرية 1-Click',
-        category: 'fashion',
-        badge: '20k+ Likes',
-        prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 3,
-        title: 'مراجعة UGC منزلية لمنتج ذكي',
-        category: 'tech',
-        badge: '$30,000 GMV',
-        prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 4,
-        title: 'إعلان عطر كلاسيكي بإضاءة ذهبية',
-        category: 'beauty',
-        badge: '5000+ Likes',
-        prompt: 'عبير يدوم طويلاً ويترك بصمتك الخاصة في كل مكان تذهب إليه',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 5,
-        title: 'إعلان إكسسوارات ومجوهرات فاخرة',
-        category: 'fashion',
-        badge: '1000+ Sales',
-        prompt: 'لمسة من الفخامة تكتمل بها أناقتك • إصدار محدود متوفر الآن',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 6,
-        title: 'منتج أسلوب حياة صحي وقهوة مختصة',
-        category: 'lifestyle',
-        badge: '350k+ Views',
-        prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة',
-        mediaType: 'image',
-        cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80'
-      }
+      { id: 1, title: 'إعلان سيروم العناية بالبشرة الفاخر', category: 'beauty', badge: 'GMV $20,000', prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80' },
+      { id: 2, title: 'ترويج حقائب وأزياء عصرية 1-Click', category: 'fashion', badge: '20k+ Likes', prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80' },
+      { id: 3, title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' },
+      { id: 4, title: 'إعلان عطر كلاسيكي بإضاءة ذهبية', category: 'beauty', badge: '5000+ Likes', prompt: 'عبير يدوم طويلاً ويترك بصمتك الخاصة في كل مكان تذهب إليه', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80' },
+      { id: 5, title: 'إعلان إكسسوارات ومجوهرات فاخرة', category: 'fashion', badge: '1000+ Sales', prompt: 'لمسة من الفخامة تكتمل بها أناقتك • إصدار محدود متوفر الآن', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80' },
+      { id: 6, title: 'منتج أسلوب حياة صحي وقهوة مختصة', category: 'lifestyle', badge: '350k+ Views', prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80' }
     ];
 
     let templates = safeGetStorage('adspark_templates', null);
-    if (!Array.isArray(templates) || templates.length === 0) {
-      templates = defaultTemplates;
-    }
+    if (!Array.isArray(templates) || templates.length === 0) templates = defaultTemplates;
     let selectedTemplate = templates[0];
 
-    // عناصر الواجهة
     const gmailLoginBtn = document.getElementById('gmailLoginBtn');
     const userLabel = document.getElementById('userLabel');
     const creditPill = document.getElementById('creditPill');
@@ -489,13 +488,11 @@
     const outputVideo = document.getElementById('outputVideo');
     const outputImage = document.getElementById('outputImage');
 
-    // التبديل بين وضع الفيديو ووضع الصورة
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentMode = btn.dataset.mode;
-
         if (currentMode === 'video') {
           generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
           costHint.textContent = 'التكلفة: 250 نقطة';
@@ -510,8 +507,7 @@
       const isSecretAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
       if (isSecretAdminUrl) return true;
       if (!user || !user.email) return false;
-      const emailLower = user.email.toLowerCase().trim();
-      return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower);
+      return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase().trim());
     }
 
     function updateAuthUI() {
@@ -528,17 +524,13 @@
     }
 
     function saveUser() {
-      try {
-        localStorage.setItem('adspark_user', JSON.stringify(user));
-      } catch (e) {}
+      try { localStorage.setItem('adspark_user', JSON.stringify(user)); } catch (e) {}
       updateAuthUI();
     }
 
-    // تسجيل الدخول عبر Gmail
     gmailLoginBtn.addEventListener('click', () => {
       if (user) {
-        const logout = confirm('أنت مسجل الدخول بحساب: ' + user.email + ' - هل ترغب بتسجيل الخروج؟');
-        if (logout) {
+        if (confirm('أنت مسجل الدخول بحساب: ' + user.email + ' - هل ترغب بتسجيل الخروج؟')) {
           user = null;
           localStorage.removeItem('adspark_user');
           userLabel.textContent = 'تسجيل الدخول عبر Gmail (1000 نقطة)';
@@ -547,38 +539,302 @@
         }
         return;
       }
-
       const email = prompt('أدخل بريدك الإلكتروني (Gmail) للحصول على 1000 نقطة مجانية:', 'creator@gmail.com');
       if (email && email.includes('@')) {
-        user = {
-          email: email.trim(),
-          credits: 1000,
-          plan: 'مجانية'
-        };
+        user = { email: email.trim(), credits: 1000, plan: 'مجانية' };
         saveUser();
-        if (isOwnerLoggedIn()) {
-          alert('مرحباً بك بصفتك مالك المنصة! تم تفعيل زر لوحة المشرف لك.');
-        } else {
-          alert('تم تسجيل الدخول بنجاح! حصلت على 1000 نقطة مجانية في رصيدك.');
-        }
+        alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! تم تفعيل لوحة المشرف.' : 'تم تسجيل الدخول وحصلت على 1000 نقطة!');
       } else if (email) {
-        alert('يرجى إدخال عنوان بريد إلكتروني صحيح.');
+        alert('بريد إلكتروني غير صحيح.');
       }
     });
 
-    // رسم القوالب في الشبكة
     function renderTemplates(filterCat = 'all') {
       templatesGrid.innerHTML = '';
       const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
-
       filtered.forEach(tpl => {
         const card = document.createElement('div');
         card.className = 'template-card ' + (selectedTemplate && selectedTemplate.id === tpl.id ? 'selected' : '');
-
         const isVideo = tpl.mediaType === 'video';
         const mediaHtml = isVideo
           ? '<span class="video-tag-badge">🎬 فيديو</span><video src="' + tpl.cover + '" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>'
           : '<img src="' + tpl.cover + '" alt="' + tpl.title + '" crossorigin="anonymous" />';
 
-        card.innerHTML =
-          '<span class="card-badge">' + tpl.badge
+        card.innerHTML = '<span class="card-badge">' + tpl.badge + '</span>' + mediaHtml + '<div class="card-overlay"><h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب</span></div>';
+        card.addEventListener('click', () => {
+          selectedTemplate = tpl;
+          activeTemplateTitle.textContent = tpl.title;
+          promptInput.value = tpl.prompt;
+          renderTemplates(filterCat);
+          switchPage('home');
+        });
+        templatesGrid.appendChild(card);
+      });
+    }
+
+    document.querySelectorAll('.cat-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderTemplates(tab.dataset.cat);
+      });
+    });
+
+    productImageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      uploadFileName.textContent = file.name.slice(0, 18);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => { uploadedProductImg = img; };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function generateAd() {
+      if (!user) {
+        alert('يرجى تسجيل الدخول عبر Gmail أولاً!');
+        gmailLoginBtn.click();
+        return;
+      }
+      const cost = currentMode === 'video' ? 250 : 100;
+      if (user.credits < cost) {
+        document.getElementById('pricingModal').classList.remove('hidden');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳ جاري المعالجة بالذكاء الاصطناعي...</span>';
+
+      const canvas = document.getElementById('renderCanvas');
+      const ctx = canvas.getContext('2d');
+      const adText = promptInput.value.trim() || selectedTemplate.prompt;
+      const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
+
+      let activeImg = uploadedProductImg;
+      if (!activeImg && selectedTemplate.mediaType !== 'video') {
+        const bgImg = new Image();
+        bgImg.crossOrigin = 'anonymous';
+        bgImg.src = selectedTemplate.cover;
+        await new Promise(r => { bgImg.onload = r; bgImg.onerror = r; });
+        activeImg = bgImg;
+      }
+
+      function renderScene(scaleFactor, pulseFactor) {
+        ctx.fillStyle = '#0e0f13';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
+          const w = canvas.width * scaleFactor;
+          const h = canvas.height * scaleFactor;
+          const x = (canvas.width - w) / 2;
+          const y = (canvas.height - h) / 2;
+          ctx.globalAlpha = 0.85;
+          ctx.drawImage(activeImg, x, y, w, h);
+          ctx.globalAlpha = 1;
+        }
+        const grad = ctx.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height);
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.92)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#ff5b5b';
+        ctx.fillRect(40, 50, 230, 44);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 22px Cairo, sans-serif';
+        ctx.fillText(selectedTemplate.badge, 60, 80);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 34px Cairo, sans-serif';
+        ctx.fillText(adText.slice(0, 48), 40, canvas.height - 230);
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height - 120);
+        ctx.scale(pulseFactor, pulseFactor);
+        ctx.fillStyle = '#7c5cff';
+        ctx.fillRect(-240, -35, 480, 70);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 28px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(ctaText, 0, 10);
+        ctx.restore();
+        ctx.textAlign = 'start';
+      }
+
+      if (currentMode === 'image') {
+        renderScene(1.04, 1);
+        canvas.toBlob((blob) => {
+          user.credits -= cost;
+          saveUser();
+          if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+          lastGeneratedBlobUrl = URL.createObjectURL(blob);
+          lastGeneratedExt = 'png';
+
+          document.getElementById('resultTitle').textContent = '🖼️ البوستر الإعلاني الجاهز';
+          outputVideo.classList.add('hidden');
+          outputImage.classList.remove('hidden');
+          outputImage.src = lastGeneratedBlobUrl;
+          resultSection.classList.remove('hidden');
+
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
+          resultSection.scrollIntoView({ behavior: 'smooth' });
+        }, 'image/png');
+        return;
+      }
+
+      let audioCtx = null;
+      let osc = null;
+      let combinedStream = canvas.captureStream(30);
+
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const dest = audioCtx.createMediaStreamDestination();
+        osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2.5);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 5);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start();
+        combinedStream = new MediaStream([...combinedStream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      } catch (err) {}
+
+      const recorder = new MediaRecorder(combinedStream);
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        if (osc) osc.stop();
+        if (audioCtx) audioCtx.close();
+        user.credits -= cost;
+        saveUser();
+
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+        lastGeneratedBlobUrl = URL.createObjectURL(blob);
+        lastGeneratedExt = 'webm';
+
+        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز';
+        outputImage.classList.add('hidden');
+        outputVideo.classList.remove('hidden');
+        outputVideo.src = lastGeneratedBlobUrl;
+        resultSection.classList.remove('hidden');
+        outputVideo.play();
+
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      recorder.start();
+      let frame = 0;
+      const totalFrames = 140;
+
+      function drawFrame() {
+        const progress = frame / totalFrames;
+        const pulse = 1 + Math.sin(frame * 0.2) * 0.04;
+        renderScene(1 + progress * 0.16, pulse);
+        frame++;
+        if (frame <= totalFrames) {
+          requestAnimationFrame(drawFrame);
+        } else {
+          recorder.stop();
+        }
+      }
+      drawFrame();
+    }
+
+    generateBtn.addEventListener('click', generateAd);
+    document.getElementById('regenerateBtn').addEventListener('click', generateAd);
+
+    document.getElementById('downloadVideoBtn').addEventListener('click', () => {
+      if (!lastGeneratedBlobUrl) return;
+      const a = document.createElement('a');
+      a.href = lastGeneratedBlobUrl;
+      a.download = 'AdSpark-Ad-' + Date.now() + '.' + lastGeneratedExt;
+      a.click();
+    });
+
+    document.getElementById('shareVideoBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('تم نسخ رابط مشاركة الإعلان إلى الحافظة!');
+    });
+
+    creditPill.addEventListener('click', () => {
+      document.getElementById('pricingModal').classList.remove('hidden');
+    });
+
+    document.querySelectorAll('.select-plan-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!user) {
+          alert('يرجى تسجيل الدخول بحساب Gmail أولاً.');
+          return;
+        }
+        const addedPoints = Number(btn.dataset.points);
+        user.credits += addedPoints;
+        user.plan = btn.dataset.plan;
+        saveUser();
+        document.getElementById('pricingModal').classList.add('hidden');
+        alert('تم تفعيل باقة ' + btn.dataset.plan + ' وإضافة ' + addedPoints + ' نقطة بنجاح!');
+      });
+    });
+
+    openAdminBtn.addEventListener('click', () => {
+      if (!isOwnerLoggedIn()) {
+        alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
+        return;
+      }
+      document.getElementById('adminModal').classList.add('hidden');
+      document.getElementById('adminModal').classList.remove('hidden');
+    });
+
+    document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!isOwnerLoggedIn()) return;
+      const title = document.getElementById('tplTitle').value.trim();
+      const category = document.getElementById('tplCategory').value;
+      const badge = document.getElementById('tplBadge').value.trim();
+      const promptText = document.getElementById('tplPrompt').value.trim();
+      const file = document.getElementById('tplMediaFile').files[0];
+
+      const finalizeAdd = (mediaUrl, mediaType) => {
+        templates.unshift({ id: Date.now(), title, category, badge, prompt: promptText, mediaType, cover: mediaUrl });
+        try { localStorage.setItem('adspark_templates', JSON.stringify(templates)); } catch (err) {}
+        renderTemplates('all');
+        document.getElementById('adminModal').classList.add('hidden');
+        e.target.reset();
+        alert('تم نشر القالب الجديد بنجاح!');
+      };
+
+      if (file) {
+        if (file.type.startsWith('video/')) {
+          finalizeAdd(URL.createObjectURL(file), 'video');
+        } else {
+          const reader = new FileReader();
+          reader.onload = (ev) => finalizeAdd(ev.target.result, 'image');
+          reader.readAsDataURL(file);
+        }
+      } else {
+        finalizeAdd('https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80', 'image');
+      }
+    });
+
+    document.querySelectorAll('.close-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById(btn.dataset.close).classList.add('hidden');
+      });
+    });
+
+    // التشغيل الأولي
+    promptInput.value = selectedTemplate.prompt;
+    updateAuthUI();
+    renderTemplates('all');
+  </script>
+</body>
+</html>
