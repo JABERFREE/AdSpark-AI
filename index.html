@@ -270,12 +270,12 @@
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ إضافة قالب عبر الرابط السحابي المباشر</h2>
-      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابط مباشر ينتهي بـ .mp4 للفيديو ليعمل بدون شاشة سوداء.</p>
+      <h2>🛠️ إضافة قالب عبر الرابط المباشر (صيغة .mp4)</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابطاً مباشراً صحيحاً يعمل بسلاسة على الهواتف والمتصفحات.</p>
 
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
-        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر نسائي فرنسي" />
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان ترويجي جديد" />
         <div class="form-row">
           <div>
             <label>التصنيف</label>
@@ -296,8 +296,8 @@
           <option value="video">فيديو (MP4 مباشر)</option>
           <option value="image">صورة (JPG / PNG)</option>
         </select>
-        <label>رابط الملف المباشر (URL ينتهي بـ .mp4)</label>
-        <input type="text" id="tplMediaUrl" required placeholder="https://files.catbox.moe/xxxxxx.mp4" />
+        <label>رابط الملف المباشر (URL)</label>
+        <input type="text" id="tplMediaUrl" required placeholder="https://files.catbox.moe/xxxxxx.mp4 أو رابط الصورة" />
         <label>الكلمات الترويجية للقالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الترويجي الذي يظهر على الإعلان..."></textarea>
         <button type="submit" class="btn btn-primary full-width">➕ إضافة وحفظ القالب فوراً</button>
@@ -333,10 +333,6 @@
 
     let currentMode = 'video';
     let user = safeGetStorage('adspark_user', null);
-    let uploadedProductImg = null;
-    let uploadedProductVideo = null;
-    let lastGeneratedBlobUrl = null;
-    let lastGeneratedExt = 'webm';
     let currentFilterCat = 'all';
 
     function switchPage(pageName) {
@@ -358,8 +354,12 @@
       { id: 3, title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' }
     ];
 
+    // دمج القوالب الافتراضية مع المحفوظة وتحديث التخزين بشكل موحد ومتزامن
     let templates = safeGetStorage('adspark_templates', null);
-    if (!Array.isArray(templates) || templates.length === 0) templates = defaultTemplates;
+    if (!Array.isArray(templates) || templates.length === 0) {
+      templates = defaultTemplates;
+      localStorage.setItem('adspark_templates', JSON.stringify(templates));
+    }
     let selectedTemplate = templates[0];
 
     const gmailLoginBtn = document.getElementById('gmailLoginBtn');
@@ -370,14 +370,8 @@
     const templatesGrid = document.getElementById('templatesGrid');
     const promptInput = document.getElementById('promptInput');
     const activeTemplateTitle = document.getElementById('activeTemplateTitle');
-    const productImageInput = document.getElementById('productImageInput');
-    const uploadFileName = document.getElementById('uploadFileName');
     const generateBtn = document.getElementById('generateBtn');
     const costHint = document.getElementById('costHint');
-    const resultSection = document.getElementById('resultSection');
-    const outputVideo = document.getElementById('outputVideo');
-    const outputImage = document.getElementById('outputImage');
-    const uploadedVideoSource = document.getElementById('uploadedVideoSource');
     const templateVideoSource = document.getElementById('templateVideoSource');
 
     const modeBtns = document.querySelectorAll('.mode-btn');
@@ -545,6 +539,15 @@
           vid.crossOrigin = 'anonymous';
           vid.onmouseover = () => vid.play().catch(() => {});
           vid.onmouseout = () => vid.pause();
+          
+          vid.onerror = () => {
+            vid.remove();
+            const errFallback = document.createElement('div');
+            errFallback.style.cssText = 'width:100%; height:100%; display:grid; place-items:center; background:#222; color:#ff5b5b; font-size:12px; padding:10px; text-align:center;';
+            errFallback.textContent = '⚠️ تأكد من صحة الرابط المباشر للملف';
+            card.prepend(errFallback);
+          };
+
           card.appendChild(vid);
         } else {
           const img = document.createElement('img');
@@ -572,6 +575,7 @@
         const overlay = document.createElement('div');
         overlay.className = 'card-overlay';
         overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب وتوليده تلقائياً</span>';
+        card.templateData = tpl;
         card.appendChild(overlay);
 
         card.onclick = () => {
@@ -604,7 +608,7 @@
       const promptText = document.getElementById('tplPrompt').value.trim();
 
       if (!mediaUrl) {
-        alert('يرجى إدخال رابط مباشر صالح.');
+        alert('يرجى إدخال رابط صالح.');
         return;
       }
 
@@ -626,7 +630,7 @@
 
       document.getElementById('adminTemplateForm').reset();
       document.getElementById('adminModal').classList.add('hidden');
-      alert('تم إضافة القالب وعرضه بنجاح!');
+      alert('تمت إضافة القالب وتحديث القائمة بنجاح!');
     };
 
     openAdminBtn.onclick = () => {
