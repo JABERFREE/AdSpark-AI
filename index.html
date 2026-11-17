@@ -250,7 +250,7 @@
     <div class="modal-card preview-modal-card">
       <button type="button" class="close-modal" data-close="templatePreviewModal">✕</button>
       <h3 id="previewTplTitle" style="margin-bottom: 14px;">معاينة القالب الكامل</h3>
-      <video id="previewTplVideo" controls playsinline style="width: 100%; border-radius: 14px; background: #000; max-height: 65vh;"></video>
+      <video id="previewTplVideo" controls playsinline crossorigin="anonymous" style="width: 100%; border-radius: 14px; background: #000; max-height: 65vh;"></video>
       <button type="button" id="usePreviewTplBtn" class="btn btn-primary full-width" style="margin-top: 14px;">✨ استخدام هذا القالب للتصميم</button>
     </div>
   </div>
@@ -270,12 +270,12 @@
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ إضافة قالب عبر الرابط السحابي (بدون حد أقصى)</h2>
-      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابط مباشر لفيديو (MP4) أو صورة لتستوعب المنصة عدد غير محدود من القوالب.</p>
+      <h2>🛠️ إضافة قالب عبر الرابط السحابي المباشر</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابط مباشر ينتهي بـ .mp4 للفيديو ليعمل بدون شاشة سوداء.</p>
 
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
-        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر 10 ثواني" />
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر نسائي فرنسي" />
         <div class="form-row">
           <div>
             <label>التصنيف</label>
@@ -293,11 +293,11 @@
         </div>
         <label>نوع القالب</label>
         <select id="tplMediaType">
-          <option value="video">فيديو (MP4 / WebM)</option>
+          <option value="video">فيديو (MP4 مباشر)</option>
           <option value="image">صورة (JPG / PNG)</option>
         </select>
-        <label>رابط الملف السحابي (URL)</label>
-        <input type="text" id="tplMediaUrl" required placeholder="https://example.com/video.mp4 أو رابط الصورة" />
+        <label>رابط الملف المباشر (URL ينتهي بـ .mp4)</label>
+        <input type="text" id="tplMediaUrl" required placeholder="https://files.catbox.moe/xxxxxx.mp4" />
         <label>الكلمات الترويجية للقالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الترويجي الذي يظهر على الإعلان..."></textarea>
         <button type="submit" class="btn btn-primary full-width">➕ إضافة وحفظ القالب فوراً</button>
@@ -428,9 +428,7 @@
     function saveTemplatesToStorage() {
       try {
         localStorage.setItem('adspark_templates', JSON.stringify(templates));
-      } catch (e) {
-        alert('تم حفظ الحد الأقصى محلياً، يرجى الاستمرار بإضافة الروابط السحابية.');
-      }
+      } catch (e) {}
     }
 
     gmailLoginBtn.onclick = () => {
@@ -471,6 +469,7 @@
       previewVid.src = tpl.cover;
       previewVid.muted = false;
       document.getElementById('templatePreviewModal').classList.remove('hidden');
+      previewVid.load();
       previewVid.play().catch(() => {});
 
       document.getElementById('usePreviewTplBtn').onclick = () => {
@@ -543,6 +542,7 @@
           vid.muted = true;
           vid.loop = true;
           vid.playsInline = true;
+          vid.crossOrigin = 'anonymous';
           vid.onmouseover = () => vid.play().catch(() => {});
           vid.onmouseout = () => vid.pause();
           card.appendChild(vid);
@@ -592,7 +592,6 @@
       };
     });
 
-    // إضافة القالب عبر الرابط السحابي لتجنب امتلاء التخزين نهائياً
     document.getElementById('adminTemplateForm').onsubmit = (e) => {
       e.preventDefault();
       if (!isOwnerLoggedIn()) return;
@@ -605,7 +604,7 @@
       const promptText = document.getElementById('tplPrompt').value.trim();
 
       if (!mediaUrl) {
-        alert('يرجى إدخال رابط صالح للملف.');
+        alert('يرجى إدخال رابط مباشر صالح.');
         return;
       }
 
@@ -627,7 +626,7 @@
 
       document.getElementById('adminTemplateForm').reset();
       document.getElementById('adminModal').classList.add('hidden');
-      alert('تمت إضافة القالب عبر الرابط السحابي بنجاح وتخزينه دون أي قيود على السعة!');
+      alert('تم إضافة القالب وعرضه بنجاح!');
     };
 
     openAdminBtn.onclick = () => {
