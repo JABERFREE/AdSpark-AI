@@ -112,7 +112,6 @@
     .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 92vh; overflow-y: auto; z-index: 1001; }
     .admin-modal-card { max-width: 620px; }
     .preview-modal-card { max-width: 440px; text-align: center; }
-    .selector-modal-card { max-width: 520px; text-align: center; }
     .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 1002; }
     .auth-modal-card { max-width: 440px; text-align: center; background: #14151a; border: 1px solid var(--border); padding: 36px 28px; }
     .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 22px; text-align: right; }
@@ -149,9 +148,6 @@
     .admin-list-box { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
     .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-elevated); padding: 10px 14px; border-radius: 10px; margin-top: 8px; gap: 10px; }
     .admin-list-item span { font-size: 13px; font-weight: 600; }
-    .selector-canvas-wrap { position: relative; display: inline-block; margin: 12px auto; border-radius: 14px; overflow: hidden; border: 2px solid var(--primary); touch-action: none; cursor: crosshair; background: #000; }
-    #selectorCanvas { display: block; max-width: 100%; max-height: 52vh; width: auto; height: auto; }
-    .selector-steps { display: flex; flex-direction: column; gap: 10px; text-align: right; background: var(--bg-elevated); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; }
     @media (max-width: 700px) { .studio-box { flex-direction: column; } .studio-sidebar { flex-direction: row; } }
   </style>
 </head>
@@ -204,12 +200,7 @@
           <div class="prompt-area">
             <div id="selectedTemplateBanner" class="template-badge-bar">
               <span>القالب المختار: <strong id="activeTemplateTitle">إعلان منتج عناية بالبشرة فائق الانتشار</strong></span>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" id="openProductReplacerBtn" class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px; border-color: var(--primary);">
-                  🎯 تحديد مكان المنتج واستبداله
-                </button>
-                <span class="badge-viral">1-Click Viral Remake</span>
-              </div>
+              <span class="badge-viral">1-Click Viral Remake</span>
             </div>
             <textarea id="promptInput" rows="3" placeholder="اكتب وصف المنتج أو عدّل سيناريو القالب الإعلاني هنا..."></textarea>
           </div>
@@ -218,7 +209,7 @@
             <div class="control-group">
               <label class="upload-trigger" for="productImageInput">
                 <span>➕</span>
-                <span id="uploadFileName">رفع صورة منتج (خلفية شفافة PNG)</span>
+                <span id="uploadFileName">رفع صورة منتجك (خلفية شفافة PNG)</span>
                 <input type="file" id="productImageInput" accept="image/*,video/*" hidden />
               </label>
 
@@ -233,7 +224,7 @@
 
             <div class="generate-wrapper">
               <button type="button" id="generateBtn" class="btn btn-primary btn-generate">
-                <span>✨ توليد الفيديو الإعلاني</span>
+                <span>✨ توليد الإعلان تلقائياً</span>
               </button>
               <span id="costHint" class="cost-hint">التكلفة: 250 نقطة</span>
             </div>
@@ -244,7 +235,7 @@
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">تم التوليد بالذكاء الاصطناعي • جاهز للنشر</span>
+          <span class="status-tag">تم الاستبدال التلقائي والتوليد بالذكاء الاصطناعي</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
@@ -288,22 +279,22 @@
         <div class="guide-card">
           <div class="step-num">1</div>
           <h3>اختر القالب الجاهز</h3>
-          <p>اضغط على أي قالب من المعرض لفتح أداة تحديد مكان المنتج.</p>
+          <p>تصفح القوالب واضغط على القالب الذي يعجبك ليتم تحميله في الاستوديو.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">2</div>
-          <h3>حدد مكان المنتج بالماوس أو الإصبع</h3>
-          <p>اسحب بالماوس أو إصبعك فوق المنتج القديم في القالب لتحديده.</p>
+          <h3>ارفع صورة منتجك الشفاف</h3>
+          <p>ارفع صورة منتجك (PNG بخلفية شفافة) ليقوم النظام تلقائياً باستبدال منتج القالب به.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>ارفع منتجك بخلفية شفافة</h3>
-          <p>ارفع صورة منتجك بصيغة PNG شفافة ليحل محل المنتج القديم تماماً مع بقاء خلفية الإعلان والنصوص الترويجية.</p>
+          <h3>الاستبدال التلقائي الذكي</h3>
+          <p>يتم مسح المنتج القديم وتوسيط منتجك الجديد في نفس المكان مع الحفاظ على الخلفية والنصوص الدعائية.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">4</div>
           <h3>التوليد والتحميل</h3>
-          <p>اضغط توليد الإعلان وحمله فوراً بجودة عالية.</p>
+          <p>اضغط توليد الإعلان وحمله فوراً.</p>
         </div>
       </div>
       <div class="info-cta-box">
@@ -374,35 +365,6 @@
       <div class="footer-copy">© 2026 AdSpark AI. جميع الحقوق محفوظة.</div>
     </div>
   </footer>
-
-  <!-- Interactive Visitor Product Replacer Modal -->
-  <div id="productSelectorModal" class="modal hidden">
-    <div class="modal-card selector-modal-card">
-      <button type="button" class="close-modal" data-close="productSelectorModal">✕</button>
-      <h3 style="margin-bottom: 8px;">🎯 استبدال المنتج داخل القالب</h3>
-      <div class="selector-steps">
-        <div><strong>1. حدد بالماوس أو الإصبع:</strong> اسحب فوق المنتج الموجود في الصورة لإزالته وتحديد مكان منتجك.</div>
-        <div><strong>2. ارفع منتجك (خلفية شفافة):</strong> اختر صورة منتجك ليظهر في نفس المكان مع بقاء الخلفية والنصوص.</div>
-      </div>
-
-      <div class="selector-canvas-wrap">
-        <canvas id="selectorCanvas" width="360" height="640"></canvas>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-        <label class="btn btn-secondary full-width" for="modalProductUploadInput" style="border: 1px dashed var(--primary);">
-          <span>📁 رفع صورة منتجك (خلفية شفافة PNG)</span>
-          <input type="file" id="modalProductUploadInput" accept="image/*" hidden />
-        </label>
-        <span id="modalSelectedProductLabel" style="font-size: 12px; color: #34d399;"></span>
-
-        <div style="display: flex; gap: 10px;">
-          <button type="button" id="confirmReplaceBtn" class="btn btn-primary full-width">✅ اعتماد الاستبدال وتوليد الإعلان</button>
-          <button type="button" id="resetSelectionBtn" class="btn btn-outline">🔄 إعادة التحديد</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Full Video Template Preview Modal -->
   <div id="templatePreviewModal" class="modal hidden">
@@ -561,12 +523,6 @@
     let lastGeneratedExt = 'webm';
     let currentFilterCat = 'all';
 
-    let customReplaceBox = { x: 0.16, y: 0.20, w: 0.68, h: 0.56 };
-    let isDrawingBox = false;
-    let boxStartX = 0;
-    let boxStartY = 0;
-    let selectorBgImage = null;
-
     function switchPage(pageName) {
       document.querySelectorAll('.page-view').forEach(page => {
         page.classList.add('hidden');
@@ -624,7 +580,7 @@
         btn.classList.add('active');
         currentMode = btn.dataset.mode;
         if (currentMode === 'video') {
-          generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
+          generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
           costHint.textContent = 'التكلفة: 250 نقطة';
         } else {
           generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
@@ -665,9 +621,7 @@
     function saveTemplatesToStorage() {
       try {
         localStorage.setItem('adspark_templates', JSON.stringify(templates));
-      } catch (e) {
-        console.warn('Storage quota exceeded for large video, kept in active session.');
-      }
+      } catch (e) {}
     }
 
     gmailLoginBtn.addEventListener('click', () => {
@@ -695,7 +649,7 @@
       user = { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مجانية' };
       saveUser();
       document.getElementById('authModal').classList.add('hidden');
-      alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! يمكنك الآن إضافة أو حذف القوالب.' : 'تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
+      alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة!' : 'تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
     });
 
     document.getElementById('authContinueBtn').addEventListener('click', () => {
@@ -704,136 +658,13 @@
         user = { email: emailVal, credits: 1000, plan: 'مجانية' };
         saveUser();
         document.getElementById('authModal').classList.add('hidden');
-        alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! يمكنك الآن إضافة أو حذف القوالب.' : 'تم تسجيل الدخول بنجاح وحصلت على 1000 نقطة!');
+        alert('تم تسجيل الدخول بنجاح وحصلت على 1000 نقطة!');
       } else {
         alert('يرجى إدخال بريد إلكتروني صحيح.');
       }
     });
 
-    function drawSelectorPreview() {
-      const sCanvas = document.getElementById('selectorCanvas');
-      const sCtx = sCanvas.getContext('2d');
-      sCtx.fillStyle = '#0e0f13';
-      sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
-
-      if (selectorBgImage && selectorBgImage.complete && selectorBgImage.naturalWidth > 0) {
-        sCtx.drawImage(selectorBgImage, 0, 0, sCanvas.width, sCanvas.height);
-      }
-
-      const rx = customReplaceBox.x * sCanvas.width;
-      const ry = customReplaceBox.y * sCanvas.height;
-      const rw = customReplaceBox.w * sCanvas.width;
-      const rh = customReplaceBox.h * sCanvas.height;
-
-      if (uploadedProductImg && uploadedProductImg.complete && uploadedProductImg.naturalWidth > 0) {
-        applySmartBackgroundFill(sCtx, selectorBgImage, rx, ry, rw, rh, sCanvas.width, sCanvas.height);
-        drawFittedProduct(sCtx, uploadedProductImg, rx, ry, rw, rh, 1);
-      }
-
-      sCtx.strokeStyle = '#7c5cff';
-      sCtx.lineWidth = 3;
-      sCtx.setLineDash([8, 5]);
-      sCtx.strokeRect(rx, ry, rw, rh);
-      sCtx.setLineDash([]);
-
-      sCtx.fillStyle = 'rgba(124, 92, 255, 0.9)';
-      sCtx.fillRect(rx, Math.max(0, ry - 24), 150, 24);
-      sCtx.fillStyle = '#fff';
-      sCtx.font = 'bold 12px Cairo, sans-serif';
-      sCtx.fillText('منطقة استبدال المنتج', rx + 8, Math.max(16, ry - 7));
-    }
-
-    function openProductSelectorModal(tpl) {
-      if (tpl.mediaType === 'video') return;
-      const modal = document.getElementById('productSelectorModal');
-      modal.classList.remove('hidden');
-
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        selectorBgImage = img;
-        drawSelectorPreview();
-      };
-      img.src = tpl.cover;
-    }
-
-    const selectorCanvas = document.getElementById('selectorCanvas');
-    function getPointerPos(e) {
-      const rect = selectorCanvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
-        y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
-      };
-    }
-
-    function onPointerDown(e) {
-      isDrawingBox = true;
-      const pos = getPointerPos(e);
-      boxStartX = pos.x;
-      boxStartY = pos.y;
-    }
-
-    function onPointerMove(e) {
-      if (!isDrawingBox) return;
-      e.preventDefault();
-      const pos = getPointerPos(e);
-      const x = Math.min(boxStartX, pos.x);
-      const y = Math.min(boxStartY, pos.y);
-      const w = Math.max(0.08, Math.abs(pos.x - boxStartX));
-      const h = Math.max(0.08, Math.abs(pos.y - boxStartY));
-      customReplaceBox = { x, y, w, h };
-      drawSelectorPreview();
-    }
-
-    function onPointerUp() {
-      isDrawingBox = false;
-    }
-
-    selectorCanvas.addEventListener('mousedown', onPointerDown);
-    selectorCanvas.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
-    selectorCanvas.addEventListener('touchstart', onPointerDown, { passive: false });
-    selectorCanvas.addEventListener('touchmove', onPointerMove, { passive: false });
-    window.addEventListener('touchend', onPointerUp);
-
-    document.getElementById('resetSelectionBtn').addEventListener('click', () => {
-      customReplaceBox = { x: 0.16, y: 0.20, w: 0.68, h: 0.56 };
-      drawSelectorPreview();
-    });
-
-    document.getElementById('modalProductUploadInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      uploadFileName.textContent = file.name.slice(0, 18);
-      document.getElementById('modalSelectedProductLabel').textContent = '✅ تم رفع المنتج: ' + file.name;
-      uploadedProductVideo = null;
-
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          uploadedProductImg = img;
-          if (!document.getElementById('productSelectorModal').classList.contains('hidden')) {
-            drawSelectorPreview();
-          }
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById('confirmReplaceBtn').addEventListener('click', () => {
-      document.getElementById('productSelectorModal').classList.add('hidden');
-      generateAd();
-    });
-
-    document.getElementById('openProductReplacerBtn').addEventListener('click', () => {
-      openProductSelectorModal(selectedTemplate);
-    });
-
-    function selectTemplate(tpl, openSelector = false) {
+    function selectTemplate(tpl) {
       selectedTemplate = tpl;
       activeTemplateTitle.textContent = tpl.title;
       promptInput.value = tpl.prompt;
@@ -842,9 +673,6 @@
         templateVideoSource.load();
       } else {
         templateVideoSource.removeAttribute('src');
-        if (openSelector) {
-          openProductSelectorModal(tpl);
-        }
       }
       renderTemplates(currentFilterCat);
     }
@@ -860,7 +688,7 @@
       document.getElementById('usePreviewTplBtn').onclick = () => {
         previewVid.pause();
         document.getElementById('templatePreviewModal').classList.add('hidden');
-        selectTemplate(tpl, false);
+        selectTemplate(tpl);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
     }
@@ -871,7 +699,7 @@
       templates = templates.filter(t => t.id !== id);
       saveTemplatesToStorage();
       if (selectedTemplate && selectedTemplate.id === id && templates.length > 0) {
-        selectTemplate(templates[0], false);
+        selectTemplate(templates[0]);
       }
       renderTemplates(currentFilterCat);
       renderAdminTemplatesList();
@@ -959,11 +787,11 @@
 
         const overlay = document.createElement('div');
         overlay.className = 'card-overlay';
-        overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>' + (isVideo ? 'اضغط لاختيار قالب الفيديو' : 'اضغط لتحديد المنتج واستبداله بمنتجك') + '</span>';
+        overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب وتوليده تلقائياً</span>';
         card.appendChild(overlay);
 
         card.addEventListener('click', () => {
-          selectTemplate(tpl, !isVideo);
+          selectTemplate(tpl);
           switchPage('home');
         });
 
@@ -994,12 +822,7 @@
         const reader = new FileReader();
         reader.onload = (ev) => {
           const img = new Image();
-          img.onload = () => {
-            uploadedProductImg = img;
-            if (!document.getElementById('productSelectorModal').classList.contains('hidden')) {
-              drawSelectorPreview();
-            }
-          };
+          img.onload = () => { uploadedProductImg = img; };
           img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
@@ -1043,66 +866,52 @@
       return currentY;
     }
 
-    function applySmartBackgroundFill(ctx, bgImg, rx, ry, rw, rh, totalW, totalH) {
+    // استبدال تلقائي ذكي: تغطية منطقة المنتج في منتصف القالب بلون الخلفية المحيطة، ووضع منتج الزائر بدقة تلقائياً
+    function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
-      const scaleX = bgImg.naturalWidth / totalW;
-      const scaleY = bgImg.naturalHeight / totalH;
+      // 1. رسم القالب الأصلي بالكامل أولاً
+      ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
 
-      const leftMarginPx = rx;
-      const rightMarginPx = totalW - (rx + rw);
+      if (pImg && pImg.complete && pImg.naturalWidth > 0) {
+        // إحداثيات مركز ومساحة المنتج الافتراضية في القوالب
+        const rx = canvasW * 0.16;
+        const ry = canvasH * 0.20;
+        const rw = canvasW * 0.68;
+        const rh = canvasH * 0.56;
 
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(rx, ry, rw, rh);
-      ctx.clip();
+        // مسح نظيف وتغطية المنتج القديم بالاعتماد على حواف الخلفية المحيطة
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(rx, ry, rw, rh);
+        ctx.clip();
+        const scaleX = bgImg.naturalWidth / canvasW;
+        const scaleY = bgImg.naturalHeight / canvasH;
+        ctx.drawImage(bgImg, (rx - 20) * scaleX, ry * scaleY, 20 * scaleX, rh * scaleY, rx - 2, ry - 2, rw + 4, rh + 4);
+        ctx.restore();
 
-      if (leftMarginPx >= rightMarginPx && leftMarginPx > 12) {
-        const sampleW = Math.min(24, leftMarginPx * 0.7);
-        const srcX = Math.max(0, (rx - sampleW) * scaleX);
-        ctx.drawImage(
-          bgImg,
-          srcX, ry * scaleY, sampleW * scaleX, rh * scaleY,
-          rx - 2, ry - 2, rw + 4, rh + 4
-        );
-      } else if (rightMarginPx > 12) {
-        const sampleW = Math.min(24, rightMarginPx * 0.7);
-        const srcX = Math.min(bgImg.naturalWidth - sampleW * scaleX, (rx + rw) * scaleX);
-        ctx.drawImage(
-          bgImg,
-          srcX, ry * scaleY, sampleW * scaleX, rh * scaleY,
-          rx - 2, ry - 2, rw + 4, rh + 4
-        );
-      } else {
-        const srcY = Math.max(0, (ry - 25) * scaleY);
-        ctx.drawImage(
-          bgImg,
-          rx * scaleX, srcY, rw * scaleX, 20 * scaleY,
-          rx - 2, ry - 2, rw + 4, rh + 4
-        );
+        // حساب الحجم والتوسيط التلقائي لمنتج الزائر الجديد (مع الحفاظ على الأبعاد النسبية)
+        const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
+        const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
+        const drawW = pImg.naturalWidth * ratio * scaleOffset;
+        const drawH = pImg.naturalHeight * ratio * scaleOffset;
+        const drawX = rx + (rw - drawW) / 2;
+        const drawY = ry + (rh - drawH) / 2;
+
+        // وضع منتج الزائر (PNG بخلفية شفافة) مع ظل واقعي احترافي
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 16;
+        ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
+        ctx.restore();
       }
-      ctx.restore();
-    }
-
-    function drawFittedProduct(ctx, pImg, rx, ry, rw, rh, scaleOffset) {
-      const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
-      const drawW = pImg.naturalWidth * ratio * scaleOffset;
-      const drawH = pImg.naturalHeight * ratio * scaleOffset;
-      const drawX = rx + (rw - drawW) / 2;
-      const drawY = ry + (rh - drawH) / 2;
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 14;
-      ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
-      ctx.restore();
     }
 
     async function generateAd() {
       if (!user) {
-        document.getElementById('authModal').classList.remove('hidden');
+        document.getElementById('authModal').classList.add('hidden');
         return;
       }
       const cost = currentMode === 'video' ? 250 : 100;
@@ -1112,7 +921,7 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري المعالجة بالذكاء الاصطناعي...</span>';
+      generateBtn.innerHTML = '<span>⏳ جاري الاستبدال والتوليد التلقائي...</span>';
 
       const canvas = document.getElementById('renderCanvas');
       const ctx = canvas.getContext('2d');
@@ -1145,24 +954,16 @@
         ctx.fillStyle = '#0b0c10';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (templateBgImg.complete && templateBgImg.naturalWidth > 0) {
+        // الاستبدال التلقائي الذكي للمنتج
+        if (uploadedProductImg) {
+          autoReplaceProduct(ctx, templateBgImg, uploadedProductImg, canvas.width, canvas.height, progress);
+        } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
+          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
+        } else {
           ctx.drawImage(templateBgImg, 0, 0, canvas.width, canvas.height);
         }
 
-        if (uploadedProductImg && uploadedProductImg.complete && uploadedProductImg.naturalWidth > 0) {
-          const rx = customReplaceBox.x * canvas.width;
-          const ry = customReplaceBox.y * canvas.height;
-          const rw = customReplaceBox.w * canvas.width;
-          const rh = customReplaceBox.h * canvas.height;
-
-          applySmartBackgroundFill(ctx, templateBgImg, rx, ry, rw, rh, canvas.width, canvas.height);
-
-          const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
-          drawFittedProduct(ctx, uploadedProductImg, rx, ry, rw, rh, scaleOffset);
-        } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
-          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
-        }
-
+        // تدرج سينمائي للنصوص في الأعلى والأسفل
         const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
         topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
         topGrad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -1176,6 +977,7 @@
         ctx.fillStyle = bottomGrad;
         ctx.fillRect(0, canvas.height - 320, canvas.width, 320);
 
+        // شارة الأداء
         ctx.save();
         ctx.font = 'bold 20px Cairo, sans-serif';
         const badgeText = selectedTemplate.badge;
@@ -1195,6 +997,7 @@
         ctx.fillText(badgeText, badgeX + badgeWidth - 18, badgeY + 28);
         ctx.restore();
 
+        // النص الترويجي
         ctx.save();
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 30px Cairo, sans-serif';
@@ -1202,6 +1005,7 @@
         wrapText(ctx, adText, canvas.width - 50, canvas.height - 210, canvas.width - 100, 42);
         ctx.restore();
 
+        // زر الشراء
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height - 85);
         ctx.scale(pulseFactor, pulseFactor);
@@ -1234,7 +1038,7 @@
           resultSection.classList.remove('hidden');
 
           generateBtn.disabled = false;
-          generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
+          generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
           resultSection.scrollIntoView({ behavior: 'smooth' });
         }, 'image/png');
         return;
@@ -1290,7 +1094,7 @@
         outputVideo.play();
 
         generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
+        generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
         resultSection.scrollIntoView({ behavior: 'smooth' });
       };
 
@@ -1384,7 +1188,7 @@
           cover: mediaUrl
         };
         templates.unshift(newTpl);
-        selectTemplate(newTpl, false);
+        selectTemplate(newTpl);
         saveTemplatesToStorage();
         renderTemplates(currentFilterCat);
         renderAdminTemplatesList();
@@ -1399,7 +1203,7 @@
           reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
           reader.readAsDataURL(file);
         } else {
-          saveFullTemplate(URL.createObjectURL(file), 'video');
+          saveFinalTemplate(URL.createObjectURL(file), 'video');
         }
       } else {
         const reader = new FileReader();
@@ -1418,7 +1222,7 @@
       });
     });
 
-    selectTemplate(selectedTemplate, false);
+    selectTemplate(selectedTemplate);
     updateAuthUI();
   </script>
 </body>
