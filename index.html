@@ -945,7 +945,7 @@
       const useUploadedVid = Boolean(uploadedProductVideo);
       const useTemplateVid = !useUploadedVid && !uploadedProductImg && selectedTemplate.mediaType === 'video';
 
-      // 1. تحميل خلفية وديكور القالب الأصلي كطبقة أساسية أولاً
+      // 1. تحميل صورة القالب لاستخراج الخلفية والديكور البيئي
       const templateBgImg = new Image();
       templateBgImg.crossOrigin = 'anonymous';
       templateBgImg.src = selectedTemplate.cover;
@@ -954,6 +954,7 @@
       let activeVideoEl = null;
       if (useUploadedVid) {
         activeVideoEl = uploadedVideoSource;
+        activeVideoName = uploadedProductVideo.name;
         activeVideoEl.currentTime = 0;
         await ensureVideoReady(activeVideoEl);
         await activeVideoEl.play().catch(() => {});
@@ -970,43 +971,55 @@
         ctx.fillStyle = '#0b0c10';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // أ) رسم ديكور وخلفية القالب الأصلي لتبقى بيئة الإعلان متناسقة
+        // أ) رسم خلفية وديكور القالب (الستائر / الإضاءة البيئية فقط بدون المنتج القديم)
         if (templateBgImg.complete && templateBgImg.naturalWidth > 0) {
+          ctx.save();
+          // نرسم فقط النصف العلوي والديكور الخلفي، ونقوم بتغطية منطقة المنتج القديم في المنتصف والأسفل بخلفية متناسقة
           ctx.drawImage(templateBgImg, 0, 0, canvas.width, canvas.height);
+          
+          if (uploadedProductImg) {
+            // تغطية منطقة المنتج القديم في القالب بلمستطيل ذكي متدرج من لون الخلفية المحيطة
+            const maskGrad = ctx.createLinearGradient(0, canvas.height * 0.3, 0, canvas.height * 0.85);
+            maskGrad.addColorStop(0, 'rgba(25, 23, 28, 0.85)');
+            maskGrad.addColorStop(0.5, 'rgba(18, 17, 22, 0.98)');
+            maskGrad.addColorStop(1, 'rgba(14, 15, 19, 1)');
+            ctx.fillStyle = maskGrad;
+            ctx.fillRect(40, canvas.height * 0.22, canvas.width - 80, canvas.height * 0.58);
+          }
+          ctx.restore();
         }
 
-        // ب) إذا قام المستخدم برفع صورة منتج خاص به، نقوم بدمجها فوق خلفية القالب في منتصف الشاشة
+        // ب) إذا قام المستخدم برفع صورة منتج جديد، يتم عرضه تماماً مكان المنتج القديم في منتصف المشهد
         if (uploadedProductImg && uploadedProductImg.complete && uploadedProductImg.naturalWidth > 0) {
           const pImg = uploadedProductImg;
-          // حساب المقاسات المناسبة لعرض المنتج داخل الإطار مع الحفاظ على الأبعاد
-          const maxW = canvas.width * 0.72;
-          const maxH = canvas.height * 0.52;
+          const maxW = canvas.width * 0.76;
+          const maxH = canvas.height * 0.54;
           const ratio = Math.min(maxW / pImg.naturalWidth, maxH / pImg.naturalHeight);
           const drawW = pImg.naturalWidth * ratio;
           const drawH = pImg.naturalHeight * ratio;
           const drawX = (canvas.width - drawW) / 2;
-          const drawY = (canvas.height - drawH) / 2 - 40;
+          const drawY = (canvas.height - drawH) / 2 - 20;
 
-          // تأثير تكبير وحركة خفيفة للمنتج المرفوع
-          const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
+          // حركة سينمائية ناعمة وخفيفة للمنتج المرفوع
+          const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.025;
           const finalW = drawW * scaleOffset;
           const finalH = drawH * scaleOffset;
           const finalX = drawX - (finalW - drawW) / 2;
           const finalY = drawY - (finalH - drawH) / 2;
 
-          // ظل خفيف أسفل المنتج المرفوع لإعطاء عمق واقعي
+          // ظل واقعي عميق تحت المنتج الجديد
           ctx.save();
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-          ctx.shadowBlur = 25;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+          ctx.shadowBlur = 30;
           ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 15;
+          ctx.shadowOffsetY = 18;
           ctx.drawImage(pImg, finalX, finalY, finalW, finalH);
           ctx.restore();
         } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
           ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
         }
 
-        // ج) تدرج لوني سينمائي في الأعلى والأسفل لقراءة فائقة الوضوح للعناصر والنصوص
+        // ج) تدرج لوني سينمائي في الأعلى والأسفل للنصوص
         const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
         topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
         topGrad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -1180,10 +1193,6 @@
     creditPill.addEventListener('click', () => {
       document.getElementById('pricingModal').classList.remove('hidden');
     });
-
-    document.querySelectorAll('.select-plan-btn').forEach, btn => {
-      // safe
-    };
 
     document.querySelectorAll('.select-plan-btn').forEach(btn => {
       btn.addEventListener('click', () => {
