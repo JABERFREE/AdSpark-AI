@@ -903,7 +903,6 @@
       });
     }
 
-    // دالة مساعدة لتقسيم النص الطويل إلى أسطر متناسقة لكي لا يتداخل على الصورة
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
       const words = text.split(' ');
       let line = '';
@@ -946,14 +945,11 @@
       const useUploadedVid = Boolean(uploadedProductVideo);
       const useTemplateVid = !useUploadedVid && !uploadedProductImg && selectedTemplate.mediaType === 'video';
 
-      let activeImg = uploadedProductImg;
-      if (!activeImg && !useUploadedVid && !useTemplateVid) {
-        const bgImg = new Image();
-        bgImg.crossOrigin = 'anonymous';
-        bgImg.src = selectedTemplate.cover;
-        await new Promise(r => { bgImg.onload = r; bgImg.onerror = r; });
-        activeImg = bgImg;
-      }
+      // 1. تحميل خلفية وديكور القالب الأصلي كطبقة أساسية أولاً
+      const templateBgImg = new Image();
+      templateBgImg.crossOrigin = 'anonymous';
+      templateBgImg.src = selectedTemplate.cover;
+      await new Promise(r => { templateBgImg.onload = r; templateBgImg.onerror = r; });
 
       let activeVideoEl = null;
       if (useUploadedVid) {
@@ -970,23 +966,47 @@
       }
 
       function renderScene(progress, pulseFactor) {
-        // خلفية داكنة نظيفة
+        // تنظيف الكانفاس
         ctx.fillStyle = '#0b0c10';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 1. رسم الفيديو أو صورة المنتج المرفوعة بحجم متناسق داخل الكانفاس (object-fit: cover)
-        if (activeVideoEl && activeVideoEl.readyState >= 2) {
-          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
-        } else if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
-          const scaleFactor = 1.02 + Math.sin(progress * Math.PI) * 0.06;
-          const w = canvas.width * scaleFactor;
-          const h = canvas.height * scaleFactor;
-          const x = (canvas.width - w) / 2;
-          const y = (canvas.height - h) / 2;
-          ctx.drawImage(activeImg, x, y, w, h);
+        // أ) رسم ديكور وخلفية القالب الأصلي لتبقى بيئة الإعلان متناسقة
+        if (templateBgImg.complete && templateBgImg.naturalWidth > 0) {
+          ctx.drawImage(templateBgImg, 0, 0, canvas.width, canvas.height);
         }
 
-        // 2. تدرج لوني سينمائي في الأعلى والأسفل لقراءة فائقة الوضوح للعناصر
+        // ب) إذا قام المستخدم برفع صورة منتج خاص به، نقوم بدمجها فوق خلفية القالب في منتصف الشاشة
+        if (uploadedProductImg && uploadedProductImg.complete && uploadedProductImg.naturalWidth > 0) {
+          const pImg = uploadedProductImg;
+          // حساب المقاسات المناسبة لعرض المنتج داخل الإطار مع الحفاظ على الأبعاد
+          const maxW = canvas.width * 0.72;
+          const maxH = canvas.height * 0.52;
+          const ratio = Math.min(maxW / pImg.naturalWidth, maxH / pImg.naturalHeight);
+          const drawW = pImg.naturalWidth * ratio;
+          const drawH = pImg.naturalHeight * ratio;
+          const drawX = (canvas.width - drawW) / 2;
+          const drawY = (canvas.height - drawH) / 2 - 40;
+
+          // تأثير تكبير وحركة خفيفة للمنتج المرفوع
+          const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
+          const finalW = drawW * scaleOffset;
+          const finalH = drawH * scaleOffset;
+          const finalX = drawX - (finalW - drawW) / 2;
+          const finalY = drawY - (finalH - drawH) / 2;
+
+          // ظل خفيف أسفل المنتج المرفوع لإعطاء عمق واقعي
+          ctx.save();
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+          ctx.shadowBlur = 25;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 15;
+          ctx.drawImage(pImg, finalX, finalY, finalW, finalH);
+          ctx.restore();
+        } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
+          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
+        }
+
+        // ج) تدرج لوني سينمائي في الأعلى والأسفل لقراءة فائقة الوضوح للعناصر والنصوص
         const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
         topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
         topGrad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -1000,7 +1020,7 @@
         ctx.fillStyle = bottomGrad;
         ctx.fillRect(0, canvas.height - 320, canvas.width, 320);
 
-        // 3. شارة الأداء (Badge) مرتبة باحترافية في أعلى اليمين
+        // د) شارة الأداء (Badge) في أعلى اليمين
         ctx.save();
         ctx.font = 'bold 20px Cairo, sans-serif';
         const badgeText = selectedTemplate.badge;
@@ -1020,7 +1040,7 @@
         ctx.fillText(badgeText, badgeX + badgeWidth - 18, badgeY + 28);
         ctx.restore();
 
-        // 4. النص الإعلاني الرئيسي (مرتب داخل صندوق نصي مع تباعد أسطر مثالي لئلا يتداخل)
+        // هـ) النص الإعلاني الرئيسي
         ctx.save();
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 30px Cairo, sans-serif';
@@ -1028,18 +1048,16 @@
         wrapText(ctx, adText, canvas.width - 50, canvas.height - 210, canvas.width - 100, 42);
         ctx.restore();
 
-        // 5. زر الدعوة للشراء (CTA) بتصميم بارز ومرتب في أسفل الإعلان
+        // و) زر الدعوة للشراء (CTA) في الأسفل
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height - 85);
         ctx.scale(pulseFactor, pulseFactor);
         
-        // خلفية الزر البنفسجي
         ctx.fillStyle = '#7c5cff';
         ctx.beginPath();
         ctx.roundRect(-260, -32, 520, 64, 16);
         ctx.fill();
 
-        // نص الزر
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 26px Cairo, sans-serif';
         ctx.textAlign = 'center';
@@ -1162,6 +1180,10 @@
     creditPill.addEventListener('click', () => {
       document.getElementById('pricingModal').classList.remove('hidden');
     });
+
+    document.querySelectorAll('.select-plan-btn').forEach, btn => {
+      // safe
+    };
 
     document.querySelectorAll('.select-plan-btn').forEach(btn => {
       btn.addEventListener('click', () => {
