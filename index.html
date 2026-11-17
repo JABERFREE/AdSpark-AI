@@ -209,7 +209,7 @@
             <div class="control-group">
               <label class="upload-trigger" for="productImageInput">
                 <span>➕</span>
-                <span id="uploadFileName">رفع صورة منتجك (خلفية شفافة PNG)</span>
+                <span id="uploadFileName">رفع صورة منتجك (تفريغ تلقائي للخلفية)</span>
                 <input type="file" id="productImageInput" accept="image/*,video/*" hidden />
               </label>
 
@@ -235,7 +235,7 @@
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">تم الاستبدال التلقائي النظيف بالذكاء الاصطناعي</span>
+          <span class="status-tag">تم تفريغ المنتج ودمجه تلقائياً بدون أي خلفية</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
@@ -283,13 +283,13 @@
         </div>
         <div class="guide-card">
           <div class="step-num">2</div>
-          <h3>ارفع صورة منتجك الشفاف</h3>
-          <p>ارفع صورة منتجك (PNG بخلفية شفافة تماماً) ليقوم النظام تلقائياً باستبدال منتج القالب به بدون أي آثار أو ظلال.</p>
+          <h3>ارفع صورة منتجك</h3>
+          <p>حتى لو كانت صورة منتجك بخلفية بيضاء، يقوم النظام تلقائياً بإزالة خلفيتها ليصبح المنتج شفافاً تماماً.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>الاستبدال النظيف التلقائي</h3>
-          <p>تتم تغطية منطقة المنتج القديم بخلفية القالب الأصلية بدقة، وعرض منتجك الجديد بوضوح كامل.</p>
+          <h3>الاستبدال والدمج الاحترافي</h3>
+          <p>يتم تمويه المنتج القديم في القالب وإبراز منتجك المفرغ في المقدمة دون أي مربعات أو حواف بيضاء.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">4</div>
@@ -807,6 +807,46 @@
       });
     });
 
+    // تفريغ الخلفية البيضاء من صورة منتج المستخدم تلقائياً عند الرفع ليصبح شفافاً 100%
+    function createTransparentProductImage(rawImg) {
+      return new Promise((resolve) => {
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = rawImg.naturalWidth;
+        offCanvas.height = rawImg.naturalHeight;
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(rawImg, 0, 0);
+
+        const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+        const data = imgData.data;
+
+        // فحص لون الزاوية لمعرفة ما إذا كانت الصورة بخلفية بيضاء أو فاتحة صلبة
+        const cornerR = data[0];
+        const cornerG = data[1];
+        const cornerB = data[2];
+        const cornerA = data[3];
+
+        // إذا كانت الزاوية غير شفافة وتقترب من الأبيض أو الرمادي الفاتح، نقوم بتفريغها
+        if (cornerA > 200 && cornerR > 220 && cornerG > 220 && cornerB > 220) {
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const dist = Math.hypot(r - cornerR, g - cornerG, b - cornerB);
+            if (dist < 32) {
+              data[i + 3] = 0; // جعل البكسل شفافاً بالكامل
+            } else if (dist < 48) {
+              data[i + 3] = Math.round(((dist - 32) / 16) * 255); // تنعيم الحواف
+            }
+          }
+          offCtx.putImageData(imgData, 0, 0);
+        }
+
+        const cleanImg = new Image();
+        cleanImg.onload = () => resolve(cleanImg);
+        cleanImg.src = offCanvas.toDataURL('image/png');
+      });
+    }
+
     productImageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -822,7 +862,9 @@
         const reader = new FileReader();
         reader.onload = (ev) => {
           const img = new Image();
-          img.onload = () => { uploadedProductImg = img; };
+          img.onload = async () => {
+            uploadedProductImg = await createTransparentProductImage(img);
+          };
           img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
@@ -866,356 +908,12 @@
       return currentY;
     }
 
-    // دالة استبدال نظيفة 100%: طلاء مساحة المنتج بلون خلفية نظيف ومحيط متناسق مع دمج PNG بدون أي ظلال مربعة
+    // استبدال احترافي: تمويه القالب ليصبح خلفية استوديو ناعمة وإبراز منتج الزائر المفرغ تماماً بدون أي مربع أبيض
     function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
-      // 1. رسم القالب الأصلي بالكامل أولاً
-      ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
-
       if (pImg && pImg.complete && pImg.naturalWidth > 0) {
-        // إحداثيات منطقة عرض المنتج في القالب
-        const rx = canvasW * 0.16;
-        const ry = canvasH * 0.20;
-        const rw = canvasW * 0.68;
-        const rh = canvasH * 0.56;
-
-        // مسح وتغطية المنتج القديم تماماً بلون خلفية محيط نقي ونظيف دون استنساخ مستطيلات مزعجة
+        // 1. تحويل القالب الأصلي إلى خلفية ضبابية ناعمة (Depth of Field) لإخفاء معالم المنتج القديم وإبراز ألوان المشهد
         ctx.save();
-        ctx.fillStyle = '#f8f8f9';
-        ctx.fillRect(rx - 2, ry - 2, rw + 4, rh + 4);
-        ctx.restore();
-
-        // حساب الحجم والتوسيط التلقائي لمنتج الزائر الجديد (PNG شفاف بالكامل)
-        const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
-        const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
-        const drawW = pImg.naturalWidth * ratio * scaleOffset;
-        const drawH = pImg.naturalHeight * ratio * scaleOffset;
-        const drawX = rx + (rw - drawW) / 2;
-        const drawY = ry + (rh - drawH) / 2;
-
-        // رسم منتج الزائر الجديد بوضوح وتناغم تام وبدون أي خلفيات أو مربعات سوداء أو بيضاء
-        ctx.save();
-        ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
-        ctx.restore();
-      }
-    }
-
-    async function generateAd() {
-      if (!user) {
-        document.getElementById('authModal').classList.remove('hidden');
-        return;
-      }
-      const cost = currentMode === 'video' ? 250 : 100;
-      if (user.credits < cost) {
-        document.getElementById('pricingModal').classList.remove('hidden');
-        return;
-      }
-
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري الاستبدال والتوليد النظيف...</span>';
-
-      const canvas = document.getElementById('renderCanvas');
-      const ctx = canvas.getContext('2d');
-      const adText = promptInput.value.trim() || selectedTemplate.prompt;
-      const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
-
-      const useUploadedVid = Boolean(uploadedProductVideo);
-      const useTemplateVid = !useUploadedVid && !uploadedProductImg && selectedTemplate.mediaType === 'video';
-
-      const templateBgImg = new Image();
-      templateBgImg.crossOrigin = 'anonymous';
-      templateBgImg.src = selectedTemplate.cover;
-      await new Promise(r => { templateBgImg.onload = r; templateBgImg.onerror = r; });
-
-      let activeVideoEl = null;
-      if (useUploadedVid) {
-        activeVideoEl = uploadedVideoSource;
-        activeVideoEl.currentTime = 0;
-        await ensureVideoReady(activeVideoEl);
-        await activeVideoEl.play().catch(() => {});
-      } else if (useTemplateVid) {
-        activeVideoEl = templateVideoSource;
-        activeVideoEl.src = selectedTemplate.cover;
-        activeVideoEl.currentTime = 0;
-        await ensureVideoReady(activeVideoEl);
-        await activeVideoEl.play().catch(() => {});
-      }
-
-      function renderScene(progress, pulseFactor) {
-        ctx.fillStyle = '#0b0c10';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // الاستبدال التلقائي النظيف للمنتج
-        if (uploadedProductImg) {
-          autoReplaceProduct(ctx, templateBgImg, uploadedProductImg, canvas.width, canvas.height, progress);
-        } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
-          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
-        } else {
-          ctx.drawImage(templateBgImg, 0, 0, canvas.width, canvas.height);
-        }
-
-        // تدرج سينمائي للنصوص في الأعلى والأسفل
-        const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
-        topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
-        topGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = topGrad;
-        ctx.fillRect(0, 0, canvas.width, 180);
-
-        const bottomGrad = ctx.createLinearGradient(0, canvas.height - 320, 0, canvas.height);
-        bottomGrad.addColorStop(0, 'rgba(0,0,0,0)');
-        bottomGrad.addColorStop(0.4, 'rgba(10, 11, 15, 0.75)');
-        bottomGrad.addColorStop(1, 'rgba(10, 11, 15, 0.96)');
-        ctx.fillStyle = bottomGrad;
-        ctx.fillRect(0, canvas.height - 320, canvas.width, 320);
-
-        // شارة الأداء
-        ctx.save();
-        ctx.font = 'bold 20px Cairo, sans-serif';
-        const badgeText = selectedTemplate.badge;
-        const textMetrics = ctx.measureText(badgeText);
-        const badgeWidth = textMetrics.width + 36;
-        const badgeHeight = 42;
-        const badgeX = canvas.width - badgeWidth - 40;
-        const badgeY = 50;
-
-        ctx.fillStyle = '#ff5b5b';
-        ctx.beginPath();
-        ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 10);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'right';
-        ctx.fillText(badgeText, badgeX + badgeWidth - 18, badgeY + 28);
-        ctx.restore();
-
-        // النص الترويجي
-        ctx.save();
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 30px Cairo, sans-serif';
-        ctx.textAlign = 'right';
-        wrapText(ctx, adText, canvas.width - 50, canvas.height - 210, canvas.width - 100, 42);
-        ctx.restore();
-
-        // زر الشراء
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height - 85);
-        ctx.scale(pulseFactor, pulseFactor);
-        ctx.fillStyle = '#7c5cff';
-        ctx.beginPath();
-        ctx.roundRect(-260, -32, 520, 64, 16);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 26px Cairo, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(ctaText, 0, 8);
-        ctx.restore();
-      }
-
-      if (currentMode === 'image') {
-        renderScene(0.5, 1);
-        canvas.toBlob((blob) => {
-          if (activeVideoEl) activeVideoEl.pause();
-          user.credits -= cost;
-          saveUser();
-          if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
-          lastGeneratedBlobUrl = URL.createObjectURL(blob);
-          lastGeneratedExt = 'png';
-
-          document.getElementById('resultTitle').textContent = '🖼️ البوستر الإعلاني الجاهز';
-          outputVideo.classList.add('hidden');
-          outputImage.classList.remove('hidden');
-          outputImage.src = lastGeneratedBlobUrl;
-          resultSection.classList.remove('hidden');
-
-          generateBtn.disabled = false;
-          generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
-          resultSection.scrollIntoView({ behavior: 'smooth' });
-        }, 'image/png');
-        return;
-      }
-
-      const selectedOpt = document.getElementById('aspectSelect').selectedOptions[0];
-      const defaultDurSec = Number(selectedOpt?.dataset.dur || 6);
-      const targetDurationSec = (activeVideoEl && isFinite(activeVideoEl.duration) && activeVideoEl.duration > 1)
-        ? Math.min(activeVideoEl.duration, 15)
-        : defaultDurSec;
-
-      let audioCtx = null;
-      let osc = null;
-      let combinedStream = canvas.captureStream(30);
-
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const dest = audioCtx.createMediaStreamDestination();
-        osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + targetDurationSec / 2);
-        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + targetDurationSec);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(dest);
-        osc.start();
-        combinedStream = new MediaStream([...combinedStream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
-      } catch (err) {}
-
-      const recorder = new MediaRecorder(combinedStream);
-      const chunks = [];
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-      recorder.onstop = () => {
-        if (osc) osc.stop();
-        if (audioCtx) audioCtx.close();
-        if (activeVideoEl) activeVideoEl.pause();
-        user.credits -= cost;
-        saveUser();
-
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
-        lastGeneratedBlobUrl = URL.createObjectURL(blob);
-        lastGeneratedExt = 'webm';
-
-        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز (' + Math.round(targetDurationSec) + ' ثوانٍ)';
-        outputImage.classList.add('hidden');
-        outputVideo.classList.remove('hidden');
-        outputVideo.src = lastGeneratedBlobUrl;
-        resultSection.classList.remove('hidden');
-        outputVideo.play();
-
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
-        resultSection.scrollIntoView({ behavior: 'smooth' });
-      };
-
-      recorder.start();
-      const startTime = performance.now();
-      const durationMs = targetDurationSec * 1000;
-
-      function drawLoop(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(1, elapsed / durationMs);
-        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.04;
-        renderScene(progress, pulse);
-
-        if (elapsed < durationMs) {
-          requestAnimationFrame(drawLoop);
-        } else {
-          recorder.stop();
-        }
-      }
-      requestAnimationFrame(drawLoop);
-    }
-
-    generateBtn.addEventListener('click', generateAd);
-    document.getElementById('regenerateBtn').addEventListener('click', generateAd);
-
-    document.getElementById('downloadVideoBtn').addEventListener('click', () => {
-      if (!lastGeneratedBlobUrl) return;
-      const a = document.createElement('a');
-      a.href = lastGeneratedBlobUrl;
-      a.download = 'AdSpark-Ad-' + Date.now() + '.' + lastGeneratedExt;
-      a.click();
-    });
-
-    document.getElementById('shareVideoBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(window.location.href);
-      alert('تم نسخ رابط مشاركة الإعلان إلى الحافظة!');
-    });
-
-    creditPill.addEventListener('click', () => {
-      document.getElementById('pricingModal').classList.remove('hidden');
-    });
-
-    document.querySelectorAll('.select-plan-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!user) {
-          document.getElementById('authModal').classList.add('hidden');
-          return;
-        }
-        const addedPoints = Number(btn.dataset.points);
-        user.credits += addedPoints;
-        user.plan = btn.dataset.plan;
-        saveUser();
-        document.getElementById('pricingModal').classList.add('hidden');
-        alert('تم تفعيل باقة ' + btn.dataset.plan + ' وإضافة ' + addedPoints + ' نقطة بنجاح!');
-      });
-    });
-
-    openAdminBtn.addEventListener('click', () => {
-      if (!isOwnerLoggedIn()) {
-        alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
-        return;
-      }
-      document.getElementById('adminTemplateForm').reset();
-      renderAdminTemplatesList();
-      document.getElementById('adminModal').classList.remove('hidden');
-    });
-
-    document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!isOwnerLoggedIn()) return;
-
-      const title = document.getElementById('tplTitle').value.trim();
-      const category = document.getElementById('tplCategory').value;
-      const badge = document.getElementById('tplBadge').value.trim();
-      const promptText = document.getElementById('tplPrompt').value.trim();
-      const file = document.getElementById('tplMediaFile').files[0];
-
-      if (!file) {
-        alert('يرجى اختيار ملف صورة أو فيديو للقالب.');
-        return;
-      }
-
-      const saveFinalTemplate = (mediaUrl, mediaType) => {
-        const newTpl = {
-          id: Date.now(),
-          title,
-          category,
-          badge,
-          prompt: promptText,
-          mediaType,
-          cover: mediaUrl
-        };
-        templates.unshift(newTpl);
-        selectTemplate(newTpl);
-        saveTemplatesToStorage();
-        renderTemplates(currentFilterCat);
-        renderAdminTemplatesList();
-        document.getElementById('adminTemplateForm').reset();
-        document.getElementById('adminModal').classList.add('hidden');
-        alert('تم نشر القالب الجديد بنجاح!');
-      };
-
-      if (file.type.startsWith('video/')) {
-        if (file.size < 4 * 1024 * 1024) {
-          const reader = new FileReader();
-          reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
-          reader.readAsDataURL(file);
-        } else {
-          saveFinalTemplate(URL.createObjectURL(file), 'video');
-        }
-      } else {
-        const reader = new FileReader();
-        reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'image');
-        reader.readAsDataURL(file);
-      }
-    });
-
-    document.querySelectorAll('.close-modal').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.dataset.close;
-        if (targetId === 'templatePreviewModal') {
-          document.getElementById('previewTplVideo').pause();
-        }
-        document.getElementById(targetId).classList.add('hidden');
-      });
-    });
-
-    selectTemplate(selectedTemplate);
-    updateAuthUI();
-  </script>
-</body>
-</html>
+        ctx.filter = 'blur(26px) brightness(0.88)';
+        ctx
