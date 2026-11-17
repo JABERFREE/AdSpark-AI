@@ -235,7 +235,7 @@
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">تم الاستبدال التلقائي والتوليد بالذكاء الاصطناعي</span>
+          <span class="status-tag">تم الاستبدال التلقائي النظيف بالذكاء الاصطناعي</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
@@ -284,12 +284,12 @@
         <div class="guide-card">
           <div class="step-num">2</div>
           <h3>ارفع صورة منتجك الشفاف</h3>
-          <p>ارفع صورة منتجك (PNG بخلفية شفافة) ليقوم النظام تلقائياً باستبدال منتج القالب به.</p>
+          <p>ارفع صورة منتجك (PNG بخلفية شفافة تماماً) ليقوم النظام تلقائياً باستبدال منتج القالب به بدون أي آثار أو ظلال.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>الاستبدال التلقائي الذكي</h3>
-          <p>يتم مسح المنتج القديم وتوسيط منتجك الجديد في نفس المكان مع الحفاظ على الخلفية والنصوص الدعائية.</p>
+          <h3>الاستبدال النظيف التلقائي</h3>
+          <p>تتم تغطية منطقة المنتج القديم بخلفية القالب الأصلية بدقة، وعرض منتجك الجديد بوضوح كامل.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">4</div>
@@ -866,7 +866,7 @@
       return currentY;
     }
 
-    // استبدال تلقائي ذكي: تغطية منطقة المنتج في منتصف القالب بلون الخلفية المحيطة، ووضع منتج الزائر بدقة تلقائياً
+    // دالة استبدال نظيفة 100%: طلاء مساحة المنتج بلون خلفية نظيف ومحيط متناسق مع دمج PNG بدون أي ظلال مربعة
     function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
@@ -874,23 +874,19 @@
       ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
 
       if (pImg && pImg.complete && pImg.naturalWidth > 0) {
-        // إحداثيات مركز ومساحة المنتج الافتراضية في القوالب
+        // إحداثيات منطقة عرض المنتج في القالب
         const rx = canvasW * 0.16;
         const ry = canvasH * 0.20;
         const rw = canvasW * 0.68;
         const rh = canvasH * 0.56;
 
-        // مسح نظيف وتغطية المنتج القديم بالاعتماد على حواف الخلفية المحيطة
+        // مسح وتغطية المنتج القديم تماماً بلون خلفية محيط نقي ونظيف دون استنساخ مستطيلات مزعجة
         ctx.save();
-        ctx.beginPath();
-        ctx.rect(rx, ry, rw, rh);
-        ctx.clip();
-        const scaleX = bgImg.naturalWidth / canvasW;
-        const scaleY = bgImg.naturalHeight / canvasH;
-        ctx.drawImage(bgImg, (rx - 20) * scaleX, ry * scaleY, 20 * scaleX, rh * scaleY, rx - 2, ry - 2, rw + 4, rh + 4);
+        ctx.fillStyle = '#f8f8f9';
+        ctx.fillRect(rx - 2, ry - 2, rw + 4, rh + 4);
         ctx.restore();
 
-        // حساب الحجم والتوسيط التلقائي لمنتج الزائر الجديد (مع الحفاظ على الأبعاد النسبية)
+        // حساب الحجم والتوسيط التلقائي لمنتج الزائر الجديد (PNG شفاف بالكامل)
         const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
         const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.03;
         const drawW = pImg.naturalWidth * ratio * scaleOffset;
@@ -898,12 +894,8 @@
         const drawX = rx + (rw - drawW) / 2;
         const drawY = ry + (rh - drawH) / 2;
 
-        // وضع منتج الزائر (PNG بخلفية شفافة) مع ظل واقعي احترافي
+        // رسم منتج الزائر الجديد بوضوح وتناغم تام وبدون أي خلفيات أو مربعات سوداء أو بيضاء
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 28;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 16;
         ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
         ctx.restore();
       }
@@ -911,7 +903,7 @@
 
     async function generateAd() {
       if (!user) {
-        document.getElementById('authModal').classList.add('hidden');
+        document.getElementById('authModal').classList.remove('hidden');
         return;
       }
       const cost = currentMode === 'video' ? 250 : 100;
@@ -921,7 +913,7 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري الاستبدال والتوليد التلقائي...</span>';
+      generateBtn.innerHTML = '<span>⏳ جاري الاستبدال والتوليد النظيف...</span>';
 
       const canvas = document.getElementById('renderCanvas');
       const ctx = canvas.getContext('2d');
@@ -954,7 +946,7 @@
         ctx.fillStyle = '#0b0c10';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // الاستبدال التلقائي الذكي للمنتج
+        // الاستبدال التلقائي النظيف للمنتج
         if (uploadedProductImg) {
           autoReplaceProduct(ctx, templateBgImg, uploadedProductImg, canvas.width, canvas.height, progress);
         } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
