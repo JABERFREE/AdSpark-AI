@@ -886,7 +886,6 @@
       }
     });
 
-    // انتظار جاهزية الفيديو قبل البدء بالتسجيل لمنع تجمده أو اقتصاره على إطار ثابت
     function ensureVideoReady(videoEl) {
       return new Promise((resolve) => {
         if (videoEl.readyState >= 2) {
@@ -902,6 +901,27 @@
           setTimeout(onReady, 2000);
         }
       });
+    }
+
+    // دالة مساعدة لتقسيم النص الطويل إلى أسطر متناسقة لكي لا يتداخل على الصورة
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      let currentY = y;
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          context.fillText(line, x, currentY);
+          line = words[n] + ' ';
+          currentY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      context.fillText(line, x, currentY);
+      return currentY;
     }
 
     async function generateAd() {
@@ -950,58 +970,81 @@
       }
 
       function renderScene(progress, pulseFactor) {
-        ctx.fillStyle = '#0e0f13';
+        // خلفية داكنة نظيفة
+        ctx.fillStyle = '#0b0c10';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // 1. رسم الفيديو أو صورة المنتج المرفوعة بحجم متناسق داخل الكانفاس (object-fit: cover)
         if (activeVideoEl && activeVideoEl.readyState >= 2) {
           ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
         } else if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
-          // حركة سينمائية متعددة (تقريب + تحريك أفقي ناعم) بدلاً من مجرد تكبير ثابت
-          const scaleFactor = 1.05 + Math.sin(progress * Math.PI) * 0.14;
-          const panX = Math.sin(progress * Math.PI * 2) * 28;
-          const panY = Math.cos(progress * Math.PI) * 18;
+          const scaleFactor = 1.02 + Math.sin(progress * Math.PI) * 0.06;
           const w = canvas.width * scaleFactor;
           const h = canvas.height * scaleFactor;
-          const x = (canvas.width - w) / 2 + panX;
-          const y = (canvas.height - h) / 2 + panY;
-          ctx.globalAlpha = 0.9;
+          const x = (canvas.width - w) / 2;
+          const y = (canvas.height - h) / 2;
           ctx.drawImage(activeImg, x, y, w, h);
-          ctx.globalAlpha = 1;
         }
 
-        const grad = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
-        grad.addColorStop(0, 'rgba(0,0,0,0)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.92)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 2. تدرج لوني سينمائي في الأعلى والأسفل لقراءة فائقة الوضوح للعناصر
+        const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
+        topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
+        topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = topGrad;
+        ctx.fillRect(0, 0, canvas.width, 180);
 
-        // شارة الأداء
-        ctx.fillStyle = '#ff5b5b';
-        ctx.fillRect(40, 50, 230, 44);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 22px Cairo, sans-serif';
-        ctx.fillText(selectedTemplate.badge, 60, 80);
+        const bottomGrad = ctx.createLinearGradient(0, canvas.height - 320, 0, canvas.height);
+        bottomGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        bottomGrad.addColorStop(0.4, 'rgba(10, 11, 15, 0.75)');
+        bottomGrad.addColorStop(1, 'rgba(10, 11, 15, 0.96)');
+        ctx.fillStyle = bottomGrad;
+        ctx.fillRect(0, canvas.height - 320, canvas.width, 320);
 
-        // النص الإعلاني المتحرك
-        const textAlpha = Math.min(1, progress * 4);
-        ctx.globalAlpha = textAlpha;
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 34px Cairo, sans-serif';
-        ctx.fillText(adText.slice(0, 48), 40, canvas.height - 230);
-        ctx.globalAlpha = 1;
-
-        // زر الدعوة لاتخاذ إجراء (CTA)
+        // 3. شارة الأداء (Badge) مرتبة باحترافية في أعلى اليمين
         ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height - 120);
-        ctx.scale(pulseFactor, pulseFactor);
-        ctx.fillStyle = '#7c5cff';
-        ctx.fillRect(-240, -35, 480, 70);
+        ctx.font = 'bold 20px Cairo, sans-serif';
+        const badgeText = selectedTemplate.badge;
+        const textMetrics = ctx.measureText(badgeText);
+        const badgeWidth = textMetrics.width + 36;
+        const badgeHeight = 42;
+        const badgeX = canvas.width - badgeWidth - 40;
+        const badgeY = 50;
+
+        ctx.fillStyle = '#ff5b5b';
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 10);
+        ctx.fill();
+
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 28px Cairo, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(ctaText, 0, 10);
+        ctx.textAlign = 'right';
+        ctx.fillText(badgeText, badgeX + badgeWidth - 18, badgeY + 28);
         ctx.restore();
-        ctx.textAlign = 'start';
+
+        // 4. النص الإعلاني الرئيسي (مرتب داخل صندوق نصي مع تباعد أسطر مثالي لئلا يتداخل)
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px Cairo, sans-serif';
+        ctx.textAlign = 'right';
+        wrapText(ctx, adText, canvas.width - 50, canvas.height - 210, canvas.width - 100, 42);
+        ctx.restore();
+
+        // 5. زر الدعوة للشراء (CTA) بتصميم بارز ومرتب في أسفل الإعلان
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height - 85);
+        ctx.scale(pulseFactor, pulseFactor);
+        
+        // خلفية الزر البنفسجي
+        ctx.fillStyle = '#7c5cff';
+        ctx.beginPath();
+        ctx.roundRect(-260, -32, 520, 64, 16);
+        ctx.fill();
+
+        // نص الزر
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 26px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(ctaText, 0, 8);
+        ctx.restore();
       }
 
       if (currentMode === 'image') {
@@ -1027,7 +1070,6 @@
         return;
       }
 
-      // حساب مدة الفيديو الفعلية (إما مدة الفيديو المرفوع/القالب أو المدة المختارة من القائمة 6s/8s)
       const selectedOpt = document.getElementById('aspectSelect').selectedOptions[0];
       const defaultDurSec = Number(selectedOpt?.dataset.dur || 6);
       const targetDurationSec = (activeVideoEl && isFinite(activeVideoEl.duration) && activeVideoEl.duration > 1)
@@ -1089,7 +1131,7 @@
       function drawLoop(now) {
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / durationMs);
-        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.05;
+        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.04;
         renderScene(progress, pulse);
 
         if (elapsed < durationMs) {
