@@ -37,6 +37,8 @@
     .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border); }
     .btn-secondary:hover { border-color: var(--primary); }
     .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
     .btn-gmail { background: #ffffff; color: #1f2937; }
     .btn-gmail:hover { background: #f3f4f6; }
     .full-width { width: 100%; }
@@ -83,14 +85,19 @@
     .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; }
     .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
     .cat-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
     .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
     .template-card:hover { transform: translateY(-4px); border-color: var(--primary); }
     .template-card.selected { border-color: var(--primary); }
     .template-card img, .template-card video { width: 100%; height: 100%; object-fit: cover; }
     .card-badge { position: absolute; top: 10px; right: 10px; background: var(--accent-coral); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 2; }
-    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.9); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; z-index: 2; }
-    .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.92)); z-index: 2; }
+    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 3; border: none; cursor: pointer; }
+    .video-tag-badge:hover { background: #5a38f5; }
+    .card-admin-controls { position: absolute; top: 44px; left: 10px; display: flex; gap: 6px; z-index: 4; }
+    .card-admin-btn { background: rgba(18, 19, 24, 0.88); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
+    .card-admin-btn.edit:hover { border-color: var(--primary); background: var(--primary); }
+    .card-admin-btn.del:hover { border-color: #dc2626; background: #dc2626; }
+    .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.94)); z-index: 2; }
     .card-overlay h4 { font-size: 14px; margin-bottom: 4px; }
     .card-overlay span { font-size: 11px; color: #d1d5db; }
     .site-footer { background: #121318; border-top: 1px solid var(--border); padding: 24px; margin-top: auto; }
@@ -102,134 +109,46 @@
     .footer-link:hover { color: var(--text-main); border-color: var(--primary); }
     .footer-link.active { background: rgba(124, 92, 255, 0.2); border-color: var(--primary); color: #fff; }
     .footer-copy { font-size: 12px; color: var(--text-muted); }
-    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.82); display: grid; place-items: center; padding: 20px; z-index: 100; }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.84); display: grid; place-items: center; padding: 20px; z-index: 100; }
     .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
-    .admin-modal-card { max-width: 540px; }
-    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
-    
-    /* تصميم نافذة تسجيل الدخول المطابقة تماماً للصورة الأولى */
-    .auth-modal-card {
-      max-width: 440px;
-      text-align: center;
-      background: #14151a;
-      border: 1px solid var(--border);
-      padding: 36px 28px;
-    }
-    .auth-title {
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 22px;
-      text-align: right;
-    }
-    .auth-tabs {
-      display: flex;
-      background: #1f222c;
-      border-radius: 999px;
-      padding: 4px;
-      margin-bottom: 22px;
-    }
-    .auth-tab {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 10px;
-      border-radius: 999px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-    .auth-tab.active {
-      background: #2b2f3d;
-      color: #fff;
-    }
-    .btn-google-auth {
-      width: 100%;
-      background: #1f222c;
-      color: #fff;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 13px;
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-bottom: 20px;
-    }
-    .btn-google-auth:hover {
-      border-color: var(--primary);
-      background: rgba(124, 92, 255, 0.1);
-    }
-    .auth-divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-      margin: 18px 0;
-    }
-    .auth-divider::before, .auth-divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid var(--border);
-    }
+    .admin-modal-card { max-width: 620px; }
+    .preview-modal-card { max-width: 440px; text-align: center; }
+    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 5; }
+    .auth-modal-card { max-width: 440px; text-align: center; background: #14151a; border: 1px solid var(--border); padding: 36px 28px; }
+    .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 22px; text-align: right; }
+    .auth-tabs { display: flex; background: #1f222c; border-radius: 999px; padding: 4px; margin-bottom: 22px; }
+    .auth-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 10px; border-radius: 999px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; }
+    .auth-tab.active { background: #2b2f3d; color: #fff; }
+    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 20px; }
+    .btn-google-auth:hover { border-color: var(--primary); background: rgba(124, 92, 255, 0.1); }
+    .auth-divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 13px; margin: 18px 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
     .auth-divider::before { margin-left: 10px; }
     .auth-divider::after { margin-right: 10px; }
-    .auth-input {
-      width: 100%;
-      background: #0e0f13;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 14px 18px;
-      color: #fff;
-      font-size: 14px;
-      margin-bottom: 16px;
-      outline: none;
-      text-align: right;
-    }
+    .auth-input { width: 100%; background: #0e0f13; border: 1px solid var(--border); border-radius: 999px; padding: 14px 18px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none; text-align: right; }
     .auth-input:focus { border-color: var(--primary); }
-    .btn-continue-auth {
-      width: 100%;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-bottom: 18px;
-      transition: 0.2s;
-    }
+    .btn-continue-auth { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 18px; transition: 0.2s; }
     .btn-continue-auth:hover { background: var(--primary-hover); }
-    .auth-footer-links {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-    .auth-footer-links a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .auth-terms {
-      font-size: 11px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .auth-terms a {
-      color: var(--text-main);
-      text-decoration: underline;
-    }
-
+    .auth-footer-links { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .auth-footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .auth-terms { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+    .auth-terms a { color: var(--text-main); text-decoration: underline; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 20px; }
+    .plan-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    .plan-box.featured { border: 2px solid var(--primary); }
+    .plan-box.super { border: 2px solid #f59e0b; }
+    .plan-badge { align-self: flex-start; background: #374151; padding: 3px 10px; border-radius: 999px; font-size: 12px; }
+    .plan-badge.popular { background: var(--primary); }
+    .plan-badge.vip { background: #d97706; }
+    .plan-price { font-size: 32px; font-weight: 800; }
+    .plan-price span { font-size: 14px; color: var(--text-muted); }
+    .plan-points { color: #34d399; font-weight: 700; font-size: 14px; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #d1d5db; flex: 1; }
+    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .admin-list-box { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-elevated); padding: 10px 14px; border-radius: 10px; margin-top: 8px; gap: 10px; }
+    .admin-list-item span { font-size: 13px; font-weight: 600; }
     @media (max-width: 700px) { .studio-box { flex-direction: column; } .studio-sidebar { flex-direction: row; } }
   </style>
 </head>
@@ -246,7 +165,7 @@
 
     <div class="nav-actions">
       <button id="openAdminBtn" class="btn btn-secondary hidden">
-        <span>🛠️</span> لوحة المشرف (إضافة قوالب)
+        <span>🛠️</span> لوحة المشرف (إدارة القوالب)
       </button>
 
       <div id="creditPill" class="credit-pill hidden" title="اضغط لشحن الرصيد">
@@ -258,7 +177,7 @@
 
       <button id="gmailLoginBtn" class="btn btn-gmail">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
-        <span id="userLabel">تسجيل الدخول عبر Gmail (1000 نقطة)</span>
+        <span id="userLabel">Sign in / Sign up</span>
       </button>
     </div>
   </header>
@@ -361,7 +280,7 @@
         <div class="guide-card">
           <div class="step-num">1</div>
           <h3>تسجيل الدخول والرصيد المجاني</h3>
-          <p>اضغط على زر <strong>تسجيل الدخول</strong> للحصول على <strong>1,000 نقطة مجانية</strong>.</p>
+          <p>اضغط على زر <strong>Sign in / Sign up</strong> للحصول على <strong>1,000 نقطة مجانية</strong>.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">2</div>
@@ -448,13 +367,23 @@
     </div>
   </footer>
 
+  <!-- Full Video Template Preview Modal -->
+  <div id="templatePreviewModal" class="modal hidden">
+    <div class="modal-card preview-modal-card">
+      <button type="button" class="close-modal" data-close="templatePreviewModal">✕</button>
+      <h3 id="previewTplTitle" style="margin-bottom: 14px;">معاينة القالب الكامل</h3>
+      <video id="previewTplVideo" controls playsinline style="width: 100%; border-radius: 14px; background: #000; max-height: 65vh;"></video>
+      <button type="button" id="usePreviewTplBtn" class="btn btn-primary full-width" style="margin-top: 14px;">✨ استخدام هذا القالب للتصميم</button>
+    </div>
+  </div>
+
   <!-- Pricing Modal -->
   <div id="pricingModal" class="modal hidden">
     <div class="modal-card pricing-card-modal">
       <button type="button" class="close-modal" data-close="pricingModal">✕</button>
-      <div class="modal-header-center">
+      <div style="text-align: center;">
         <h2>اشحن رصيدك وتابع صناعة الإعلانات 🚀</h2>
-        <p>اختر الباقة الشهرية المناسبة لشحن رصيدك:</p>
+        <p style="color: var(--text-muted); margin-top: 6px;">اختر الباقة الشهرية المناسبة لشحن رصيدك:</p>
       </div>
       <div class="plans-grid">
         <div class="plan-box">
@@ -494,7 +423,7 @@
     </div>
   </div>
 
-  <!-- ==================== نافذة تسجيل الدخول المطابقة للصورة الأولى ==================== -->
+  <!-- Auth Modal -->
   <div id="authModal" class="modal hidden">
     <div class="modal-card auth-modal-card">
       <button type="button" class="close-modal" data-close="authModal">✕</button>
@@ -526,13 +455,15 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal -->
+  <!-- Admin Panel Modal (Add / Edit / Delete Templates) -->
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ لوحة تحكم المالك — إضافة قالب إعلاني</h2>
-      <p class="muted">رفع فيديو أو صورة غلاف ليظهر في الواجهة الرئيسية.</p>
+      <h2 id="adminFormHeading">🛠️ لوحة تحكم المالك — إضافة قالب إعلاني</h2>
+      <p style="color: var(--text-muted); font-size: 13px;">يمكنك إضافة قالب جديد أو تعديل وحذف القوالب الحالية.</p>
+
       <form id="adminTemplateForm" class="admin-form">
+        <input type="hidden" id="editTplId" value="" />
         <label>عنوان القالب الإعلاني</label>
         <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر" />
         <div class="form-row">
@@ -550,17 +481,28 @@
             <input type="text" id="tplBadge" value="GMV $15,000+" required />
           </div>
         </div>
-        <label>ملف معاينة القالب (فيديو أو صورة)</label>
+        <label>ملف معاينة القالب (فيديو كامل MP4/WebM أو صورة)</label>
         <input type="file" id="tplMediaFile" accept="video/*,image/*" />
         <label>سيناريو القالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الإعلاني..."></textarea>
-        <button type="submit" class="btn btn-primary full-width">➕ نشر القالب الجديد</button>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" id="adminSubmitBtn" class="btn btn-primary full-width">➕ نشر القالب الجديد</button>
+          <button type="button" id="cancelEditBtn" class="btn btn-secondary hidden">إلغاء التعديل</button>
+        </div>
       </form>
+
+      <!-- قائمة إدارة القوالب الحالية للمشرف -->
+      <div class="admin-list-box">
+        <h4 style="font-size: 15px; margin-bottom: 6px;">📋 القوالب المنشورة حالياً (تعديل / حذف):</h4>
+        <div id="adminTemplatesList"></div>
+      </div>
     </div>
   </div>
 
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
-  <video id="uploadedVideoSource" class="hidden" muted playsinline></video>
+  <video id="uploadedVideoSource" class="hidden" muted playsinline crossorigin="anonymous"></video>
+  <video id="templateVideoSource" class="hidden" muted playsinline crossorigin="anonymous"></video>
 
   <script>
     const ADMIN_EMAILS = [
@@ -585,6 +527,7 @@
     let uploadedProductVideo = null;
     let lastGeneratedBlobUrl = null;
     let lastGeneratedExt = 'webm';
+    let currentFilterCat = 'all';
 
     function switchPage(pageName) {
       document.querySelectorAll('.page-view').forEach(page => {
@@ -635,8 +578,8 @@
     const outputVideo = document.getElementById('outputVideo');
     const outputImage = document.getElementById('outputImage');
     const uploadedVideoSource = document.getElementById('uploadedVideoSource');
+    const templateVideoSource = document.getElementById('templateVideoSource');
 
-    // أزرار نمط التوليد (فيديو / صورة)
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -673,6 +616,7 @@
       } else {
         openAdminBtn.classList.add('hidden');
       }
+      renderTemplates(currentFilterCat);
     }
 
     function saveUser() {
@@ -680,7 +624,14 @@
       updateAuthUI();
     }
 
-    // فتح نافذة تسجيل الدخول عند الضغط على زر الحساب
+    function saveTemplatesToStorage() {
+      try {
+        localStorage.setItem('adspark_templates', JSON.stringify(templates));
+      } catch (e) {
+        console.warn('Storage quota exceeded for large video, kept in active session.');
+      }
+    }
+
     gmailLoginBtn.addEventListener('click', () => {
       if (user) {
         if (confirm('أنت مسجل الدخول بحساب: ' + user.email + ' - هل ترغب بتسجيل الخروج؟')) {
@@ -693,7 +644,6 @@
       document.getElementById('authModal').classList.remove('hidden');
     });
 
-    // تفاعل تبويبات Personal و Enterprise في نافذة تسجيل الدخول
     document.getElementById('tabPersonal').addEventListener('click', function() {
       this.classList.add('active');
       document.getElementById('tabEnterprise').classList.remove('active');
@@ -703,46 +653,211 @@
       document.getElementById('tabPersonal').classList.remove('active');
     });
 
-    // تسجيل الدخول عبر Google في النافذة المنبثقة
     document.getElementById('googleAuthBtn').addEventListener('click', () => {
       user = { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مجانية' };
       saveUser();
       document.getElementById('authModal').classList.add('hidden');
-      alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! تم تفعيل لوحة المشرف.' : 'تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
+      alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! تم تفعيل صلاحيات التعديل والحذف.' : 'تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
     });
 
-    // تسجيل الدخول عبر البريد الإلكتروني في النافذة المنبثقة
     document.getElementById('authContinueBtn').addEventListener('click', () => {
       const emailVal = document.getElementById('authEmailInput').value.trim();
       if (emailVal && emailVal.includes('@')) {
         user = { email: emailVal, credits: 1000, plan: 'مجانية' };
         saveUser();
         document.getElementById('authModal').classList.add('hidden');
-        alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! تم تفعيل لوحة المشرف.' : 'تم تسجيل الدخول بنجاح وحصلت على 1000 نقطة!');
+        alert(isOwnerLoggedIn() ? 'مرحباً بك بصفتك مالك المنصة! تم تفعيل صلاحيات التعديل والحذف.' : 'تم تسجيل الدخول بنجاح وحصلت على 1000 نقطة!');
       } else {
         alert('يرجى إدخال بريد إلكتروني صحيح.');
       }
     });
 
+    // اختيار القالب وتحميل الفيديو الخاص به في محرك التصميم
+    function selectTemplate(tpl) {
+      selectedTemplate = tpl;
+      activeTemplateTitle.textContent = tpl.title;
+      promptInput.value = tpl.prompt;
+      if (tpl.mediaType === 'video') {
+        templateVideoSource.src = tpl.cover;
+        templateVideoSource.load();
+      } else {
+        templateVideoSource.removeAttribute('src');
+      }
+      renderTemplates(currentFilterCat);
+    }
+
+    // معاينة الفيديو الكامل للقالب في نافذة منبثقة بالصوت والصورة
+    function openTemplatePreview(tpl) {
+      document.getElementById('previewTplTitle').textContent = tpl.title;
+      const previewVid = document.getElementById('previewTplVideo');
+      previewVid.src = tpl.cover;
+      previewVid.muted = false;
+      document.getElementById('templatePreviewModal').classList.remove('hidden');
+      previewVid.play().catch(() => {});
+
+      document.getElementById('usePreviewTplBtn').onclick = () => {
+        previewVid.pause();
+        document.getElementById('templatePreviewModal').classList.add('hidden');
+        selectTemplate(tpl);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+    }
+
+    // حذف قالب (للمشرف فقط)
+    function deleteTemplateById(id) {
+      if (!isOwnerLoggedIn()) return;
+      if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً؟')) return;
+      templates = templates.filter(t => t.id !== id);
+      saveTemplatesToStorage();
+      if (selectedTemplate && selectedTemplate.id === id && templates.length > 0) {
+        selectTemplate(templates[0]);
+      }
+      renderTemplates(currentFilterCat);
+      renderAdminTemplatesList();
+    }
+
+    // فتح وضع التعديل لقالب موجود (للمشرف فقط)
+    function startEditTemplate(id) {
+      if (!isOwnerLoggedIn()) return;
+      const tpl = templates.find(t => t.id === id);
+      if (!tpl) return;
+
+      document.getElementById('editTplId').value = tpl.id;
+      document.getElementById('tplTitle').value = tpl.title;
+      document.getElementById('tplCategory').value = tpl.category;
+      document.getElementById('tplBadge').value = tpl.badge;
+      document.getElementById('tplPrompt').value = tpl.prompt;
+
+      document.getElementById('adminFormHeading').textContent = '✏️ تعديل القالب الإعلاني';
+      document.getElementById('adminSubmitBtn').textContent = '💾 حفظ التعديلات';
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+      document.getElementById('adminModal').classList.remove('hidden');
+    }
+
+    function resetAdminForm() {
+      document.getElementById('adminTemplateForm').reset();
+      document.getElementById('editTplId').value = '';
+      document.getElementById('adminFormHeading').textContent = '🛠️ لوحة تحكم المالك — إضافة قالب إعلاني';
+      document.getElementById('adminSubmitBtn').textContent = '➕ نشر القالب الجديد';
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+    }
+
+    document.getElementById('cancelEditBtn').addEventListener('click', resetAdminForm);
+
+    function renderAdminTemplatesList() {
+      const listEl = document.getElementById('adminTemplatesList');
+      listEl.innerHTML = '';
+      templates.forEach(tpl => {
+        const row = document.createElement('div');
+        row.className = 'admin-list-item';
+        row.innerHTML = '<span>' + (tpl.mediaType === 'video' ? '🎬 ' : '🖼️ ') + tpl.title + '</span>';
+
+        const btns = document.createElement('div');
+        btns.style.display = 'flex';
+        btns.style.gap = '6px';
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'btn btn-secondary';
+        editBtn.style.padding = '5px 10px';
+        editBtn.textContent = '✏️ تعديل';
+        editBtn.onclick = () => startEditTemplate(tpl.id);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn btn-danger';
+        delBtn.style.padding = '5px 10px';
+        delBtn.textContent = '🗑️ حذف';
+        delBtn.onclick = () => deleteTemplateById(tpl.id);
+
+        btns.appendChild(editBtn);
+        btns.appendChild(delBtn);
+        row.appendChild(btns);
+        listEl.appendChild(row);
+      });
+    }
+
     function renderTemplates(filterCat = 'all') {
+      currentFilterCat = filterCat;
       templatesGrid.innerHTML = '';
       const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
+      const adminActive = isOwnerLoggedIn();
+
       filtered.forEach(tpl => {
         const card = document.createElement('div');
         card.className = 'template-card ' + (selectedTemplate && selectedTemplate.id === tpl.id ? 'selected' : '');
         const isVideo = tpl.mediaType === 'video';
-        const mediaHtml = isVideo
-          ? '<span class="video-tag-badge">🎬 فيديو</span><video src="' + tpl.cover + '" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>'
-          : '<img src="' + tpl.cover + '" alt="' + tpl.title + '" crossorigin="anonymous" />';
 
-        card.innerHTML = '<span class="card-badge">' + tpl.badge + '</span>' + mediaHtml + '<div class="card-overlay"><h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب</span></div>';
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'card-badge';
+        badgeSpan.textContent = tpl.badge;
+        card.appendChild(badgeSpan);
+
+        if (isVideo) {
+          const previewBtn = document.createElement('button');
+          previewBtn.type = 'button';
+          previewBtn.className = 'video-tag-badge';
+          previewBtn.textContent = '▶️ مشاهدة الفيديو الكامل';
+          previewBtn.onclick = (e) => {
+            e.stopPropagation();
+            openTemplatePreview(tpl);
+          };
+          card.appendChild(previewBtn);
+
+          const vid = document.createElement('video');
+          vid.src = tpl.cover;
+          vid.muted = true;
+          vid.loop = true;
+          vid.playsInline = true;
+          vid.onmouseover = () => vid.play().catch(() => {});
+          vid.onmouseout = () => vid.pause();
+          card.appendChild(vid);
+        } else {
+          const img = document.createElement('img');
+          img.src = tpl.cover;
+          img.alt = tpl.title;
+          img.crossOrigin = 'anonymous';
+          card.appendChild(img);
+        }
+
+        // أزرار التحكم للمشرف (تعديل وحذف) مباشرة على البطاقة
+        if (adminActive) {
+          const adminControls = document.createElement('div');
+          adminControls.className = 'card-admin-controls';
+
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.className = 'card-admin-btn edit';
+          editBtn.textContent = '✏️ تعديل';
+          editBtn.onclick = (e) => {
+            e.stopPropagation();
+            startEditTemplate(tpl.id);
+          };
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'card-admin-btn del';
+          delBtn.textContent = '🗑️ حذف';
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteTemplateById(tpl.id);
+          };
+
+          adminControls.appendChild(editBtn);
+          adminControls.appendChild(delBtn);
+          card.appendChild(adminControls);
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'card-overlay';
+        overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب في الاستوديو</span>';
+        card.appendChild(overlay);
+
         card.addEventListener('click', () => {
-          selectedTemplate = tpl;
-          activeTemplateTitle.textContent = tpl.title;
-          promptInput.value = tpl.prompt;
-          renderTemplates(filterCat);
+          selectTemplate(tpl);
           switchPage('home');
         });
+
         templatesGrid.appendChild(card);
       });
     }
@@ -763,8 +878,7 @@
       if (file.type.startsWith('video/')) {
         uploadedProductVideo = file;
         uploadedProductImg = null;
-        const videoUrl = URL.createObjectURL(file);
-        uploadedVideoSource.src = videoUrl;
+        uploadedVideoSource.src = URL.createObjectURL(file);
         uploadedVideoSource.load();
       } else {
         uploadedProductVideo = null;
@@ -797,8 +911,11 @@
       const adText = promptInput.value.trim() || selectedTemplate.prompt;
       const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
 
+      const useUploadedVid = Boolean(uploadedProductVideo);
+      const useTemplateVid = !useUploadedVid && !uploadedProductImg && selectedTemplate.mediaType === 'video';
+
       let activeImg = uploadedProductImg;
-      if (!activeImg && !uploadedProductVideo && selectedTemplate.mediaType !== 'video') {
+      if (!activeImg && !useUploadedVid && !useTemplateVid) {
         const bgImg = new Image();
         bgImg.crossOrigin = 'anonymous';
         bgImg.src = selectedTemplate.cover;
@@ -806,25 +923,34 @@
         activeImg = bgImg;
       }
 
+      if (useUploadedVid) {
+        uploadedVideoSource.currentTime = 0;
+        await uploadedVideoSource.play().catch(() => {});
+      } else if (useTemplateVid) {
+        templateVideoSource.src = selectedTemplate.cover;
+        templateVideoSource.currentTime = 0;
+        await templateVideoSource.play().catch(() => {});
+      }
+
       function renderScene(scaleFactor, pulseFactor) {
         ctx.fillStyle = '#0e0f13';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (uploadedProductVideo && uploadedProductVideo.readyState >= 2) {
-          ctx.globalAlpha = 0.9;
+        if (useUploadedVid && uploadedVideoSource.readyState >= 2) {
           ctx.drawImage(uploadedVideoSource, 0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = 1;
+        } else if (useTemplateVid && templateVideoSource.readyState >= 2) {
+          ctx.drawImage(templateVideoSource, 0, 0, canvas.width, canvas.height);
         } else if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
           const w = canvas.width * scaleFactor;
           const h = canvas.height * scaleFactor;
           const x = (canvas.width - w) / 2;
           const y = (canvas.height - h) / 2;
-          ctx.globalAlpha = 0.85;
+          ctx.globalAlpha = 0.88;
           ctx.drawImage(activeImg, x, y, w, h);
           ctx.globalAlpha = 1;
         }
 
-        const grad = ctx.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height);
+        const grad = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
         grad.addColorStop(0, 'rgba(0,0,0,0)');
         grad.addColorStop(1, 'rgba(0,0,0,0.92)');
         ctx.fillStyle = grad;
@@ -856,6 +982,8 @@
       if (currentMode === 'image') {
         renderScene(1.04, 1);
         canvas.toBlob((blob) => {
+          if (useUploadedVid) uploadedVideoSource.pause();
+          if (useTemplateVid) templateVideoSource.pause();
           user.credits -= cost;
           saveUser();
           if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
@@ -873,11 +1001,6 @@
           resultSection.scrollIntoView({ behavior: 'smooth' });
         }, 'image/png');
         return;
-      }
-
-      if (uploadedProductVideo) {
-        uploadedVideoSource.currentTime = 0;
-        await uploadedVideoSource.play().catch(e => {});
       }
 
       let audioCtx = null;
@@ -907,7 +1030,8 @@
       recorder.onstop = () => {
         if (osc) osc.stop();
         if (audioCtx) audioCtx.close();
-        if (uploadedProductVideo) uploadedVideoSource.pause();
+        if (useUploadedVid) uploadedVideoSource.pause();
+        if (useTemplateVid) templateVideoSource.pause();
         user.credits -= cost;
         saveUser();
 
@@ -930,7 +1054,7 @@
 
       recorder.start();
       let frame = 0;
-      const totalFrames = 140;
+      const totalFrames = 150;
 
       function drawFrame() {
         const progress = frame / totalFrames;
@@ -986,50 +1110,96 @@
         alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
         return;
       }
+      resetAdminForm();
+      renderAdminTemplatesList();
       document.getElementById('adminModal').classList.remove('hidden');
     });
 
+    // إضافة أو تعديل قالب من لوحة المشرف
     document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
       e.preventDefault();
       if (!isOwnerLoggedIn()) return;
+
+      const editId = document.getElementById('editTplId').value;
       const title = document.getElementById('tplTitle').value.trim();
       const category = document.getElementById('tplCategory').value;
       const badge = document.getElementById('tplBadge').value.trim();
       const promptText = document.getElementById('tplPrompt').value.trim();
       const file = document.getElementById('tplMediaFile').files[0];
 
-      const finalizeAdd = (mediaUrl, mediaType) => {
-        templates.unshift({ id: Date.now(), title, category, badge, prompt: promptText, mediaType, cover: mediaUrl });
-        try { localStorage.setItem('adspark_templates', JSON.stringify(templates)); } catch (err) {}
-        renderTemplates('all');
+      const saveFinalTemplate = (mediaUrl, mediaType) => {
+        if (editId) {
+          const idx = templates.findIndex(t => String(t.id) === String(editId));
+          if (idx !== -1) {
+            templates[idx] = {
+              ...templates[idx],
+              title,
+              category,
+              badge,
+              prompt: promptText,
+              mediaType: mediaType || templates[idx].mediaType,
+              cover: mediaUrl || templates[idx].cover
+            };
+            if (selectedTemplate && String(selectedTemplate.id) === String(editId)) {
+              selectTemplate(templates[idx]);
+            }
+          }
+          alert('تم حفظ تعديلات القالب بنجاح!');
+        } else {
+          const newTpl = {
+            id: Date.now(),
+            title,
+            category,
+            badge,
+            prompt: promptText,
+            mediaType: mediaType || 'image',
+            cover: mediaUrl || 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80'
+          };
+          templates.unshift(newTpl);
+          selectTemplate(newTpl);
+          alert('تم نشر القالب الجديد بنجاح!');
+        }
+
+        saveTemplatesToStorage();
+        renderTemplates(currentFilterCat);
+        renderAdminTemplatesList();
+        resetAdminForm();
         document.getElementById('adminModal').classList.add('hidden');
-        e.target.reset();
-        alert('تم نشر القالب الجديد بنجاح!');
       };
 
       if (file) {
         if (file.type.startsWith('video/')) {
-          finalizeAdd(URL.createObjectURL(file), 'video');
+          // قراءة الفيديو كـ DataURL ليبقى محفوظاً، مع استخدام ObjectURL إذا كان كبيراً جداً
+          if (file.size < 4 * 1024 * 1024) {
+            const reader = new FileReader();
+            reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
+            reader.readAsDataURL(file);
+          } else {
+            saveFinalTemplate(URL.createObjectURL(file), 'video');
+          }
         } else {
           const reader = new FileReader();
-          reader.onload = (ev) => finalizeAdd(ev.target.result, 'image');
+          reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'image');
           reader.readAsDataURL(file);
         }
       } else {
-        finalizeAdd('https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80', 'image');
+        saveFinalTemplate(null, null);
       }
     });
 
     document.querySelectorAll('.close-modal').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.getElementById(btn.dataset.close).classList.add('hidden');
+        const targetId = btn.dataset.close;
+        if (targetId === 'templatePreviewModal') {
+          document.getElementById('previewTplVideo').pause();
+        }
+        document.getElementById(targetId).classList.add('hidden');
       });
     });
 
     // التشغيل الأولي
-    promptInput.value = selectedTemplate.prompt;
+    selectTemplate(selectedTemplate);
     updateAuthUI();
-    renderTemplates('all');
   </script>
 </body>
 </html>
