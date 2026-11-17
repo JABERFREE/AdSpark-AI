@@ -543,7 +543,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ربط الأزرار الفردية بدلاً من التكرار المفرط لمنع تحذيرات الذاكرة
     const footerLinks = document.querySelectorAll('.footer-link');
     footerLinks.forEach(btn => {
       btn.onclick = () => switchPage(btn.dataset.page);
@@ -913,16 +912,19 @@
       return currentY;
     }
 
+    // دالة استبدال دقيقة مطابقة لأبعاد القالب الأصلي وتملأ المشهد باحترافية كاملة
     function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
+      // 1. رسم خلفية القالب الأصلي بدقة 100%
       ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
 
       if (pImg && pImg.complete && pImg.naturalWidth > 0) {
-        const rx = canvasW * 0.14;
-        const ry = canvasH * 0.18;
-        const rw = canvasW * 0.72;
-        const rh = canvasH * 0.58;
+        // إحداثيات ومقاسات دقيقة لملء المساحة المخصصة للعطر كالقالب الأصلي تماماً
+        const rx = canvasW * 0.10;
+        const ry = canvasH * 0.15;
+        const rw = canvasW * 0.80;
+        const rh = canvasH * 0.63;
 
         const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
         const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.035;
@@ -931,10 +933,11 @@
         const drawX = rx + (rw - drawW) / 2;
         const drawY = ry + (rh - drawH) / 2;
 
+        // 2. دمج منتج الزائر فوق الخلفية مع ظل خفيف ومتناسق تماماً
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        ctx.shadowBlur = 18;
-        ctx.shadowOffsetY = 10;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 12;
         ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
         ctx.restore();
       }
@@ -952,7 +955,7 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان بخلفية واضحة...</span>';
+      generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان بخلفية واضحة ومطابقة...</span>';
 
       const canvas = document.getElementById('renderCanvas');
       const ctx = canvas.getContext('2d');
