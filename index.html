@@ -22,16 +22,16 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
     .hidden { display: none !important; }
-    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #121318; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; flex-wrap: wrap; gap: 12px; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #121318; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 12px; }
     .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .brand-logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #b05cff); display: grid; place-items: center; font-size: 20px; }
     .brand-name { font-size: 20px; font-weight: 800; display: block; }
     .brand-name .accent { color: var(--primary); }
     .brand-tag { font-size: 11px; color: var(--text-muted); }
     .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .credit-pill { display: flex; align-items: center; gap: 6px; background: var(--bg-elevated); border: 1px solid var(--primary); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
+    .credit-pill { display: flex; align-items: center; gap: 6px; background: var(--bg-elevated); border: 1px solid var(--primary); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; z-index: 101; }
     .plus-badge { background: var(--primary); color: #fff; width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-weight: bold; }
-    .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; z-index: 5; position: relative; }
+    .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; z-index: 50; position: relative; pointer-events: auto; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border); }
@@ -57,23 +57,28 @@
     .legal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 22px; }
     .legal-content section h3 { color: var(--primary); font-size: 18px; margin-bottom: 8px; }
     .legal-content section p, .legal-content section li { color: #d1d5db; font-size: 14px; line-height: 1.8; }
-    .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; }
-    .studio-sidebar { display: flex; flex-direction: column; gap: 10px; }
-    .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; z-index: 5; position: relative; }
+    
+    .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; position: relative; z-index: 10; }
+    .studio-sidebar { display: flex; flex-direction: column; gap: 10px; z-index: 20; }
+    .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; z-index: 20; position: relative; pointer-events: auto; }
     .mode-btn.active { border-color: var(--primary); color: #fff; background: rgba(124, 92, 255, 0.16); }
-    .studio-main { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .studio-main { flex: 1; display: flex; flex-direction: column; gap: 14px; z-index: 20; position: relative; }
+    .prompt-area { position: relative; z-index: 25; }
     .template-badge-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-elevated); padding: 8px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
     .badge-viral { background: var(--accent-coral); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    textarea, input[type="text"], input[type="email"], select { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 12px; padding: 12px; font-size: 14px; outline: none; z-index: 5; position: relative; }
+    
+    textarea, input[type="text"], input[type="email"], select { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 12px; padding: 12px; font-size: 14px; outline: none; z-index: 30; position: relative; pointer-events: auto; }
     textarea:focus, input:focus, select:focus { border-color: var(--primary); }
-    .studio-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .control-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
-    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; z-index: 5; position: relative; }
-    .studio-select { width: auto; padding: 9px 12px; }
-    .cta-text-input { max-width: 240px; padding: 9px 12px; }
-    .generate-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; }
+    
+    .studio-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: relative; z-index: 25; }
+    .control-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; z-index: 30; position: relative; }
+    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; z-index: 35; position: relative; pointer-events: auto; }
+    .studio-select { width: auto; padding: 9px 12px; z-index: 35; position: relative; pointer-events: auto; }
+    .cta-text-input { max-width: 240px; padding: 9px 12px; z-index: 35; position: relative; pointer-events: auto; }
+    .generate-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 35; position: relative; }
+    .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; z-index: 40; pointer-events: auto; }
     .cost-hint { font-size: 11px; color: var(--text-muted); }
+    
     .result-section { background: var(--bg-card); border: 1px solid var(--primary); border-radius: 18px; padding: 20px; margin-bottom: 32px; }
     .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .status-tag { background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 4px 12px; border-radius: 999px; font-size: 12px; }
@@ -82,56 +87,56 @@
     .result-actions { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
     .section-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
     .pill-hot { background: var(--accent-coral); color: #fff; font-size: 12px; padding: 3px 10px; border-radius: 999px; vertical-align: middle; }
-    .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; z-index: 5; position: relative; }
-    .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; z-index: 5; position: relative; }
+    .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; z-index: 20; position: relative; pointer-events: auto; }
+    .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; z-index: 25; position: relative; pointer-events: auto; }
     .cat-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; z-index: 2; }
+    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; z-index: 20; position: relative; }
+    .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; z-index: 22; pointer-events: auto; }
     .template-card:hover { transform: translateY(-4px); border-color: var(--primary); }
     .template-card.selected { border-color: var(--primary); }
     .template-card img, .template-card video { width: 100%; height: 100%; object-fit: cover; }
-    .card-badge { position: absolute; top: 10px; right: 10px; background: var(--accent-coral); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 3; pointer-events: none; }
-    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 6; border: none; cursor: pointer; }
+    .card-badge { position: absolute; top: 10px; right: 10px; background: var(--accent-coral); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 23; pointer-events: none; }
+    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 25; border: none; cursor: pointer; pointer-events: auto; }
     .video-tag-badge:hover { background: #5a38f5; }
-    .card-admin-controls { position: absolute; top: 44px; left: 10px; display: flex; gap: 6px; z-index: 6; }
-    .card-admin-btn { background: rgba(18, 19, 24, 0.88); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
+    .card-admin-controls { position: absolute; top: 44px; left: 10px; display: flex; gap: 6px; z-index: 25; }
+    .card-admin-btn { background: rgba(18, 19, 24, 0.88); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; pointer-events: auto; }
     .card-admin-btn.del:hover { border-color: #dc2626; background: #dc2626; }
-    .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.94)); z-index: 4; pointer-events: none; }
+    .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.94)); z-index: 24; pointer-events: none; }
     .card-overlay h4 { font-size: 14px; margin-bottom: 4px; }
     .card-overlay span { font-size: 11px; color: #d1d5db; }
-    .site-footer { background: #121318; border-top: 1px solid var(--border); padding: 24px; margin-top: auto; }
+    .site-footer { background: #121318; border-top: 1px solid var(--border); padding: 24px; margin-top: auto; z-index: 100; position: relative; }
     .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
     .footer-brand { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
     .footer-brand span { font-size: 12px; color: var(--text-muted); }
-    .footer-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .footer-link { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; z-index: 5; position: relative; }
+    .footer-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; z-index: 105; position: relative; }
+    .footer-link { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; z-index: 105; position: relative; pointer-events: auto; }
     .footer-link:hover { color: var(--text-main); border-color: var(--primary); }
     .footer-link.active { background: rgba(124, 92, 255, 0.2); border-color: var(--primary); color: #fff; }
     .footer-copy { font-size: 12px; color: var(--text-muted); }
-    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); display: grid; place-items: center; padding: 20px; z-index: 1000; }
-    .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 92vh; overflow-y: auto; z-index: 1001; }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); display: grid; place-items: center; padding: 20px; z-index: 10000; pointer-events: auto; }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 92vh; overflow-y: auto; z-index: 10001; pointer-events: auto; }
     .admin-modal-card { max-width: 620px; }
     .preview-modal-card { max-width: 440px; text-align: center; }
-    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 1002; }
+    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10002; pointer-events: auto; }
     .auth-modal-card { max-width: 440px; text-align: center; background: #14151a; border: 1px solid var(--border); padding: 36px 28px; }
     .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 22px; text-align: right; }
     .auth-tabs { display: flex; background: #1f222c; border-radius: 999px; padding: 4px; margin-bottom: 22px; }
-    .auth-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 10px; border-radius: 999px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; }
+    .auth-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 10px; border-radius: 999px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; pointer-events: auto; }
     .auth-tab.active { background: #2b2f3d; color: #fff; }
-    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 20px; }
+    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 20px; pointer-events: auto; }
     .btn-google-auth:hover { border-color: var(--primary); background: rgba(124, 92, 255, 0.1); }
     .auth-divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 13px; margin: 18px 0; }
     .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
     .auth-divider::before { margin-left: 10px; }
     .auth-divider::after { margin-right: 10px; }
-    .auth-input { width: 100%; background: #0e0f13; border: 1px solid var(--border); border-radius: 999px; padding: 14px 18px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none; text-align: right; }
+    .auth-input { width: 100%; background: #0e0f13; border: 1px solid var(--border); border-radius: 999px; padding: 14px 18px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none; text-align: right; pointer-events: auto; }
     .auth-input:focus { border-color: var(--primary); }
-    .btn-continue-auth { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 18px; transition: 0.2s; }
+    .btn-continue-auth { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 18px; transition: 0.2s; pointer-events: auto; }
     .btn-continue-auth:hover { background: var(--primary-hover); }
     .auth-footer-links { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-    .auth-footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .auth-footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; pointer-events: auto; }
     .auth-terms { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
-    .auth-terms a { color: var(--text-main); text-decoration: underline; }
+    .auth-terms a { color: var(--text-main); text-decoration: underline; pointer-events: auto; }
     .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 20px; }
     .plan-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
     .plan-box.featured { border: 2px solid var(--primary); }
@@ -143,7 +148,7 @@
     .plan-price span { font-size: 14px; color: var(--text-muted); }
     .plan-points { color: #34d399; font-weight: 700; font-size: 14px; }
     .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #d1d5db; flex: 1; }
-    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; pointer-events: auto; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .admin-list-box { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
     .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-elevated); padding: 10px 14px; border-radius: 10px; margin-top: 8px; gap: 10px; }
@@ -807,7 +812,6 @@
       });
     });
 
-    // تفريغ الخلفية البيضاء من صورة منتج المستخدم تلقائياً عند الرفع ليصبح شفافاً 100%
     function createTransparentProductImage(rawImg) {
       return new Promise((resolve) => {
         const offCanvas = document.createElement('canvas');
@@ -819,13 +823,11 @@
         const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
         const data = imgData.data;
 
-        // فحص لون الزاوية لمعرفة ما إذا كانت الصورة بخلفية بيضاء أو فاتحة صلبة
         const cornerR = data[0];
         const cornerG = data[1];
         const cornerB = data[2];
         const cornerA = data[3];
 
-        // إذا كانت الزاوية غير شفافة وتقترب من الأبيض أو الرمادي الفاتح، نقوم بتفريغها
         if (cornerA > 200 && cornerR > 220 && cornerG > 220 && cornerB > 220) {
           for (let i = 0; i < data.length; i += 4) {
             const r = data[i];
@@ -833,9 +835,9 @@
             const b = data[i + 2];
             const dist = Math.hypot(r - cornerR, g - cornerG, b - cornerB);
             if (dist < 32) {
-              data[i + 3] = 0; // جعل البكسل شفافاً بالكامل
+              data[i + 3] = 0;
             } else if (dist < 48) {
-              data[i + 3] = Math.round(((dist - 32) / 16) * 255); // تنعيم الحواف
+              data[i + 3] = Math.round(((dist - 32) / 16) * 255);
             }
           }
           offCtx.putImageData(imgData, 0, 0);
@@ -908,12 +910,348 @@
       return currentY;
     }
 
-    // استبدال احترافي: تمويه القالب ليصبح خلفية استوديو ناعمة وإبراز منتج الزائر المفرغ تماماً بدون أي مربع أبيض
     function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
       if (pImg && pImg.complete && pImg.naturalWidth > 0) {
-        // 1. تحويل القالب الأصلي إلى خلفية ضبابية ناعمة (Depth of Field) لإخفاء معالم المنتج القديم وإبراز ألوان المشهد
         ctx.save();
         ctx.filter = 'blur(26px) brightness(0.88)';
-        ctx
+        ctx.drawImage(bgImg, -30, -30, canvasW + 60, canvasH + 60);
+        ctx.restore();
+
+        const rx = canvasW * 0.14;
+        const ry = canvasH * 0.18;
+        const rw = canvasW * 0.72;
+        const rh = canvasH * 0.58;
+
+        const ratio = Math.min(rw / pImg.naturalWidth, rh / pImg.naturalHeight);
+        const scaleOffset = 1 + Math.sin(progress * Math.PI) * 0.035;
+        const drawW = pImg.naturalWidth * ratio * scaleOffset;
+        const drawH = pImg.naturalHeight * ratio * scaleOffset;
+        const drawX = rx + (rw - drawW) / 2;
+        const drawY = ry + (rh - drawH) / 2;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+        ctx.shadowBlur = 22;
+        ctx.shadowOffsetY = 14;
+        ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
+        ctx.restore();
+      } else {
+        ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
+      }
+    }
+
+    async function generateAd() {
+      if (!user) {
+        document.getElementById('authModal').classList.remove('hidden');
+        return;
+      }
+      const cost = currentMode === 'video' ? 250 : 100;
+      if (user.credits < cost) {
+        document.getElementById('pricingModal').classList.remove('hidden');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳ جاري تفريغ المنتج وتوليد الإعلان...</span>';
+
+      const canvas = document.getElementById('renderCanvas');
+      const ctx = canvas.getContext('2d');
+      const adText = promptInput.value.trim() || selectedTemplate.prompt;
+      const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
+
+      const useUploadedVid = Boolean(uploadedProductVideo);
+      const useTemplateVid = !useUploadedVid && !uploadedProductImg && selectedTemplate.mediaType === 'video';
+
+      const templateBgImg = new Image();
+      templateBgImg.crossOrigin = 'anonymous';
+      templateBgImg.src = selectedTemplate.cover;
+      await new Promise(r => { templateBgImg.onload = r; templateBgImg.onerror = r; });
+
+      let activeVideoEl = null;
+      if (useUploadedVid) {
+        activeVideoEl = uploadedVideoSource;
+        activeVideoEl.currentTime = 0;
+        await ensureVideoReady(activeVideoEl);
+        await activeVideoEl.play().catch(() => {});
+      } else if (useTemplateVid) {
+        activeVideoEl = templateVideoSource;
+        activeVideoEl.src = selectedTemplate.cover;
+        activeVideoEl.currentTime = 0;
+        await ensureVideoReady(activeVideoEl);
+        await activeVideoEl.play().catch(() => {});
+      }
+
+      function renderScene(progress, pulseFactor) {
+        ctx.fillStyle = '#0b0c10';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (uploadedProductImg) {
+          autoReplaceProduct(ctx, templateBgImg, uploadedProductImg, canvas.width, canvas.height, progress);
+        } else if (activeVideoEl && activeVideoEl.readyState >= 2) {
+          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
+        } else {
+          ctx.drawImage(templateBgImg, 0, 0, canvas.width, canvas.height);
+        }
+
+        const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
+        topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
+        topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = topGrad;
+        ctx.fillRect(0, 0, canvas.width, 180);
+
+        const bottomGrad = ctx.createLinearGradient(0, canvas.height - 320, 0, canvas.height);
+        bottomGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        bottomGrad.addColorStop(0.4, 'rgba(10, 11, 15, 0.75)');
+        bottomGrad.addColorStop(1, 'rgba(10, 11, 15, 0.96)');
+        ctx.fillStyle = bottomGrad;
+        ctx.fillRect(0, canvas.height - 320, canvas.width, 320);
+
+        ctx.save();
+        ctx.font = 'bold 20px Cairo, sans-serif';
+        const badgeText = selectedTemplate.badge;
+        const textMetrics = ctx.measureText(badgeText);
+        const badgeWidth = textMetrics.width + 36;
+        const badgeHeight = 42;
+        const badgeX = canvas.width - badgeWidth - 40;
+        const badgeY = 50;
+
+        ctx.fillStyle = '#ff5b5b';
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 10);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'right';
+        ctx.fillText(badgeText, badgeX + badgeWidth - 18, badgeY + 28);
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px Cairo, sans-serif';
+        ctx.textAlign = 'right';
+        wrapText(ctx, adText, canvas.width - 50, canvas.height - 210, canvas.width - 100, 42);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height - 85);
+        ctx.scale(pulseFactor, pulseFactor);
+        ctx.fillStyle = '#7c5cff';
+        ctx.beginPath();
+        ctx.roundRect(-260, -32, 520, 64, 16);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 26px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(ctaText, 0, 8);
+        ctx.restore();
+      }
+
+      if (currentMode === 'image') {
+        renderScene(0.5, 1);
+        canvas.toBlob((blob) => {
+          if (activeVideoEl) activeVideoEl.pause();
+          user.credits -= cost;
+          saveUser();
+          if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+          lastGeneratedBlobUrl = URL.createObjectURL(blob);
+          lastGeneratedExt = 'png';
+
+          document.getElementById('resultTitle').textContent = '🖼️ البوستر الإعلاني الجاهز';
+          outputVideo.classList.add('hidden');
+          outputImage.classList.remove('hidden');
+          outputImage.src = lastGeneratedBlobUrl;
+          resultSection.classList.remove('hidden');
+
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
+          resultSection.scrollIntoView({ behavior: 'smooth' });
+        }, 'image/png');
+        return;
+      }
+
+      const selectedOpt = document.getElementById('aspectSelect').selectedOptions[0];
+      const defaultDurSec = Number(selectedOpt?.dataset.dur || 6);
+      const targetDurationSec = (activeVideoEl && isFinite(activeVideoEl.duration) && activeVideoEl.duration > 1)
+        ? Math.min(activeVideoEl.duration, 15)
+        : defaultDurSec;
+
+      let audioCtx = null;
+      let osc = null;
+      let combinedStream = canvas.captureStream(30);
+
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const dest = audioCtx.createMediaStreamDestination();
+        osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + targetDurationSec / 2);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + targetDurationSec);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start();
+        combinedStream = new MediaStream([...combinedStream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      } catch (err) {}
+
+      const recorder = new MediaRecorder(combinedStream);
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        if (osc) osc.stop();
+        if (audioCtx) audioCtx.close();
+        if (activeVideoEl) activeVideoEl.pause();
+        user.credits -= cost;
+        saveUser();
+
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+        lastGeneratedBlobUrl = URL.createObjectURL(blob);
+        lastGeneratedExt = 'webm';
+
+        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز (' + Math.round(targetDurationSec) + ' ثوانٍ)';
+        outputImage.classList.add('hidden');
+        outputVideo.classList.remove('hidden');
+        outputVideo.src = lastGeneratedBlobUrl;
+        resultSection.classList.remove('hidden');
+        outputVideo.play();
+
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      recorder.start();
+      const startTime = performance.now();
+      const durationMs = targetDurationSec * 1000;
+
+      function drawLoop(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / durationMs);
+        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.04;
+        renderScene(progress, pulse);
+
+        if (elapsed < durationMs) {
+          requestAnimationFrame(drawLoop);
+        } else {
+          recorder.stop();
+        }
+      }
+      requestAnimationFrame(drawLoop);
+    }
+
+    generateBtn.addEventListener('click', generateAd);
+    document.getElementById('regenerateBtn').addEventListener('click', generateAd);
+
+    document.getElementById('downloadVideoBtn').addEventListener('click', () => {
+      if (!lastGeneratedBlobUrl) return;
+      const a = document.createElement('a');
+      a.href = lastGeneratedBlobUrl;
+      a.download = 'AdSpark-Ad-' + Date.now() + '.' + lastGeneratedExt;
+      a.click();
+    });
+
+    document.getElementById('shareVideoBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('تم نسخ رابط مشاركة الإعلان إلى الحافظة!');
+    });
+
+    creditPill.addEventListener('click', () => {
+      document.getElementById('pricingModal').classList.remove('hidden');
+    });
+
+    document.querySelectorAll('.select-plan-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!user) {
+          document.getElementById('authModal').classList.add('hidden');
+          return;
+        }
+        const addedPoints = Number(btn.dataset.points);
+        user.credits += addedPoints;
+        user.plan = btn.dataset.plan;
+        saveUser();
+        document.getElementById('pricingModal').classList.add('hidden');
+        alert('تم تفعيل باقة ' + btn.dataset.plan + ' وإضافة ' + addedPoints + ' نقطة بنجاح!');
+      });
+    });
+
+    openAdminBtn.addEventListener('click', () => {
+      if (!isOwnerLoggedIn()) {
+        alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
+        return;
+      }
+      document.getElementById('adminTemplateForm').reset();
+      renderAdminTemplatesList();
+      document.getElementById('adminModal').classList.remove('hidden');
+    });
+
+    document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!isOwnerLoggedIn()) return;
+
+      const title = document.getElementById('tplTitle').value.trim();
+      const category = document.getElementById('tplCategory').value;
+      const badge = document.getElementById('tplBadge').value.trim();
+      const promptText = document.getElementById('tplPrompt').value.trim();
+      const file = document.getElementById('tplMediaFile').files.length > 0 ? document.getElementById('tplMediaFile').files[0] : null;
+
+      if (!file) {
+        alert('يرجى اختيار ملف صورة أو فيديو للقالب.');
+        return;
+      }
+
+      const saveFinalTemplate = (mediaUrl, mediaType) => {
+        const newTpl = {
+          id: Date.now(),
+          title,
+          category,
+          badge,
+          prompt: promptText,
+          mediaType,
+          cover: mediaUrl
+        };
+        templates.unshift(newTpl);
+        selectTemplate(newTpl);
+        saveTemplatesToStorage();
+        renderTemplates(currentFilterCat);
+        renderAdminTemplatesList();
+        document.getElementById('adminTemplateForm').reset();
+        document.getElementById('adminModal').classList.add('hidden');
+        alert('تم نشر القالب الجديد بنجاح!');
+      };
+
+      if (file.type.startsWith('video/')) {
+        if (file.size < 4 * 1024 * 1024) {
+          const reader = new FileReader();
+          reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
+          reader.readAsDataURL(file);
+        } else {
+          saveFinalTemplate(URL.createObjectURL(file), 'video');
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'image');
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.querySelectorAll('.close-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.close;
+        if (targetId === 'templatePreviewModal') {
+          document.getElementById('previewTplVideo').pause();
+        }
+        document.getElementById(targetId).classList.add('hidden');
+      });
+    });
+
+    selectTemplate(selectedTemplate);
+    updateAuthUI();
+  </script>
+</body>
+</html>
