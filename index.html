@@ -215,9 +215,9 @@
               </label>
 
               <select id="aspectSelect" class="studio-select">
-                <option value="9:16">Seedance 2.0 • 9:16 • 6s • 1080P</option>
-                <option value="16:9">Seedance 2.0 • 16:9 • 6s • 1080P</option>
-                <option value="1:1">Seedance 2.0 • 1:1 • 6s • 1080P</option>
+                <option value="9:16" data-dur="6">Seedance 2.0 • 9:16 • 6s • 1080P</option>
+                <option value="16:9" data-dur="6">Seedance 2.0 • 16:9 • 6s • 1080P</option>
+                <option value="1:1" data-dur="8">Seedance 2.0 • 1:1 • 8s • 1080P</option>
               </select>
 
               <input type="text" id="ctaInput" class="cta-text-input" value="اطلبه الآن • خصم لفترة محدودة" placeholder="نص زر الشراء" />
@@ -455,7 +455,7 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal (Add / Edit / Delete Templates) -->
+  <!-- Admin Panel Modal -->
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
@@ -492,7 +492,6 @@
         </div>
       </form>
 
-      <!-- قائمة إدارة القوالب الحالية للمشرف -->
       <div class="admin-list-box">
         <h4 style="font-size: 15px; margin-bottom: 6px;">📋 القوالب المنشورة حالياً (تعديل / حذف):</h4>
         <div id="adminTemplatesList"></div>
@@ -501,8 +500,8 @@
   </div>
 
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
-  <video id="uploadedVideoSource" class="hidden" muted playsinline crossorigin="anonymous"></video>
-  <video id="templateVideoSource" class="hidden" muted playsinline crossorigin="anonymous"></video>
+  <video id="uploadedVideoSource" class="hidden" muted loop playsinline crossorigin="anonymous"></video>
+  <video id="templateVideoSource" class="hidden" muted loop playsinline crossorigin="anonymous"></video>
 
   <script>
     const ADMIN_EMAILS = [
@@ -672,7 +671,6 @@
       }
     });
 
-    // اختيار القالب وتحميل الفيديو الخاص به في محرك التصميم
     function selectTemplate(tpl) {
       selectedTemplate = tpl;
       activeTemplateTitle.textContent = tpl.title;
@@ -686,7 +684,6 @@
       renderTemplates(currentFilterCat);
     }
 
-    // معاينة الفيديو الكامل للقالب في نافذة منبثقة بالصوت والصورة
     function openTemplatePreview(tpl) {
       document.getElementById('previewTplTitle').textContent = tpl.title;
       const previewVid = document.getElementById('previewTplVideo');
@@ -703,7 +700,6 @@
       };
     }
 
-    // حذف قالب (للمشرف فقط)
     function deleteTemplateById(id) {
       if (!isOwnerLoggedIn()) return;
       if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً؟')) return;
@@ -716,7 +712,6 @@
       renderAdminTemplatesList();
     }
 
-    // فتح وضع التعديل لقالب موجود (للمشرف فقط)
     function startEditTemplate(id) {
       if (!isOwnerLoggedIn()) return;
       const tpl = templates.find(t => t.id === id);
@@ -820,7 +815,6 @@
           card.appendChild(img);
         }
 
-        // أزرار التحكم للمشرف (تعديل وحذف) مباشرة على البطاقة
         if (adminActive) {
           const adminControls = document.createElement('div');
           adminControls.className = 'card-admin-controls';
@@ -892,6 +886,24 @@
       }
     });
 
+    // انتظار جاهزية الفيديو قبل البدء بالتسجيل لمنع تجمده أو اقتصاره على إطار ثابت
+    function ensureVideoReady(videoEl) {
+      return new Promise((resolve) => {
+        if (videoEl.readyState >= 2) {
+          resolve();
+        } else {
+          const onReady = () => {
+            videoEl.removeEventListener('loadeddata', onReady);
+            videoEl.removeEventListener('error', onReady);
+            resolve();
+          };
+          videoEl.addEventListener('loadeddata', onReady);
+          videoEl.addEventListener('error', onReady);
+          setTimeout(onReady, 2000);
+        }
+      });
+    }
+
     async function generateAd() {
       if (!user) {
         document.getElementById('authModal').classList.remove('hidden');
@@ -923,29 +935,36 @@
         activeImg = bgImg;
       }
 
+      let activeVideoEl = null;
       if (useUploadedVid) {
-        uploadedVideoSource.currentTime = 0;
-        await uploadedVideoSource.play().catch(() => {});
+        activeVideoEl = uploadedVideoSource;
+        activeVideoEl.currentTime = 0;
+        await ensureVideoReady(activeVideoEl);
+        await activeVideoEl.play().catch(() => {});
       } else if (useTemplateVid) {
-        templateVideoSource.src = selectedTemplate.cover;
-        templateVideoSource.currentTime = 0;
-        await templateVideoSource.play().catch(() => {});
+        activeVideoEl = templateVideoSource;
+        activeVideoEl.src = selectedTemplate.cover;
+        activeVideoEl.currentTime = 0;
+        await ensureVideoReady(activeVideoEl);
+        await activeVideoEl.play().catch(() => {});
       }
 
-      function renderScene(scaleFactor, pulseFactor) {
+      function renderScene(progress, pulseFactor) {
         ctx.fillStyle = '#0e0f13';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (useUploadedVid && uploadedVideoSource.readyState >= 2) {
-          ctx.drawImage(uploadedVideoSource, 0, 0, canvas.width, canvas.height);
-        } else if (useTemplateVid && templateVideoSource.readyState >= 2) {
-          ctx.drawImage(templateVideoSource, 0, 0, canvas.width, canvas.height);
+        if (activeVideoEl && activeVideoEl.readyState >= 2) {
+          ctx.drawImage(activeVideoEl, 0, 0, canvas.width, canvas.height);
         } else if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
+          // حركة سينمائية متعددة (تقريب + تحريك أفقي ناعم) بدلاً من مجرد تكبير ثابت
+          const scaleFactor = 1.05 + Math.sin(progress * Math.PI) * 0.14;
+          const panX = Math.sin(progress * Math.PI * 2) * 28;
+          const panY = Math.cos(progress * Math.PI) * 18;
           const w = canvas.width * scaleFactor;
           const h = canvas.height * scaleFactor;
-          const x = (canvas.width - w) / 2;
-          const y = (canvas.height - h) / 2;
-          ctx.globalAlpha = 0.88;
+          const x = (canvas.width - w) / 2 + panX;
+          const y = (canvas.height - h) / 2 + panY;
+          ctx.globalAlpha = 0.9;
           ctx.drawImage(activeImg, x, y, w, h);
           ctx.globalAlpha = 1;
         }
@@ -956,16 +975,22 @@
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // شارة الأداء
         ctx.fillStyle = '#ff5b5b';
         ctx.fillRect(40, 50, 230, 44);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 22px Cairo, sans-serif';
         ctx.fillText(selectedTemplate.badge, 60, 80);
 
+        // النص الإعلاني المتحرك
+        const textAlpha = Math.min(1, progress * 4);
+        ctx.globalAlpha = textAlpha;
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 34px Cairo, sans-serif';
         ctx.fillText(adText.slice(0, 48), 40, canvas.height - 230);
+        ctx.globalAlpha = 1;
 
+        // زر الدعوة لاتخاذ إجراء (CTA)
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height - 120);
         ctx.scale(pulseFactor, pulseFactor);
@@ -980,10 +1005,9 @@
       }
 
       if (currentMode === 'image') {
-        renderScene(1.04, 1);
+        renderScene(0.5, 1);
         canvas.toBlob((blob) => {
-          if (useUploadedVid) uploadedVideoSource.pause();
-          if (useTemplateVid) templateVideoSource.pause();
+          if (activeVideoEl) activeVideoEl.pause();
           user.credits -= cost;
           saveUser();
           if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
@@ -1003,6 +1027,13 @@
         return;
       }
 
+      // حساب مدة الفيديو الفعلية (إما مدة الفيديو المرفوع/القالب أو المدة المختارة من القائمة 6s/8s)
+      const selectedOpt = document.getElementById('aspectSelect').selectedOptions[0];
+      const defaultDurSec = Number(selectedOpt?.dataset.dur || 6);
+      const targetDurationSec = (activeVideoEl && isFinite(activeVideoEl.duration) && activeVideoEl.duration > 1)
+        ? Math.min(activeVideoEl.duration, 15)
+        : defaultDurSec;
+
       let audioCtx = null;
       let osc = null;
       let combinedStream = canvas.captureStream(30);
@@ -1014,8 +1045,8 @@
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2.5);
-        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 5);
+        osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + targetDurationSec / 2);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + targetDurationSec);
         gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
         osc.connect(gain);
         gain.connect(dest);
@@ -1030,8 +1061,7 @@
       recorder.onstop = () => {
         if (osc) osc.stop();
         if (audioCtx) audioCtx.close();
-        if (useUploadedVid) uploadedVideoSource.pause();
-        if (useTemplateVid) templateVideoSource.pause();
+        if (activeVideoEl) activeVideoEl.pause();
         user.credits -= cost;
         saveUser();
 
@@ -1040,7 +1070,7 @@
         lastGeneratedBlobUrl = URL.createObjectURL(blob);
         lastGeneratedExt = 'webm';
 
-        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز';
+        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز (' + Math.round(targetDurationSec) + ' ثوانٍ)';
         outputImage.classList.add('hidden');
         outputVideo.classList.remove('hidden');
         outputVideo.src = lastGeneratedBlobUrl;
@@ -1053,21 +1083,22 @@
       };
 
       recorder.start();
-      let frame = 0;
-      const totalFrames = 150;
+      const startTime = performance.now();
+      const durationMs = targetDurationSec * 1000;
 
-      function drawFrame() {
-        const progress = frame / totalFrames;
-        const pulse = 1 + Math.sin(frame * 0.2) * 0.04;
-        renderScene(1 + progress * 0.16, pulse);
-        frame++;
-        if (frame <= totalFrames) {
-          requestAnimationFrame(drawFrame);
+      function drawLoop(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / durationMs);
+        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.05;
+        renderScene(progress, pulse);
+
+        if (elapsed < durationMs) {
+          requestAnimationFrame(drawLoop);
         } else {
           recorder.stop();
         }
       }
-      drawFrame();
+      requestAnimationFrame(drawLoop);
     }
 
     generateBtn.addEventListener('click', generateAd);
@@ -1115,7 +1146,6 @@
       document.getElementById('adminModal').classList.remove('hidden');
     });
 
-    // إضافة أو تعديل قالب من لوحة المشرف
     document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
       e.preventDefault();
       if (!isOwnerLoggedIn()) return;
@@ -1169,7 +1199,6 @@
 
       if (file) {
         if (file.type.startsWith('video/')) {
-          // قراءة الفيديو كـ DataURL ليبقى محفوظاً، مع استخدام ObjectURL إذا كان كبيراً جداً
           if (file.size < 4 * 1024 * 1024) {
             const reader = new FileReader();
             reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
