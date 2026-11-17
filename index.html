@@ -240,7 +240,7 @@
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">تم تفريغ المنتج ودمجه تلقائياً بدون أي خلفية</span>
+          <span class="status-tag">خلفية عالية الدقة والوضوح + دمج المنتج بنجاح</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
@@ -289,12 +289,12 @@
         <div class="guide-card">
           <div class="step-num">2</div>
           <h3>ارفع صورة منتجك</h3>
-          <p>حتى لو كانت صورة منتجك بخلفية بيضاء، يقوم النظام تلقائياً بإزالة خلفيتها ليصبح المنتج شفافاً تماماً.</p>
+          <p>يقوم النظام تلقائياً بإزالة الخلفية البيضاء ليصبح المنتج شفافاً تماماً.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">3</div>
-          <h3>الاستبدال والدمج الاحترافي</h3>
-          <p>يتم تمويه المنتج القديم في القالب وإبراز منتجك المفرغ في المقدمة دون أي مربعات أو حواف بيضاء.</p>
+          <h3>الوضوح التام للخلفية</h3>
+          <p>تظهر خلفية القالب الأصلي بدقتها ووضوحها الكامل دون أي تشويش، مع دمج منتجك في المكان المناسب.</p>
         </div>
         <div class="guide-card">
           <div class="step-num">4</div>
@@ -554,7 +554,7 @@
       { id: 3, title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' },
       { id: 4, title: 'إعلان عطر كلاسيكي بإضاءة ذهبية', category: 'beauty', badge: '5000+ Likes', prompt: 'عبير يدوم طويلاً ويترك بصمتك الخاصة في كل مكان تذهب إليه', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80' },
       { id: 5, title: 'إعلان إكسسوارات ومجوهرات فاخرة', category: 'fashion', badge: '1000+ Sales', prompt: 'لمسة من الفخامة تكتمل بها أناقتك • إصدار محدود متوفر الآن', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80' },
-      { id: 6, title: 'منتج أسلوب حياة صحي وقهوة مختصة', category: 'lifestyle', badge: '350k+ Views', prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80' }
+      { id: 6, title: 'منتج أسلوب الحياة صحي وقهوة مختصة', category: 'lifestyle', badge: '350k+ Views', prompt: 'ابدأ يومك بطاقة وتركيز عالٍ مع نكهة محمصة بعناية فائقة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80' }
     ];
 
     let templates = safeGetStorage('adspark_templates', null);
@@ -910,15 +910,15 @@
       return currentY;
     }
 
+    // دالة استبدال دقيقة تحافظ على خلفية القالب واضحة 100% وتدمج المنتج بنجاح
     function autoReplaceProduct(ctx, bgImg, pImg, canvasW, canvasH, progress) {
       if (!bgImg || !bgImg.complete || bgImg.naturalWidth === 0) return;
 
-      if (pImg && pImg.complete && pImg.naturalWidth > 0) {
-        ctx.save();
-        ctx.filter = 'blur(26px) brightness(0.88)';
-        ctx.drawImage(bgImg, -30, -30, canvasW + 60, canvasH + 60);
-        ctx.restore();
+      // 1. رسم خلفية القالب الأصلي بوضوح ودقة عالية 100% بدون أي فلتر تشويش
+      ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
 
+      if (pImg && pImg.complete && pImg.naturalWidth > 0) {
+        // إحداثيات مكان عرض المنتج في القالب
         const rx = canvasW * 0.14;
         const ry = canvasH * 0.18;
         const rw = canvasW * 0.72;
@@ -931,14 +931,13 @@
         const drawX = rx + (rw - drawW) / 2;
         const drawY = ry + (rh - drawH) / 2;
 
+        // 2. دمج منتج الزائر المفرغ فوق القالب مع ظل خفيف وناعم جداً للتجسيم
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-        ctx.shadowBlur = 22;
-        ctx.shadowOffsetY = 14;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 10;
         ctx.drawImage(pImg, drawX, drawY, drawW, drawH);
         ctx.restore();
-      } else {
-        ctx.drawImage(bgImg, 0, 0, canvasW, canvasH);
       }
     }
 
@@ -954,7 +953,7 @@
       }
 
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري تفريغ المنتج وتوليد الإعلان...</span>';
+      generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان بخلفية واضحة...</span>';
 
       const canvas = document.getElementById('renderCanvas');
       const ctx = canvas.getContext('2d');
@@ -1127,131 +1126,4 @@
       };
 
       recorder.start();
-      const startTime = performance.now();
-      const durationMs = targetDurationSec * 1000;
-
-      function drawLoop(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(1, elapsed / durationMs);
-        const pulse = 1 + Math.sin(elapsed * 0.008) * 0.04;
-        renderScene(progress, pulse);
-
-        if (elapsed < durationMs) {
-          requestAnimationFrame(drawLoop);
-        } else {
-          recorder.stop();
-        }
-      }
-      requestAnimationFrame(drawLoop);
-    }
-
-    generateBtn.addEventListener('click', generateAd);
-    document.getElementById('regenerateBtn').addEventListener('click', generateAd);
-
-    document.getElementById('downloadVideoBtn').addEventListener('click', () => {
-      if (!lastGeneratedBlobUrl) return;
-      const a = document.createElement('a');
-      a.href = lastGeneratedBlobUrl;
-      a.download = 'AdSpark-Ad-' + Date.now() + '.' + lastGeneratedExt;
-      a.click();
-    });
-
-    document.getElementById('shareVideoBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(window.location.href);
-      alert('تم نسخ رابط مشاركة الإعلان إلى الحافظة!');
-    });
-
-    creditPill.addEventListener('click', () => {
-      document.getElementById('pricingModal').classList.remove('hidden');
-    });
-
-    document.querySelectorAll('.select-plan-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!user) {
-          document.getElementById('authModal').classList.add('hidden');
-          return;
-        }
-        const addedPoints = Number(btn.dataset.points);
-        user.credits += addedPoints;
-        user.plan = btn.dataset.plan;
-        saveUser();
-        document.getElementById('pricingModal').classList.add('hidden');
-        alert('تم تفعيل باقة ' + btn.dataset.plan + ' وإضافة ' + addedPoints + ' نقطة بنجاح!');
-      });
-    });
-
-    openAdminBtn.addEventListener('click', () => {
-      if (!isOwnerLoggedIn()) {
-        alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
-        return;
-      }
-      document.getElementById('adminTemplateForm').reset();
-      renderAdminTemplatesList();
-      document.getElementById('adminModal').classList.remove('hidden');
-    });
-
-    document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!isOwnerLoggedIn()) return;
-
-      const title = document.getElementById('tplTitle').value.trim();
-      const category = document.getElementById('tplCategory').value;
-      const badge = document.getElementById('tplBadge').value.trim();
-      const promptText = document.getElementById('tplPrompt').value.trim();
-      const file = document.getElementById('tplMediaFile').files.length > 0 ? document.getElementById('tplMediaFile').files[0] : null;
-
-      if (!file) {
-        alert('يرجى اختيار ملف صورة أو فيديو للقالب.');
-        return;
-      }
-
-      const saveFinalTemplate = (mediaUrl, mediaType) => {
-        const newTpl = {
-          id: Date.now(),
-          title,
-          category,
-          badge,
-          prompt: promptText,
-          mediaType,
-          cover: mediaUrl
-        };
-        templates.unshift(newTpl);
-        selectTemplate(newTpl);
-        saveTemplatesToStorage();
-        renderTemplates(currentFilterCat);
-        renderAdminTemplatesList();
-        document.getElementById('adminTemplateForm').reset();
-        document.getElementById('adminModal').classList.add('hidden');
-        alert('تم نشر القالب الجديد بنجاح!');
-      };
-
-      if (file.type.startsWith('video/')) {
-        if (file.size < 4 * 1024 * 1024) {
-          const reader = new FileReader();
-          reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'video');
-          reader.readAsDataURL(file);
-        } else {
-          saveFinalTemplate(URL.createObjectURL(file), 'video');
-        }
-      } else {
-        const reader = new FileReader();
-        reader.onload = (ev) => saveFinalTemplate(ev.target.result, 'image');
-        reader.readAsDataURL(file);
-      }
-    });
-
-    document.querySelectorAll('.close-modal').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.dataset.close;
-        if (targetId === 'templatePreviewModal') {
-          document.getElementById('previewTplVideo').pause();
-        }
-        document.getElementById(targetId).classList.add('hidden');
-      });
-    });
-
-    selectTemplate(selectedTemplate);
-    updateAuthUI();
-  </script>
-</body>
-</html>
+      const startTime = performance.now
