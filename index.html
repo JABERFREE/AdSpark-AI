@@ -34,6 +34,7 @@
     .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; position: relative; pointer-events: auto; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border); }
     .btn-secondary:hover { border-color: var(--primary); }
     .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
@@ -58,15 +59,21 @@
     
     .studio-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .control-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
-    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; pointer-events: auto; }
+    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; pointer-events: auto; transition: 0.2s; }
+    .upload-trigger.has-file { border-style: solid; border-color: #34d399; background: rgba(16, 185, 129, 0.12); color: #34d399; }
     .studio-select { width: auto; padding: 9px 12px; pointer-events: auto; }
     .cta-text-input { max-width: 240px; padding: 9px 12px; pointer-events: auto; }
     .generate-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; pointer-events: auto; }
     .cost-hint { font-size: 11px; color: var(--text-muted); }
+
+    /* معاينة مصغرة لصورة المنتج المفرغة قبل التوليد */
+    .product-preview-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid #34d399; padding: 4px 10px; border-radius: 10px; font-size: 12px; }
+    .product-preview-chip img { width: 32px; height: 32px; object-fit: contain; border-radius: 6px; background: repeating-conic-gradient(#2b2f3d 0% 25%, #1f222c 0% 50%) 50% / 10px 10px; }
+    .remove-prod-btn { background: none; border: none; color: #ff5b5b; cursor: pointer; font-weight: bold; font-size: 14px; }
     
     .result-section { background: var(--bg-card); border: 1px solid var(--primary); border-radius: 18px; padding: 20px; margin-bottom: 32px; }
-    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .status-tag { background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 4px 12px; border-radius: 999px; font-size: 12px; }
     .result-body { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
     .video-frame video, .video-frame img { width: 270px; max-width: 100%; border-radius: 14px; border: 1px solid var(--border); background: #000; }
@@ -130,7 +137,7 @@
         <span>🛠️</span> لوحة المشرف (إضافة / حذف قوالب)
       </button>
 
-      <div id="creditPill" class="credit-pill hidden" title="اضغط لشحن الرصيد">
+      <div id="creditPill" class="credit-pill hidden" title="رصيدك الحالي">
         <span>💎</span>
         <strong id="creditBalance">1000</strong>
         <span>نقطة</span>
@@ -170,16 +177,22 @@
 
           <div class="studio-controls">
             <div class="control-group">
-              <label class="upload-trigger" for="productImageInput">
+              <label id="uploadLabelBox" class="upload-trigger" for="productImageInput">
                 <span>➕</span>
                 <span id="uploadFileName">رفع صورة منتجك (تفريغ تلقائي للخلفية)</span>
-                <input type="file" id="productImageInput" accept="image/*,video/*" hidden />
+                <input type="file" id="productImageInput" accept="image/*" hidden />
               </label>
+
+              <div id="productPreviewChip" class="product-preview-chip hidden">
+                <img id="productThumbImg" src="" alt="المنتج" />
+                <span>جاهز للدمج</span>
+                <button type="button" id="clearProductBtn" class="remove-prod-btn" title="إزالة المنتج">✕</button>
+              </div>
 
               <select id="aspectSelect" class="studio-select">
                 <option value="9:16" data-dur="6">Seedance 2.0 • 9:16 • 6s • 1080P</option>
                 <option value="16:9" data-dur="6">Seedance 2.0 • 16:9 • 6s • 1080P</option>
-                <option value="1:1" data-dur="8">Seedance 2.0 • 1:1 • 8s • 1080P</option>
+                <option value="1:1" data-dur="6">Seedance 2.0 • 1:1 • 6s • 1080P</option>
               </select>
 
               <input type="text" id="ctaInput" class="cta-text-input" value="اطلبه الآن • خصم لفترة محدودة" placeholder="نص زر الشراء" />
@@ -198,11 +211,11 @@
       <section id="resultSection" class="result-section hidden">
         <div class="result-header">
           <h3 id="resultTitle">🎥 الفيديو الإعلاني الجاهز</h3>
-          <span class="status-tag">خلفية عالية الدقة والوضوح + دمج المنتج بنجاح</span>
+          <span class="status-tag">تم استبدال المنتج ودمجه داخل القالب بنجاح</span>
         </div>
         <div class="result-body">
           <div class="video-frame">
-            <video id="outputVideo" controls playsinline></video>
+            <video id="outputVideo" controls playsinline loop></video>
             <img id="outputImage" class="hidden" alt="الإعلان المُولد" />
           </div>
           <div class="result-actions">
@@ -311,7 +324,6 @@
   </div>
 
   <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
-  <video id="uploadedVideoSource" class="hidden" muted loop playsinline crossorigin="anonymous"></video>
   <video id="templateVideoSource" class="hidden" muted loop playsinline crossorigin="anonymous"></video>
 
   <script>
@@ -332,8 +344,11 @@
     }
 
     let currentMode = 'video';
-    let user = safeGetStorage('adspark_user', null);
+    let user = safeGetStorage('adspark_user', { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مجانية' });
     let currentFilterCat = 'all';
+    let processedProductImg = null; // صورة المنتج بعد تفريغ الخلفية
+    let lastGeneratedBlobUrl = null;
+    let lastGeneratedExt = 'webm';
 
     function switchPage(pageName) {
       document.querySelectorAll('.page-view').forEach(page => {
@@ -354,7 +369,6 @@
       { id: 3, title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' }
     ];
 
-    // دمج القوالب الافتراضية مع المحفوظة وتحديث التخزين بشكل موحد ومتزامن
     let templates = safeGetStorage('adspark_templates', null);
     if (!Array.isArray(templates) || templates.length === 0) {
       templates = defaultTemplates;
@@ -373,6 +387,362 @@
     const generateBtn = document.getElementById('generateBtn');
     const costHint = document.getElementById('costHint');
     const templateVideoSource = document.getElementById('templateVideoSource');
+    const productImageInput = document.getElementById('productImageInput');
+    const uploadFileName = document.getElementById('uploadFileName');
+    const uploadLabelBox = document.getElementById('uploadLabelBox');
+    const productPreviewChip = document.getElementById('productPreviewChip');
+    const productThumbImg = document.getElementById('productThumbImg');
+    const clearProductBtn = document.getElementById('clearProductBtn');
+
+    // 1. دالة التفريغ التلقائي لخلفية صورة المنتج وتحويلها إلى Image شفافة جاهزة للدمج
+    function removeBackgroundSmart(imgElement) {
+      const tempCanvas = document.createElement('canvas');
+      const maxDim = 650;
+      let w = imgElement.naturalWidth || imgElement.width;
+      let h = imgElement.naturalHeight || imgElement.height;
+      if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tCtx = tempCanvas.getContext('2d');
+      tCtx.drawImage(imgElement, 0, 0, w, h);
+
+      const imgData = tCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      // أخذ عينة من زوايا الصورة لتحديد لون الخلفية الأساسي
+      const corners = [
+        0,
+        (w - 1) * 4,
+        (h - 1) * w * 4,
+        ((h - 1) * w + (w - 1)) * 4
+      ];
+      let bgR = 0, bgG = 0, bgB = 0;
+      corners.forEach(idx => {
+        bgR += data[idx];
+        bgG += data[idx + 1];
+        bgB += data[idx + 2];
+      });
+      bgR /= 4; bgG /= 4; bgB /= 4;
+
+      const tolerance = 48; // حساسية إزالة الخلفية
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const dist = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
+        if (dist < tolerance) {
+          data[i + 3] = 0; // شفافية كاملة للخلفية
+        } else if (dist < tolerance + 18) {
+          // تنعيم الحواف حول المنتج
+          data[i + 3] = Math.round(((dist - tolerance) / 18) * 255);
+        }
+      }
+      tCtx.putImageData(imgData, 0, 0);
+
+      const cleanImg = new Image();
+      cleanImg.src = tempCanvas.toDataURL('image/png');
+      return cleanImg;
+    }
+
+    // مستمع رفع صورة المنتج من الجهاز
+    productImageInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      uploadFileName.textContent = 'جاري تفريغ خلفية: ' + file.name;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const rawImg = new Image();
+        rawImg.onload = () => {
+          const transparentImg = removeBackgroundSmart(rawImg);
+          transparentImg.onload = () => {
+            processedProductImg = transparentImg;
+            uploadFileName.textContent = 'تم تفريغ المنتج: ' + file.name;
+            uploadLabelBox.classList.add('has-file');
+            productThumbImg.src = transparentImg.src;
+            productPreviewChip.classList.remove('hidden');
+          };
+        };
+        rawImg.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // زر إزالة صورة المنتج المرفوعة
+    clearProductBtn.onclick = () => {
+      processedProductImg = null;
+      productImageInput.value = '';
+      uploadFileName.textContent = 'رفع صورة منتجك (تفريغ تلقائي للخلفية)';
+      uploadLabelBox.classList.remove('has-file');
+      productPreviewChip.classList.add('hidden');
+    };
+
+    // 2. دالة رسم الإطار ودمج صورة المنتج لتحل محل منتج القالب داخل الفيديو
+    function autoReplaceProduct(ctx, w, h, bgSource, productImg, promptText, ctaText, progress) {
+      ctx.clearRect(0, 0, w, h);
+
+      // أ) رسم خلفية القالب (سواء كانت فيديو أو صورة) بملء الشاشة
+      if (bgSource) {
+        const srcW = bgSource.videoWidth || bgSource.naturalWidth || w;
+        const srcH = bgSource.videoHeight || bgSource.naturalHeight || h;
+        const scale = Math.max(w / srcW, h / srcH);
+        const drawW = srcW * scale;
+        const drawH = srcH * scale;
+        const offsetX = (w - drawW) / 2;
+        const offsetY = (h - drawH) / 2;
+        try {
+          ctx.drawImage(bgSource, offsetX, offsetY, drawW, drawH);
+        } catch (err) {
+          // خلفية متدرجة احتياطية في حال تعذر رسم الإطار
+          const grad = ctx.createLinearGradient(0, 0, w, h);
+          grad.addColorStop(0, '#1e1b4b');
+          grad.addColorStop(1, '#090d16');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, h);
+        }
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, '#1e1b4b');
+        grad.addColorStop(1, '#090d16');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // طبقة تظليل خفيفة لدمج الإضاءة وإبراز المنتج والنصوص
+      const overlayGrad = ctx.createLinearGradient(0, h * 0.45, 0, h);
+      overlayGrad.addColorStop(0, 'rgba(0,0,0,0.05)');
+      overlayGrad.addColorStop(1, 'rgba(0,0,0,0.82)');
+      ctx.fillStyle = overlayGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // ب) دمج صورة المنتج المرفوعة في منتصف المشهد بحركة ديناميكية وظل واقعي
+      if (productImg) {
+        const pulseScale = 1 + Math.sin(progress * Math.PI * 2) * 0.04; // حركة تنفس/زوم ناعمة
+        const floatY = Math.sin(progress * Math.PI * 2) * 12;
+
+        const maxProdW = w * 0.64 * pulseScale;
+        const maxProdH = h * 0.48 * pulseScale;
+        const pRatio = Math.min(maxProdW / productImg.width, maxProdH / productImg.height);
+        const pW = productImg.width * pRatio;
+        const pH = productImg.height * pRatio;
+        const pX = (w - pW) / 2;
+        const pY = (h * 0.42) - (pH / 2) + floatY;
+
+        // رسم هالة ضوئية خلف المنتج لدمجه مع مشهد الفيديو
+        ctx.save();
+        const glow = ctx.createRadialGradient(w / 2, pY + pH / 2, 10, w / 2, pY + pH / 2, pW * 0.7);
+        glow.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+        glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, pY - 60, w, pH + 120);
+
+        // ظل واقعي أسفل المنتج
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 18;
+        ctx.drawImage(productImg, pX, pY, pW, pH);
+        ctx.restore();
+      }
+
+      // ج) رسم النص الترويجي وزر الشراء (CTA) أسفل الفيديو
+      if (promptText) {
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 28px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 10;
+
+        const words = promptText.split(' ');
+        let line = '';
+        const lines = [];
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (ctx.measureText(testLine).width > w - 80 && n > 0) {
+            lines.push(line.trim());
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line.trim());
+
+        const startTextY = h - 195 - (lines.slice(0, 2).length * 36);
+        lines.slice(0, 2).forEach((l, idx) => {
+          ctx.fillText(l, w / 2, startTextY + idx * 38);
+        });
+        ctx.restore();
+      }
+
+      if (ctaText) {
+        ctx.save();
+        const btnW = Math.min(w - 90, 440);
+        const btnH = 62;
+        const btnX = (w - btnW) / 2;
+        const btnY = h - 125;
+
+        ctx.fillStyle = '#7c5cff';
+        ctx.beginPath();
+        ctx.roundRect(btnX, btnY, btnW, btnH, 31);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ctaText, w / 2, btnY + btnH / 2);
+        ctx.restore();
+      }
+    }
+
+    // تحميل صورة القالب بأمان لتجنب قفل CORS
+    function loadSafeImage(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
+
+    // 3. تشغيل عملية التوليد الفعلية عند الضغط على زر "توليد الإعلان تلقائياً"
+    generateBtn.onclick = async () => {
+      const cost = currentMode === 'video' ? 250 : 100;
+      if (user && user.credits < cost) {
+        alert('رصيد النقاط غير كافٍ. يرجى شحن رصيدك.');
+        return;
+      }
+
+      if (!processedProductImg) {
+        const proceedWithoutProd = confirm('لم تقم برفع صورة منتجك بعد! هل تريد المتابعة بالقالب فقط أم تفضل رفع صورة المنتج أولاً؟\n(اضغط "إلغاء" لرفع صورة منتجك)');
+        if (!proceedWithoutProd) return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳ جاري دمج المنتج وتوليد الإعلان...</span>';
+
+      const canvas = document.getElementById('renderCanvas');
+      const aspect = document.getElementById('aspectSelect').value;
+      if (aspect === '16:9') { canvas.width = 1280; canvas.height = 720; }
+      else if (aspect === '1:1') { canvas.width = 900; canvas.height = 900; }
+      else { canvas.width = 720; canvas.height = 1280; }
+
+      const ctx = canvas.getContext('2d');
+      const promptText = promptInput.value.trim();
+      const ctaText = document.getElementById('ctaInput').value.trim();
+
+      let bgSource = null;
+      if (selectedTemplate.mediaType === 'video') {
+        templateVideoSource.crossOrigin = 'anonymous';
+        templateVideoSource.src = selectedTemplate.cover;
+        await new Promise((resolve) => {
+          templateVideoSource.onloadeddata = () => resolve();
+          templateVideoSource.onerror = () => resolve();
+          setTimeout(resolve, 3500);
+        });
+        try {
+          await templateVideoSource.play();
+          bgSource = templateVideoSource;
+        } catch (e) {
+          bgSource = null;
+        }
+      } else {
+        bgSource = await loadSafeImage(selectedTemplate.cover);
+      }
+
+      const resultSection = document.getElementById('resultSection');
+      const outputVideo = document.getElementById('outputVideo');
+      const outputImage = document.getElementById('outputImage');
+
+      if (currentMode === 'image') {
+        autoReplaceProduct(ctx, canvas.width, canvas.height, bgSource, processedProductImg, promptText, ctaText, 0.25);
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          lastGeneratedBlobUrl = dataUrl;
+          lastGeneratedExt = 'png';
+          outputVideo.classList.add('hidden');
+          outputImage.src = dataUrl;
+          outputImage.classList.remove('hidden');
+          document.getElementById('resultTitle').textContent = '🖼️ البوستر الإعلاني الجاهز';
+          resultSection.classList.remove('hidden');
+          resultSection.scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+          alert('تعذر تصدير الصورة بسبب قيود الحماية من رابط الخلفية الخارجي. جرب قالباً آخر.');
+        }
+        if (user) { user.credits -= cost; saveUser(); }
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
+        return;
+      }
+
+      // توليد الفيديو (مدة 5 ثوانٍ مع دمج المنتج وحركته)
+      const durationMs = 5000;
+      const stream = canvas.captureStream(30);
+      let mimeType = 'video/webm';
+      if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
+      else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+        lastGeneratedBlobUrl = URL.createObjectURL(blob);
+        lastGeneratedExt = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+        outputImage.classList.add('hidden');
+        outputVideo.src = lastGeneratedBlobUrl;
+        outputVideo.classList.remove('hidden');
+        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز (تم دمج منتجك)';
+        resultSection.classList.remove('hidden');
+        outputVideo.play().catch(() => {});
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+
+        if (user) { user.credits -= cost; saveUser(); }
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
+      };
+
+      recorder.start();
+      const startTime = performance.now();
+
+      function renderLoop(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        autoReplaceProduct(ctx, canvas.width, canvas.height, bgSource, processedProductImg, promptText, ctaText, progress);
+
+        if (elapsed < durationMs) {
+          requestAnimationFrame(renderLoop);
+        } else {
+          recorder.stop();
+          if (bgSource && bgSource.pause) bgSource.pause();
+        }
+      }
+      requestAnimationFrame(renderLoop);
+    };
+
+    // أزرار التحميل وإعادة التوليد والمشاركة
+    document.getElementById('downloadVideoBtn').onclick = () => {
+      if (!lastGeneratedBlobUrl) return;
+      const a = document.createElement('a');
+      a.href = lastGeneratedBlobUrl;
+      a.download = 'AdSpark_Ad_' + Date.now() + '.' + lastGeneratedExt;
+      a.click();
+    };
+
+    document.getElementById('regenerateBtn').onclick = () => generateBtn.click();
+
+    document.getElementById('shareVideoBtn').onclick = () => {
+      navigator.clipboard?.writeText(window.location.href);
+      alert('تم نسخ رابط الاستوديو للمشاركة!');
+    };
 
     const modeBtns = document.querySelectorAll('.mode-btn');
     modeBtns.forEach(btn => {
@@ -575,7 +945,6 @@
         const overlay = document.createElement('div');
         overlay.className = 'card-overlay';
         overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب وتوليده تلقائياً</span>';
-        card.templateData = tpl;
         card.appendChild(overlay);
 
         card.onclick = () => {
