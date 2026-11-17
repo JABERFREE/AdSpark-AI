@@ -44,10 +44,6 @@
     .full-width { width: 100%; }
     .page-view { flex: 1; }
     .container { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
-    .info-page { max-width: 920px; }
-    .info-header { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; margin-bottom: 24px; text-align: center; }
-    .info-header h1 { font-size: 26px; margin-bottom: 8px; }
-    .info-header p { color: var(--text-muted); font-size: 15px; }
     
     .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; }
     .studio-sidebar { display: flex; flex-direction: column; gap: 10px; }
@@ -110,40 +106,12 @@
     .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; pointer-events: auto; }
     .auth-modal-card { max-width: 440px; text-align: center; background: #14151a; border: 1px solid var(--border); padding: 36px 28px; }
     .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 22px; text-align: right; }
-    .auth-tabs { display: flex; background: #1f222c; border-radius: 999px; padding: 4px; margin-bottom: 22px; }
-    .auth-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 10px; border-radius: 999px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; pointer-events: auto; }
-    .auth-tab.active { background: #2b2f3d; color: #fff; }
-    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 20px; pointer-events: auto; }
-    .btn-google-auth:hover { border-color: var(--primary); background: rgba(124, 92, 255, 0.1); }
-    .auth-divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 13px; margin: 18px 0; }
-    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
-    .auth-divider::before { margin-left: 10px; }
-    .auth-divider::after { margin-right: 10px; }
-    .auth-input { width: 100%; background: #0e0f13; border: 1px solid var(--border); border-radius: 999px; padding: 14px 18px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none; text-align: right; pointer-events: auto; }
-    .auth-input:focus { border-color: var(--primary); }
-    .btn-continue-auth { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 18px; transition: 0.2s; pointer-events: auto; }
-    .btn-continue-auth:hover { background: var(--primary-hover); }
-    .auth-footer-links { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-    .auth-footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; pointer-events: auto; }
-    .auth-terms { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
-    .auth-terms a { color: var(--text-main); text-decoration: underline; pointer-events: auto; }
-    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 20px; }
-    .plan-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
-    .plan-box.featured { border: 2px solid var(--primary); }
-    .plan-box.super { border: 2px solid #f59e0b; }
-    .plan-badge { align-self: flex-start; background: #374151; padding: 3px 10px; border-radius: 999px; font-size: 12px; }
-    .plan-badge.popular { background: var(--primary); }
-    .plan-badge.vip { background: #d97706; }
-    .plan-price { font-size: 32px; font-weight: 800; }
-    .plan-price span { font-size: 14px; color: var(--text-muted); }
-    .plan-points { color: #34d399; font-weight: 700; font-size: 14px; }
-    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #d1d5db; flex: 1; }
+    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 20px; pointer-events: auto; }
     .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; pointer-events: auto; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .admin-list-box { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
     .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-elevated); padding: 10px 14px; border-radius: 10px; margin-top: 8px; gap: 10px; }
     .admin-list-item span { font-size: 13px; font-weight: 600; }
-    @media (max-width: 700px) { .studio-box { flex-direction: column; } .studio-sidebar { flex-direction: row; } }
   </style>
 </head>
 <body>
@@ -287,26 +255,6 @@
     </div>
   </div>
 
-  <!-- Pricing Modal -->
-  <div id="pricingModal" class="modal hidden">
-    <div class="modal-card pricing-card-modal">
-      <button type="button" class="close-modal" data-close="pricingModal">✕</button>
-      <div style="text-align: center;">
-        <h2>اشحن رصيدك وتابع صناعة الإعلانات 🚀</h2>
-        <p style="color: var(--text-muted); margin-top: 6px;">اختر الباقة المناسبة لشحن رصيدك:</p>
-      </div>
-      <div class="plans-grid">
-        <div class="plan-box featured">
-          <div class="plan-badge popular">الاحترافية</div>
-          <h3>الخطة الاحترافية</h3>
-          <div class="plan-price">$30<span>/شهرياً</span></div>
-          <div class="plan-points">6,000 نقطة</div>
-          <button type="button" class="btn btn-primary full-width select-plan-btn" data-points="6000" data-plan="الاحترافية ($30)">اشترك الآن</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Auth Modal -->
   <div id="authModal" class="modal hidden">
     <div class="modal-card auth-modal-card">
@@ -315,9 +263,6 @@
       <button type="button" id="googleAuthBtn" class="btn-google-auth">
         <span>Continue with Google</span>
       </button>
-      <div class="auth-divider">or</div>
-      <input type="email" id="authEmailInput" class="auth-input" placeholder="Email" />
-      <button type="button" id="authContinueBtn" class="btn-continue-auth">Continue</button>
     </div>
   </div>
 
@@ -325,10 +270,12 @@
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ لوحة تحكم المالك — إضافة أو حذف قالب</h2>
+      <h2>🛠️ إضافة قالب عبر الرابط السحابي (بدون حد أقصى)</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابط مباشر لفيديو (MP4) أو صورة لتستوعب المنصة عدد غير محدود من القوالب.</p>
+
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
-        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر" />
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان عطر فاخر 10 ثواني" />
         <div class="form-row">
           <div>
             <label>التصنيف</label>
@@ -344,12 +291,18 @@
             <input type="text" id="tplBadge" value="GMV $15,000+" required />
           </div>
         </div>
-        <label>ملف القالب (فيديو MP4/WebM أو صورة)</label>
-        <input type="file" id="tplMediaFile" accept="video/*,image/*" required />
+        <label>نوع القالب</label>
+        <select id="tplMediaType">
+          <option value="video">فيديو (MP4 / WebM)</option>
+          <option value="image">صورة (JPG / PNG)</option>
+        </select>
+        <label>رابط الملف السحابي (URL)</label>
+        <input type="text" id="tplMediaUrl" required placeholder="https://example.com/video.mp4 أو رابط الصورة" />
         <label>الكلمات الترويجية للقالب (Prompt الافتراضي)</label>
         <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الترويجي الذي يظهر على الإعلان..."></textarea>
-        <button type="submit" class="btn btn-primary full-width">➕ نشر القالب الجديد وحفظه دائماً</button>
+        <button type="submit" class="btn btn-primary full-width">➕ إضافة وحفظ القالب فوراً</button>
       </form>
+
       <div class="admin-list-box">
         <h4 style="font-size: 15px; margin-bottom: 6px;">📋 القوالب المنشورة حالياً (حذف):</h4>
         <div id="adminTemplatesList"></div>
@@ -472,12 +425,11 @@
       updateAuthUI();
     }
 
-    // دالة حفظ القوالب مع معالجة الأخطاء لضمان عدم امتلاء التخزين المحلي
     function saveTemplatesToStorage() {
       try {
         localStorage.setItem('adspark_templates', JSON.stringify(templates));
       } catch (e) {
-        alert('تحذير: مساحة التخزين المحلي ممتلئة بسبب حجم الملفات الكبيرة. يرجى استخدام روابط صور/فيديوهات خارجية أو حذف قوالب قديمة.');
+        alert('تم حفظ الحد الأقصى محلياً، يرجى الاستمرار بإضافة الروابط السحابية.');
       }
     }
 
@@ -640,7 +592,7 @@
       };
     });
 
-    // معالجة النموذج المحدث لضمان الحفظ الدائم وعدم فقدان البيانات
+    // إضافة القالب عبر الرابط السحابي لتجنب امتلاء التخزين نهائياً
     document.getElementById('adminTemplateForm').onsubmit = (e) => {
       e.preventDefault();
       if (!isOwnerLoggedIn()) return;
@@ -648,41 +600,34 @@
       const title = document.getElementById('tplTitle').value.trim();
       const category = document.getElementById('tplCategory').value;
       const badge = document.getElementById('tplBadge').value.trim();
+      const mediaType = document.getElementById('tplMediaType').value;
+      const mediaUrl = document.getElementById('tplMediaUrl').value.trim();
       const promptText = document.getElementById('tplPrompt').value.trim();
-      const fileInput = document.getElementById('tplMediaFile');
-      const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
-      if (!file) {
-        alert('يرجى اختيار ملف صورة أو فيديو للقالب.');
+      if (!mediaUrl) {
+        alert('يرجى إدخال رابط صالح للملف.');
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const mediaUrl = ev.target.result;
-        const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-
-        const newTpl = {
-          id: Date.now(),
-          title,
-          category,
-          badge,
-          prompt: promptText,
-          mediaType,
-          cover: mediaUrl
-        };
-
-        templates.unshift(newTpl);
-        selectTemplate(newTpl);
-        saveTemplatesToStorage();
-        renderTemplates(currentFilterCat);
-        renderAdminTemplatesList();
-
-        document.getElementById('adminTemplateForm').reset();
-        document.getElementById('adminModal').classList.add('hidden');
-        alert('تم نشر القالب وحفظه في الذاكرة الدائمة بنجاح!');
+      const newTpl = {
+        id: Date.now(),
+        title,
+        category,
+        badge,
+        prompt: promptText,
+        mediaType,
+        cover: mediaUrl
       };
-      reader.readAsDataURL(file);
+
+      templates.unshift(newTpl);
+      selectTemplate(newTpl);
+      saveTemplatesToStorage();
+      renderTemplates(currentFilterCat);
+      renderAdminTemplatesList();
+
+      document.getElementById('adminTemplateForm').reset();
+      document.getElementById('adminModal').classList.add('hidden');
+      alert('تمت إضافة القالب عبر الرابط السحابي بنجاح وتخزينه دون أي قيود على السعة!');
     };
 
     openAdminBtn.onclick = () => {
