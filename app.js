@@ -3,10 +3,9 @@ const GENERATION_COST = 250;
 
 let user = JSON.parse(localStorage.getItem('adspark_user')) || null;
 let uploadedProductImg = null;
-let outputMediaType = 'video'; // 'video' or 'image' 
+let outputMediaType = 'video';
 let lastDownloadUrl = null;
 
-// مكتبة قوالب غنية ومتنوعة (صور عالية الدقة تظهر فوراً بدون شاشات سوداء)
 const defaultTemplates = [
   {
     id: 1,
@@ -86,7 +85,6 @@ let templates = JSON.parse(localStorage.getItem('adspark_templates_v2')) || defa
 let selectedTemplate = templates[0];
 let previewingTemplate = null;
 
-// عناصر الواجهة
 const gmailLoginBtn = document.getElementById('gmailLoginBtn');
 const creditPill = document.getElementById('creditPill');
 const creditBalance = document.getElementById('creditBalance');
@@ -136,7 +134,6 @@ gmailLoginBtn.addEventListener('click', () => {
   }
 });
 
-// التبديل بين الفيديو والصورة
 document.querySelectorAll('.type-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
@@ -145,7 +142,6 @@ document.querySelectorAll('.type-btn').forEach(btn => {
   });
 });
 
-// عرض القوالب
 function renderTemplates(category = 'all') {
   templatesGrid.innerHTML = '';
   const list = category === 'all' ? templates : templates.filter(t => t.category === category);
@@ -225,7 +221,6 @@ document.getElementById('usePreviewTemplateBtn').addEventListener('click', () =>
   document.getElementById('previewModalVideo').pause();
 });
 
-// التصنيفات
 document.querySelectorAll('.cat-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
@@ -234,7 +229,6 @@ document.querySelectorAll('.cat-tab').forEach(tab => {
   });
 });
 
-// رفع صورة المنتج
 productImageInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -252,11 +246,10 @@ productImageInput.addEventListener('change', (e) => {
 clearProductBtn.addEventListener('click', () => {
   uploadedProductImg = null;
   productImageInput.value = '';
-  uploadFileName.textContent = 'استخدام صورة القالب الافتراضية';
+  uploadFileName.textContent = 'صورة القالب الافتراضية';
   clearProductBtn.classList.add('hidden');
 });
 
-// تحميل صورة القالب بأمان للرسم على Canvas
 function loadImageSafe(url) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -267,7 +260,6 @@ function loadImageSafe(url) {
   });
 }
 
-// رسم إطار الإعلان (دمج الخلفية + صورة المنتج المرفوعة + النصوص + زر CTA)
 function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
   const w = canvas.width;
   const h = canvas.height;
@@ -278,7 +270,6 @@ function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
   ctx.fillStyle = '#0b0c10';
   ctx.fillRect(0, 0, w, h);
 
-  // 1. رسم خلفية القالب مع حركة الكاميرا
   if (bgImg) {
     let scale = 1;
     if (motion === 'zoom-in') scale = 1 + progress * 0.14;
@@ -293,7 +284,6 @@ function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
     ctx.restore();
   }
 
-  // 2. دمج صورة المنتج المرفوعة في منتصف الإعلان بإطار احترافي وحركة
   if (prodImg) {
     const floatY = Math.sin(frameNum * 0.1) * 8;
     const boxSize = Math.min(w, h) * 0.52;
@@ -311,14 +301,12 @@ function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
     ctx.restore();
   }
 
-  // 3. تدرج سفلي لوضوح النصوص
   const grad = ctx.createLinearGradient(0, h * 0.48, 0, h);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
   grad.addColorStop(1, 'rgba(0,0,0,0.92)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
 
-  // 4. شارة العرض
   ctx.fillStyle = '#ef4444';
   ctx.beginPath();
   ctx.roundRect(w - 230, 36, 195, 40, 20);
@@ -328,7 +316,6 @@ function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
   ctx.textAlign = 'center';
   ctx.fillText(selectedTemplate.badge, w - 132, 62);
 
-  // 5. النص الترويجي
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 28px Cairo, sans-serif';
   ctx.textAlign = 'center';
@@ -337,7 +324,6 @@ function renderAdFrame(ctx, canvas, bgImg, prodImg, progress, frameNum) {
     ctx.fillText(line, w / 2, h - 185 + (idx * 38));
   });
 
-  // 6. زر الدعوة لاتخاذ إجراء (CTA)
   const btnPulse = 1 + Math.sin(frameNum * 0.18) * 0.025;
   ctx.save();
   ctx.translate(w / 2, h - 85);
@@ -368,7 +354,6 @@ function wrapArabicText(text, maxChars) {
   return lines;
 }
 
-// التوليد الفعلي (فيديو بصوت وحركة أو صورة عالية الدقة)
 generateBtn.addEventListener('click', async () => {
   if (!user) {
     alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة!');
@@ -398,7 +383,6 @@ generateBtn.addEventListener('click', async () => {
 
   const bgImg = await loadImageSafe(selectedTemplate.cover);
 
-  // إذا اختار المستخدم توليد صورة
   if (outputMediaType === 'image') {
     renderAdFrame(ctx, canvas, bgImg, uploadedProductImg, 0.5, 15);
     lastDownloadUrl = canvas.toDataURL('image/png');
@@ -418,7 +402,6 @@ generateBtn.addEventListener('click', async () => {
     return;
   }
 
-  // إذا اختار المستخدم توليد فيديو إعلاني
   const audioStyle = document.getElementById('audioStyleSelect').value;
   let audioCtx = null;
   let osc = null;
@@ -468,7 +451,7 @@ generateBtn.addEventListener('click', async () => {
 
   recorder.start();
   let frame = 0;
-  const totalFrames = 120; // 4 ثوانٍ
+  const totalFrames = 120;
 
   function step() {
     renderAdFrame(ctx, canvas, bgImg, uploadedProductImg, frame / totalFrames, frame);
@@ -482,7 +465,6 @@ generateBtn.addEventListener('click', async () => {
   step();
 });
 
-// التحميل والمشاركة
 document.getElementById('downloadBtn').addEventListener('click', () => {
   if (!lastDownloadUrl) return;
   const a = document.createElement('a');
@@ -496,7 +478,6 @@ document.getElementById('shareBtn').addEventListener('click', () => {
   alert('تم نسخ رابط الاستوديو بنجاح!');
 });
 
-// لوحة المشرف لإضافة قوالب جديدة
 openAdminBtn.addEventListener('click', () => {
   document.getElementById('adminModal').classList.remove('hidden');
 });
@@ -539,7 +520,6 @@ document.getElementById('addTemplateForm').addEventListener('submit', (e) => {
   }
 });
 
-// إغلاق النوافذ
 document.querySelectorAll('.close-modal').forEach(btn => {
   btn.addEventListener('click', () => {
     const target = document.getElementById(btn.dataset.target);
@@ -549,7 +529,6 @@ document.querySelectorAll('.close-modal').forEach(btn => {
   });
 });
 
-// تشغيل أولي
 promptInput.value = selectedTemplate.prompt;
 updateUI();
 renderTemplates('all');
