@@ -41,7 +41,6 @@
         if (cloudTemplates.length > 0) {
           window.templates = cloudTemplates;
         } else {
-          // إذا كانت قاعدة البيانات فارغة، ندرج القوالب الافتراضية لأول مرة
           for (let tpl of defaultTemplates) {
             await addDoc(collection(db, "templates"), tpl);
           }
@@ -458,6 +457,137 @@
     const productThumbImg = document.getElementById('productThumbImg');
     const clearProductBtn = document.getElementById('clearProductBtn');
 
+    function updateAuthUI() {
+      if (user && user.email) {
+        userLabel.textContent = user.email;
+        creditBalance.textContent = user.credits;
+        creditPill.classList.remove('hidden');
+        if (ADMIN_EMAILS.includes(user.email)) {
+          openAdminBtn.classList.remove('hidden');
+        } else {
+          openAdminBtn.classList.add('hidden');
+        }
+      } else {
+        userLabel.textContent = 'Sign in / Sign up';
+        creditPill.classList.add('hidden');
+        openAdminBtn.classList.add('hidden');
+      }
+    }
+
+    gmailLoginBtn.onclick = () => {
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+
+    document.getElementById('googleAuthBtn').onclick = () => {
+      user = { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مدير المنصة' };
+      localStorage.setItem('adspark_user', JSON.stringify(user));
+      updateAuthUI();
+      document.getElementById('authModal').classList.add('hidden');
+      alert('تم تسجيل الدخول بنجاح بحسابك الرئيسي!');
+    };
+
+    openAdminBtn.onclick = () => {
+      document.getElementById('adminModal').classList.remove('hidden');
+      renderAdminTemplatesList();
+    };
+
+    function renderTemplates(category = 'all') {
+      templatesGrid.innerHTML = '';
+      const filtered = category === 'all' ? window.templates : window.templates.filter(t => t.category === category);
+      
+      filtered.forEach(tpl => {
+        const card = document.createElement('div');
+        card.className = `template-card ${window.selectedTemplate && window.selectedTemplate.id === tpl.id ? 'selected' : ''}`;
+        
+        let mediaHtml = '';
+        if (tpl.mediaType === 'video') {
+          mediaHtml = `<video src="${tpl.mediaUrl}" muted loop playsinline preload="metadata"></video>`;
+        } else {
+          mediaHtml = `<img src="${tpl.cover}" alt="${tpl.title}" />`;
+        }
+
+        card.innerHTML = `
+          ${mediaHtml}
+          <div class="card-badge">${tpl.badge}</div>
+          <button type="button" class="video-tag-badge" onclick="event.stopPropagation(); previewTemplateFull('${tpl.id}')">👁️ معاينة</button>
+          ${ADMIN_EMAILS.includes(user.email) ? `<div class="card-admin-controls"><button type="button" class="card-admin-btn del" onclick="event.stopPropagation(); deleteCloudTemplate('${tpl.id}')">حذف</button></div>` : ''}
+          <div class="card-overlay">
+            <h4>${tpl.title}</h4>
+            <span>${tpl.prompt}</span>
+          </div>
+        `;
+
+        card.onmouseenter = () => {
+          const v = card.querySelector('video');
+          if (v) v.play().catch(e => {});
+        };
+        card.onmouseleave = () => {
+          const v = card.querySelector('video');
+          if (v) { v.pause(); v.currentTime = 0; }
+        };
+
+        card.onclick = () => selectTemplate(tpl);
+        templatesGrid.appendChild(card);
+      });
+    }
+
+    window.selectTemplate = function(tpl) {
+      window.selectedTemplate = tpl;
+      activeTemplateTitle.textContent = tpl.title;
+      if (tpl.prompt) promptInput.value = tpl.prompt;
+      renderTemplates(window.currentFilterCat);
+    };
+
+    window.previewTemplateFull = function(tplId) {
+      const tpl = window.templates.find(t => t.id === tplId);
+      if (!tpl) return;
+      document.getElementById('previewTplTitle').textContent = tpl.title;
+      const v = document.getElementById('previewTplVideo');
+      v.src = tpl.mediaUrl || tpl.cover;
+      v.play().catch(e => {});
+      document.getElementById('templatePreviewModal').classList.remove('hidden');
+    };
+
+    document.getElementById('usePreviewTplBtn').onclick = () => {
+      document.getElementById('templatePreviewModal').classList.add('hidden');
+      document.getElementById('previewTplVideo').pause();
+    };
+
+    document.getElementById('adminTemplateForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const newTpl = {
+        title: document.getElementById('tplTitle').value,
+        category: document.getElementById('tplCategory').value,
+        badge: document.getElementById('tplBadge').value,
+        mediaType: document.getElementById('tplMediaType').value,
+        mediaUrl: document.getElementById('tplMediaUrl').value,
+        cover: document.getElementById('tplMediaType').value === 'image' ? document.getElementById('tplMediaUrl').value : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+        prompt: document.getElementById('tplPrompt').value
+      };
+      await window.saveCloudTemplate(newTpl);
+      document.getElementById('adminTemplateForm').reset();
+      document.getElementById('adminModal').classList.add('hidden');
+    };
+
+    function renderAdminTemplatesList() {
+      const box = document.getElementById('adminTemplatesList');
+      box.innerHTML = '';
+      window.templates.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'admin-list-item';
+        item.innerHTML = `<span>${t.title} (${t.category})</span><button type="button" class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="window.deleteCloudTemplate('${t.id}'); renderAdminTemplatesList();">حذف</button>`;
+        box.appendChild(item);
+      });
+    }
+
+    document.getElementById('categoryTabs').onclick = (e) => {
+      if (!e.target.classList.contains('cat-tab')) return;
+      document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      window.currentFilterCat = e.target.dataset.cat;
+      renderTemplates(window.currentFilterCat);
+    };
+
     productImageInput.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -485,495 +615,37 @@
       productPreviewChip.classList.add('hidden');
     };
 
-    function autoReplaceProduct(ctx, w, h, bgSource, productImg, promptText, ctaText, progress) {
-      ctx.clearRect(0, 0, w, h);
+    // --- دالة الاتصال بـ Replicate ---
+    async function generateWithReplicate(promptText, imageUrl = null) {
+      const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
+      const modelVersion = "black-forest-labs/flux-schnell";
 
-      if (bgSource) {
-        const srcW = bgSource.videoWidth || bgSource.naturalWidth || w;
-        const srcH = bgSource.videoHeight || bgSource.naturalHeight || h;
-        const scale = Math.max(w / srcW, h / srcH);
-        const drawW = srcW * scale;
-        const drawH = srcH * scale;
-        const offsetX = (w - drawW) / 2;
-        const offsetY = (h - drawH) / 2;
-        try {
-          ctx.drawImage(bgSource, offsetX, offsetY, drawW, drawH);
-        } catch (err) {
-          const grad = ctx.createLinearGradient(0, 0, w, h);
-          grad.addColorStop(0, '#1e1b4b');
-          grad.addColorStop(1, '#090d16');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, w, h);
-        }
-      } else {
-        const grad = ctx.createLinearGradient(0, 0, w, h);
-        grad.addColorStop(0, '#1e1b4b');
-        grad.addColorStop(1, '#090d16');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
-      }
-
-      const overlayGrad = ctx.createLinearGradient(0, h * 0.45, 0, h);
-      overlayGrad.addColorStop(0, 'rgba(0,0,0,0.08)');
-      overlayGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
-      ctx.fillStyle = overlayGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      const imgToRender = productImg || bgSource;
-      if (imgToRender && imgToRender !== bgSource) {
-        const pulseScale = 1 + Math.sin(progress * Math.PI * 2) * 0.02;
-        const maxW = w * 0.72 * pulseScale;
-        const maxH = h * 0.52 * pulseScale;
-        const pRatio = Math.min(maxW / imgToRender.width, maxH / imgToRender.height);
-        const pW = imgToRender.width * pRatio;
-        const pH = imgToRender.height * pRatio;
-        const pX = (w - pW) / 2;
-        const pY = (h * 0.43) - (pH / 2);
-
-        ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-        ctx.shadowBlur = 35;
-        ctx.shadowOffsetY = 15;
-        ctx.drawImage(imgToRender, pX, pY, pW, pH);
-        ctx.restore();
-      }
-
-      if (promptText) {
-        ctx.save();
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 28px Cairo, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0,0,0,0.9)';
-        ctx.shadowBlur = 12;
-
-        const words = promptText.split(' ');
-        let line = '';
-        const lines = [];
-        for (let n = 0; n < words.length; n++) {
-          const testLine = line + words[n] + ' ';
-          if (ctx.measureText(testLine).width > w - 80 && n > 0) {
-            lines.push(line.trim());
-            line = words[n] + ' ';
-          } else {
-            line = testLine;
-          }
-        }
-        lines.push(line.trim());
-
-        const startTextY = h - 195 - (lines.slice(0, 2).length * 36);
-        lines.slice(0, 2).forEach((l, idx) => {
-          ctx.fillText(l, w / 2, startTextY + idx * 38);
-        });
-        ctx.restore();
-      }
-
-      if (ctaText) {
-        ctx.save();
-        const btnW = Math.min(w - 90, 440);
-        const btnH = 62;
-        const btnX = (w - btnW) / 2;
-        const btnY = h - 125;
-
-        ctx.fillStyle = '#7c5cff';
-        ctx.beginPath();
-        ctx.roundRect(btnX, btnY, btnW, btnH, 31);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px Cairo, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(ctaText, w / 2, btnY + btnH / 2);
-        ctx.restore();
-      }
-    }
-
-    function loadSafeImage(url) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = url;
-      });
-    }
-
-    generateBtn.onclick = async () => {
-      const cost = currentMode === 'video' ? 250 : 100;
-      if (user && user.credits < cost) {
-        alert('رصيد النقاط غير كافٍ.');
-        return;
-      }
-
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span>⏳ جاري معالجة وتوليد الإعلان...</span>';
-
-      const canvas = document.getElementById('renderCanvas');
-      const aspect = document.getElementById('aspectSelect').value;
-      if (aspect === '16:9') { canvas.width = 1280; canvas.height = 720; }
-      else if (aspect === '1:1') { canvas.width = 900; canvas.height = 900; }
-      else { canvas.width = 720; canvas.height = 1280; }
-
-      const ctx = canvas.getContext('2d');
-      const promptText = promptInput.value.trim();
-      const ctaText = document.getElementById('ctaInput').value.trim();
-
-      let bgSource = null;
-      if (window.selectedTemplate.mediaType === 'video') {
-        templateVideoSource.crossOrigin = 'anonymous';
-        templateVideoSource.src = window.selectedTemplate.cover;
-        await new Promise((resolve) => {
-          templateVideoSource.onloadeddata = () => resolve();
-          templateVideoSource.onerror = () => resolve();
-          setTimeout(resolve, 3500);
-        });
-        try {
-          await templateVideoSource.play();
-          bgSource = templateVideoSource;
-        } catch (e) {
-          bgSource = null;
-        }
-      } else {
-        bgSource = await loadSafeImage(window.selectedTemplate.cover);
-      }
-
-      const resultSection = document.getElementById('resultSection');
-      const outputVideo = document.getElementById('outputVideo');
-      const outputImage = document.getElementById('outputImage');
-
-      if (currentMode === 'image') {
-        autoReplaceProduct(ctx, canvas.width, canvas.height, bgSource, rawProductImg, promptText, ctaText, 0.25);
-        try {
-          const dataUrl = canvas.toDataURL('image/png');
-          lastGeneratedBlobUrl = dataUrl;
-          lastGeneratedExt = 'png';
-          outputVideo.classList.add('hidden');
-          outputImage.src = dataUrl;
-          outputImage.classList.remove('hidden');
-          document.getElementById('resultTitle').textContent = '🖼️ البوستر الإعلاني الجاهز';
-          resultSection.classList.remove('hidden');
-          resultSection.scrollIntoView({ behavior: 'smooth' });
-        } catch (err) {
-          alert('تعذر تصدير الصورة.');
-        }
-        if (user) { user.credits -= cost; saveUser(); }
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
-        return;
-      }
-
-      const durationMs = 5000;
-      const stream = canvas.captureStream(30);
-      let mimeType = 'video/webm';
-      if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
-      else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-
-      const recorder = new MediaRecorder(stream, { mimeType });
-      const chunks = [];
-      recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
-        if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
-        lastGeneratedBlobUrl = URL.createObjectURL(blob);
-        lastGeneratedExt = mimeType.includes('mp4') ? 'mp4' : 'webm';
-
-        outputImage.classList.add('hidden');
-        outputVideo.src = lastGeneratedBlobUrl;
-        outputVideo.classList.remove('hidden');
-        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز';
-        resultSection.classList.remove('hidden');
-        outputVideo.play().catch(() => {});
-        resultSection.scrollIntoView({ behavior: 'smooth' });
-
-        if (user) { user.credits -= cost; saveUser(); }
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
-      };
-
-      recorder.start();
-      const startTime = performance.now();
-
-      function renderLoop(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / durationMs, 1);
-        autoReplaceProduct(ctx, canvas.width, canvas.height, bgSource, rawProductImg, promptText, ctaText, progress);
-
-        if (elapsed < durationMs) {
-          requestAnimationFrame(renderLoop);
-        } else {
-          recorder.stop();
-          if (bgSource && bgSource.pause) bgSource.pause();
-        }
-      }
-      requestAnimationFrame(renderLoop);
-    };
-
-    document.getElementById('downloadVideoBtn').onclick = () => {
-      if (!lastGeneratedBlobUrl) return;
-      const a = document.createElement('a');
-      a.href = lastGeneratedBlobUrl;
-      a.download = 'AdSpark_Ad_' + Date.now() + '.' + lastGeneratedExt;
-      a.click();
-    };
-
-    document.getElementById('regenerateBtn').onclick = () => generateBtn.click();
-
-    document.getElementById('shareVideoBtn').onclick = () => {
-      navigator.clipboard?.writeText(window.location.href);
-      alert('تم نسخ رابط الاستوديو للمشاركة!');
-    };
-
-    const modeBtns = document.querySelectorAll('.mode-btn');
-    modeBtns.forEach(btn => {
-      btn.onclick = () => {
-        modeBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentMode = btn.dataset.mode;
-        if (currentMode === 'video') {
-          generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
-          costHint.textContent = 'التكلفة: 250 نقطة';
-        } else {
-          generateBtn.innerHTML = '<span>🖼️ توليد بوستر إعلاني</span>';
-          costHint.textContent = 'التكلفة: 100 نقطة';
-        }
-      };
-    });
-
-    function isOwnerLoggedIn() {
-      const isSecretAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
-      if (isSecretAdminUrl) return true;
-      if (!user || !user.email) return false;
-      return ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase().trim());
-    }
-
-    function updateAuthUI() {
-      if (user) {
-        userLabel.textContent = user.email;
-        creditPill.classList.remove('hidden');
-        creditBalance.textContent = user.credits;
-      } else {
-        userLabel.textContent = 'Sign in / Sign up';
-        creditPill.classList.add('hidden');
-      }
-      if (isOwnerLoggedIn()) {
-        openAdminBtn.classList.remove('hidden');
-      } else {
-        openAdminBtn.classList.add('hidden');
-      }
-      if (typeof window.renderTemplates === 'function') {
-        window.renderTemplates(window.currentFilterCat || 'all');
-      }
-    }
-
-    function saveUser() {
-      try { localStorage.setItem('adspark_user', JSON.stringify(user)); } catch (e) {}
-      updateAuthUI();
-    }
-
-    gmailLoginBtn.onclick = () => {
-      if (user) {
-        if (confirm('أنت مسجل الدخول بحساب: ' + user.email + ' - هل ترغب بتسجيل الخروج؟')) {
-          user = null;
-          localStorage.removeItem('adspark_user');
-          updateAuthUI();
-        }
-        return;
-      }
-      document.getElementById('authModal').classList.remove('hidden');
-    };
-
-    document.getElementById('googleAuthBtn').onclick = () => {
-      user = { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مجانية' };
-      saveUser();
-      document.getElementById('authModal').classList.add('hidden');
-      alert('تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
-    };
-
-    window.selectTemplate = function(tpl) {
-      window.selectedTemplate = tpl;
-      activeTemplateTitle.textContent = tpl.title;
-      promptInput.value = tpl.prompt;
-      if (tpl.mediaType === 'video') {
-        templateVideoSource.src = tpl.cover;
-        templateVideoSource.load();
-      } else {
-        templateVideoSource.removeAttribute('src');
-      }
-      window.renderTemplates(window.currentFilterCat || 'all');
-    }
-
-    function openTemplatePreview(tpl) {
-      document.getElementById('previewTplTitle').textContent = tpl.title;
-      const previewVid = document.getElementById('previewTplVideo');
-      previewVid.src = tpl.cover;
-      previewVid.muted = false;
-      document.getElementById('templatePreviewModal').classList.remove('hidden');
-      previewVid.load();
-      previewVid.play().catch(() => {});
-
-      document.getElementById('usePreviewTplBtn').onclick = () => {
-        previewVid.pause();
-        document.getElementById('templatePreviewModal').classList.add('hidden');
-        window.selectTemplate(tpl);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-    }
-
-    window.renderAdminTemplatesList = function() {
-      const listEl = document.getElementById('adminTemplatesList');
-      listEl.innerHTML = '';
-      window.templates.forEach(tpl => {
-        const row = document.createElement('div');
-        row.className = 'admin-list-item';
-        row.innerHTML = '<span>' + (tpl.mediaType === 'video' ? '🎬 ' : '🖼️ ') + tpl.title + '</span>';
-        const delBtn = document.createElement('button');
-        delBtn.type = 'button';
-        delBtn.className = 'btn btn-danger';
-        delBtn.style.padding = '5px 12px';
-        delBtn.textContent = '🗑️ حذف';
-        delBtn.onclick = async () => {
-          if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً من السحابة؟')) return;
-          await window.deleteCloudTemplate(tpl.id);
-          window.renderAdminTemplatesList();
-        };
-        row.appendChild(delBtn);
-        listEl.appendChild(row);
-      });
-    }
-
-    window.renderTemplates = function(filterCat = 'all') {
-      window.currentFilterCat = filterCat;
-      templatesGrid.innerHTML = '';
-      const filtered = filterCat === 'all' ? window.templates : window.templates.filter(t => t.category === filterCat);
-      const adminActive = isOwnerLoggedIn();
-
-      filtered.forEach(tpl => {
-        const card = document.createElement('div');
-        card.className = 'template-card ' + (window.selectedTemplate && window.selectedTemplate.id === tpl.id ? 'selected' : '');
-        const isVideo = tpl.mediaType === 'video';
-
-        const badgeSpan = document.createElement('span');
-        badgeSpan.className = 'card-badge';
-        badgeSpan.textContent = tpl.badge;
-        card.appendChild(badgeSpan);
-
-        if (isVideo) {
-          const previewBtn = document.createElement('button');
-          previewBtn.type = 'button';
-          previewBtn.className = 'video-tag-badge';
-          previewBtn.textContent = '▶️ مشاهدة الفيديو الكامل';
-          previewBtn.onclick = (e) => {
-            e.stopPropagation();
-            openTemplatePreview(tpl);
-          };
-          card.appendChild(previewBtn);
-
-          const vid = document.createElement('video');
-          vid.src = tpl.cover;
-          vid.muted = true;
-          vid.loop = true;
-          vid.playsInline = true;
-          vid.crossOrigin = 'anonymous';
-          vid.onmouseover = () => vid.play().catch(() => {});
-          vid.onmouseout = () => vid.pause();
-          
-          vid.onerror = () => {
-            vid.remove();
-            const errFallback = document.createElement('div');
-            errFallback.style.cssText = 'width:100%; height:100%; display:grid; place-items:center; background:#222; color:#ff5b5b; font-size:12px; padding:10px; text-align:center;';
-            errFallback.textContent = '⚠️ تأكد من صحة الرابط المباشر للملف';
-            card.prepend(errFallback);
-          };
-
-          card.appendChild(vid);
-        } else {
-          const img = document.createElement('img');
-          img.src = tpl.cover;
-          img.alt = tpl.title;
-          img.crossOrigin = 'anonymous';
-          card.appendChild(img);
-        }
-
-        if (adminActive) {
-          const adminControls = document.createElement('div');
-          adminControls.className = 'card-admin-controls';
-          const delBtn = document.createElement('button');
-          delBtn.type = 'button';
-          delBtn.className = 'card-admin-btn del';
-          delBtn.textContent = '🗑️ حذف';
-          delBtn.onclick = async (e) => {
-            e.stopPropagation();
-            if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً من السحابة؟')) return;
-            await window.deleteCloudTemplate(tpl.id);
-            window.renderAdminTemplatesList();
-          };
-          adminControls.appendChild(delBtn);
-          card.appendChild(adminControls);
-        }
-
-        const overlay = document.createElement('div');
-        overlay.className = 'card-overlay';
-        overlay.innerHTML = '<h4>' + tpl.title + '</h4><span>اضغط لاختيار القالب وتوليده تلقائياً</span>';
-        card.appendChild(overlay);
-
-        card.onclick = () => {
-          window.selectTemplate(tpl);
-          switchPage('home');
-        };
-
-        templatesGrid.appendChild(card);
-      });
-    }
-
-    const catTabs = document.querySelectorAll('.cat-tab');
-    catTabs.forEach(tab => {
-      tab.onclick = () => {
-        catTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        window.renderTemplates(tab.dataset.cat);
-      };
-    });
-
-    document.getElementById('adminTemplateForm').onsubmit = async (e) => {
-      e.preventDefault();
-      if (!isOwnerLoggedIn()) return;
-
-      const title = document.getElementById('tplTitle').value.trim();
-      const category = document.getElementById('tplCategory').value;
-      const badge = document.getElementById('tplBadge').value.trim();
-      const mediaType = document.getElementById('tplMediaType').value;
-      const mediaUrl = document.getElementById('tplMediaUrl').value.trim();
-      const promptText = document.getElementById('tplPrompt').value.trim();
-
-      if (!mediaUrl) {
-        alert('يرجى إدخال رابط صالح.');
-        return;
-      }
-
-      const newTpl = {
-        title,
-        category,
-        badge,
+      const inputData = {
         prompt: promptText,
-        mediaType,
-        cover: mediaUrl
+        ...(imageUrl && { image: imageUrl })
       };
 
-      await window.saveCloudTemplate(newTpl);
-      window.renderAdminTemplatesList();
-      document.getElementById('adminTemplateForm').reset();
-    };
+      try {
+        const responseUrl = `https://api.replicate.com/v1/models/${modelVersion}/predictions`;
+        const res = await fetch(responseUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${API_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "wait"
+          },
+          body: JSON.stringify({ input: inputData })
+        });
 
-    openAdminBtn.onclick = () => {
-      if (!isOwnerLoggedIn()) {
-        alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
-        return;
+        if (!res.ok) throw new Error(`خطأ في الاتصال: ${res.statusText}`);
+        const result = await res.json();
+        return result.output;
+      } catch (error) {
+        console.error("خطأ التوليد:", error);
+        alert("فشل توليد الإعلان عبر الذكاء الاصطناعي.");
+        return null;
       }
-      document.getElementById('adminTemplateForm').reset();
-      window.renderAdminTemplatesList();
-      document.getElementById('adminModal').classList.remove('hidden');
-    };
+    }
 
     document.querySelectorAll('.close-modal').forEach(btn => {
       btn.onclick = () => {
@@ -984,53 +656,43 @@
         document.getElementById(targetId).classList.add('hidden');
       };
     });
-document.querySelectorAll('.close-modal').forEach(btn => {
-    btn.onclick = () => {
-        const targetId = btn.dataset.close;
-        if (targetId === 'templatePreviewModal') {
-            document.getElementById('previewTplVideo').pause();
+
+    // ربط زر التوليد بدالة Replicate
+    generateBtn.onclick = async () => {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان عبر Replicate...</span>';
+
+      const userPrompt = promptInput.value || (window.selectedTemplate && window.selectedTemplate.prompt) || "Professional fashion advertisement";
+      const productImageUrl = window.uploadedProductUrl || null;
+
+      const outputUrl = await generateWithReplicate(userPrompt, productImageUrl);
+
+      if (outputUrl) {
+        console.log("رابط النتيجة النهائية:", outputUrl);
+        const resultSection = document.getElementById('resultSection');
+        const outputVideo = document.getElementById('outputVideo');
+        const outputImage = document.getElementById('outputImage');
+
+        resultSection.classList.remove('hidden');
+        
+        if (Array.isArray(outputUrl)) {
+          outputImage.src = outputUrl[0];
+          outputImage.classList.remove('hidden');
+          outputVideo.classList.add('hidden');
+        } else {
+          outputVideo.src = outputUrl;
+          outputVideo.classList.remove('hidden');
+          outputImage.classList.add('hidden');
         }
-        document.getElementById(targetId).classList.add('hidden');
-    };
-});
 
-// ==========================================
-// ضع كود Replicate هنا:
-// ==========================================
-async function generateWithReplicate(promptText, imageUrl = null) {
-    const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
-    const modelVersion = "black-forest-labs/flux-schnell";
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+        alert("تم توليد الإعلان بنجاح!");
+      }
 
-    const inputData = {
-        prompt: promptText,
-        ...(imageUrl && { image: imageUrl })
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
     };
 
-    try {
-        const response = `https://api.replicate.com/v1/models/${modelVersion}/predictions`;
-        const res = await fetch(response, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json",
-                "Prefer": "wait"
-            },
-            body: JSON.stringify({ input: inputData })
-        });
-
-        if (!res.ok) throw new Error(`خطأ في الاتصال: ${res.statusText}`);
-        const result = await res.json();
-        return result.output;
-    } catch (error) {
-        console.error("خطأ التوليد:", error);
-        alert("فشل توليد الإعلان.");
-    }
-}
-
-updateAuthUI();
-</script>
-</body>
-</html>
     updateAuthUI();
   </script>
 </body>
