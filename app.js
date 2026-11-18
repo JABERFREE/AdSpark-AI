@@ -98,6 +98,7 @@ const defaultTemplates = [
 
 let templates = JSON.parse(localStorage.getItem('adspark_templates')) || defaultTemplates;
 let selectedTemplate = templates[0];
+let uploadedProductUrl = null; // لتخزين رابط صورة المنتج المرفوعة
 
 // عناصر الواجهة
 const gmailLoginBtn = document.getElementById('gmailLoginBtn');
@@ -113,6 +114,7 @@ const uploadFileName = document.getElementById('uploadFileName');
 const generateBtn = document.getElementById('generateBtn');
 const resultSection = document.getElementById('resultSection');
 const outputVideo = document.getElementById('outputVideo');
+const outputImage = document.getElementById('outputImage');
 
 // التحقق هل المستخدم الحالي هو مالك الصفحة
 function isOwnerLoggedIn() {
@@ -251,7 +253,7 @@ document.querySelectorAll('.cat-tab').forEach(tab => {
   });
 });
 
-// رفع صورة المنتج
+// رفع صورة المنتج وتجهيز رابطها
 productImageInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -259,14 +261,55 @@ productImageInput.addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = (ev) => {
     const img = new Image();
-    img.onload = () => { uploadedProductImg = img; };
+    img.onload = () => { 
+      uploadedProductImg = img;
+      uploadedProductUrl = ev.target.result; // تخزين رابط الـ Data URL لاستخدامه في Replicate
+    };
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 });
 
-// توليد الفيديو الإعلاني الحقيقي (صوت + صورة)
-async function generateRealAdVideo() {
+// --- دالة الاتصال بمنصة Replicate عبر Proxy لتجاوز حظر CORS ---
+async function generateWithReplicate(promptText, imageUrl = null) {
+  const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
+  const targetUrl = `https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions`;
+  
+  const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+
+  const inputData = {
+    prompt: promptText,
+    ...(imageUrl && { image: imageUrl })
+  };
+
+  try {
+    const res = await fetch(proxyUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      body: JSON.stringify({ input: inputData })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Replicate API Error:", errText);
+      throw new Error(`خطأ من الخادم: ${res.statusText}`);
+    }
+
+    const result = await res.json();
+    return result.output;
+  } catch (error) {
+    console.error("خطأ التوليد:", error);
+    alert("فشل توليد الإعلان عبر الذكاء الاصطناعي. تأكد من صحة الاتصال والمفاتيح.");
+    return null;
+  }
+}
+
+// ربط زر التوليد بدالة Replicate الجديدة
+async function handleGenerateAd() {
   if (!user) {
     alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة مجانية!');
     gmailLoginBtn.click();
@@ -279,136 +322,61 @@ async function generateRealAdVideo() {
   }
 
   generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span>⏳ جاري تصيير الفيديو والصوت...</span>';
+  generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان عبر Replicate...</span>';
 
-  const canvas = document.getElementById('renderCanvas');
-  const ctx = canvas.getContext('2d');
-  const adText = promptInput.value.trim() || selectedTemplate.prompt;
-  const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
+  const userPrompt = promptInput.value.trim() || (selectedTemplate && selectedTemplate.prompt) || "Professional fashion advertisement";
+  const productImageUrl = uploadedProductUrl || null;
 
-  let activeImg = uploadedProductImg;
-  if (!activeImg && selectedTemplate.mediaType !== 'video') {
-    const bgImg = new Image();
-    bgImg.crossOrigin = 'anonymous';
-    bgImg.src = selectedTemplate.cover;
-    await new Promise(r => { bgImg.onload = r; bgImg.onerror = r; });
-    activeImg = bgImg;
-  }
+  const outputUrl = await generateWithReplicate(userPrompt, productImageUrl);
 
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const dest = audioCtx.createMediaStreamDestination();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2.5);
-  osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 5);
-  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-  osc.connect(gain);
-  gain.connect(dest);
-  osc.start();
-
-  const canvasStream = canvas.captureStream(30);
-  const combinedStream = new MediaStream([
-    ...canvasStream.getVideoTracks(),
-    ...dest.stream.getAudioTracks()
-  ]);
-
-  const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
-  const chunks = [];
-  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-  recorder.onstop = () => {
-    osc.stop();
-    audioCtx.close();
-
+  if (outputUrl) {
+    // خصم النقاط وتحديث رصيد المستخدم
     user.credits -= GENERATION_COST;
     saveUser();
 
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
-    lastGeneratedBlobUrl = URL.createObjectURL(blob);
-
-    outputVideo.src = lastGeneratedBlobUrl;
     resultSection.classList.remove('hidden');
-    outputVideo.play();
+    
+    // عرض النتيجة (سواء كانت صورة أو فيديو ناتج)
+    if (outputImage && outputVideo) {
+      if (Array.isArray(outputUrl)) {
+        outputImage.src = outputUrl[0];
+        outputImage.classList.remove('hidden');
+        outputVideo.classList.add('hidden');
+      } else if (typeof outputUrl === 'string') {
+        if (outputUrl.endsWith('.mp4') || outputUrl.endsWith('.webm')) {
+          outputVideo.src = outputUrl;
+          outputVideo.classList.remove('hidden');
+          outputImage.classList.add('hidden');
+          outputVideo.play().catch(e => console.log("Autoplay prevented:", e));
+        } else {
+          outputImage.src = outputUrl;
+          outputImage.classList.remove('hidden');
+          outputVideo.classList.add('hidden');
+        }
+      }
+    }
 
-    generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span>✨ توليد الفيديو الإعلاني</span>';
     resultSection.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  recorder.start();
-
-  let frame = 0;
-  const totalFrames = 150;
-
-  function drawFrame() {
-    const progress = frame / totalFrames;
-    ctx.fillStyle = '#0e0f13';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
-      const scale = 1 + progress * 0.18;
-      const w = canvas.width * scale;
-      const h = canvas.height * scale;
-      const x = (canvas.width - w) / 2;
-      const y = (canvas.height - h) / 2;
-      ctx.globalAlpha = 0.85;
-      ctx.drawImage(activeImg, x, y, w, h);
-      ctx.globalAlpha = 1;
-    }
-
-    const grad = ctx.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.92)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#ff5b5b';
-    ctx.fillRect(40, 50, 230, 44);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 22px Cairo, sans-serif';
-    ctx.fillText(selectedTemplate.badge, 60, 80);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 34px Cairo, sans-serif';
-    const shortText = adText.slice(0, 48);
-    ctx.fillText(shortText, 40, canvas.height - 230);
-
-    const pulse = 1 + Math.sin(frame * 0.2) * 0.04;
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height - 120);
-    ctx.scale(pulse, pulse);
-    ctx.fillStyle = '#7c5cff';
-    ctx.fillRect(-240, -35, 480, 70);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px Cairo, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(ctaText, 0, 10);
-    ctx.restore();
-    ctx.textAlign = 'start';
-
-    frame++;
-    if (frame <= totalFrames) {
-      requestAnimationFrame(drawFrame);
-    } else {
-      recorder.stop();
-    }
+    alert("تم توليد الإعلان بنجاح!");
   }
 
-  drawFrame();
+  generateBtn.disabled = false;
+  generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
 }
 
-generateBtn.addEventListener('click', generateRealAdVideo);
-document.getElementById('regenerateBtn').addEventListener('click', generateRealAdVideo);
+generateBtn.addEventListener('click', handleGenerateAd);
+const regenerateBtn = document.getElementById('regenerateBtn');
+if (regenerateBtn) {
+  regenerateBtn.addEventListener('click', handleGenerateAd);
+}
 
-// تحميل ومشاركة الفيديو
+// تحميل ومشاركة الفيديو أو الصورة الناتجة
 document.getElementById('downloadVideoBtn').addEventListener('click', () => {
-  if (!lastGeneratedBlobUrl) return;
+  const targetSrc = outputVideo.src || outputImage.src;
+  if (!targetSrc) return;
   const a = document.createElement('a');
-  a.href = lastGeneratedBlobUrl;
-  a.download = `AdSpark-Ad-${Date.now()}.webm`;
+  a.href = targetSrc;
+  a.download = `AdSpark-Ad-${Date.now()}`;
   a.click();
 });
 
@@ -465,7 +433,7 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
       prompt: promptText,
       mediaType,
       cover: mediaUrl,
-      mediaUrl: mediaUrl // حفظ الرابط بوضوح لمعاينة الفيديو
+      mediaUrl: mediaUrl
     };
     templates.unshift(newTpl);
     try {
