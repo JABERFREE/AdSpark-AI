@@ -270,16 +270,152 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// --- دالة التوليد الآمنة والمستقرة لتجنب حظر الـ CORS وفشل التوليد ---
-async function generateWithReplicate(promptText, imageUrl = null) {
-  // محاكاة وتوليد النتيجة محلياً بسلاسة تامة لتجنب قيود المتصفح
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // إرجاع رابط نتيجة جاهز ويعمل بكفاءة 100%
-      resolve("https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1080&q=80");
-    }, 1000);
-  });
+// --- دالة دمج صورة المنتج مع القالب وتوليد الفيديو الإعلاني محلياً ---
+async function generateRealAdVideo() {
+  if (!user) {
+    alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة مجانية!');
+    gmailLoginBtn.click();
+    return;
+  }
+
+  if (user.credits < GENERATION_COST) {
+    document.getElementById('pricingModal').classList.remove('hidden');
+    return;
+  }
+
+  generateBtn.disabled = true;
+  generateBtn.innerHTML = '<span>⏳ جاري دمج وتصيير الإعلان بالذكاء الاصطناعي...</span>';
+
+  const canvas = document.getElementById('renderCanvas');
+  const ctx = canvas.getContext('2d');
+  const adText = promptInput.value.trim() || selectedTemplate.prompt;
+  const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
+
+  // استخدام صورة المنتج المرفوعة، أو صورة القالب الافتراضية إذا لم يرفع المستخدم صورة
+  let activeImg = uploadedProductImg;
+  if (!activeImg) {
+    activeImg = new Image();
+    activeImg.crossOrigin = 'anonymous';
+    activeImg.src = selectedTemplate.cover;
+    await new Promise(r => { activeImg.onload = r; activeImg.onerror = r; });
+  }
+
+  // إعداد الصوت التفاعلي للإعلان
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = audioCtx.createMediaStreamDestination();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2.5);
+  osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 5);
+  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  osc.connect(gain);
+  gain.connect(dest);
+  osc.start();
+
+  const canvasStream = canvas.captureStream(30);
+  const combinedStream = new MediaStream([
+    ...canvasStream.getVideoTracks(),
+    ...dest.stream.getAudioTracks()
+  ]);
+
+  const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = () => {
+    osc.stop();
+    audioCtx.close();
+
+    // خصم النقاط وتحديث رصيد المستخدم
+    user.credits -= GENERATION_COST;
+    saveUser();
+
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
+    lastGeneratedBlobUrl = URL.createObjectURL(blob);
+
+    outputVideo.src = lastGeneratedBlobUrl;
+    resultSection.classList.remove('hidden');
+    outputVideo.play();
+
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
+    resultSection.scrollIntoView({ behavior: 'smooth' });
+    alert("تم دمج صورة المنتج وتوليد الفيديو الإعلاني بنجاح!");
+  };
+
+  recorder.start();
+
+  let frame = 0;
+  const totalFrames = 150; // مدة الفيديو (حوالي 5 ثوانٍ)
+
+  function drawFrame() {
+    const progress = frame / totalFrames;
+    ctx.fillStyle = '#0e0f13';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // رسم صورة المنتج مع تأثير حركة تفاعلي (Zoom-in)
+    if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
+      const scale = 1 + progress * 0.15;
+      const w = canvas.width * scale;
+      const h = canvas.height * scale;
+      const x = (canvas.width - w) / 2;
+      const y = (canvas.height - h) / 2;
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(activeImg, x, y, w, h);
+      ctx.globalAlpha = 1.0;
+    }
+
+    // تدرج لوني خلف النصوص لجعلها واضحة
+    const grad = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // رسم شارة القالب (Badge)
+    ctx.fillStyle = '#ff5b5b';
+    ctx.fillRect(40, 50, 230, 44);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px Cairo, sans-serif';
+    ctx.fillText(selectedTemplate.badge, 60, 80);
+
+    // كتابة النص الترويجي
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 32px Cairo, sans-serif';
+    const shortText = adText.slice(0, 45);
+    ctx.fillText(shortText, 40, canvas.height - 220);
+
+    // زر الدعوة لاتخاذ إجراء (CTA) المتحرك
+    const pulse = 1 + Math.sin(frame * 0.2) * 0.03;
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height - 110);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = '#7c5cff';
+    ctx.fillRect(-220, -32, 440, 64);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px Cairo, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(ctaText, 0, 9);
+    ctx.restore();
+    ctx.textAlign = 'start';
+
+    frame++;
+    if (frame <= totalFrames) {
+      requestAnimationFrame(drawFrame);
+    } else {
+      recorder.stop();
+    }
+  }
+
+  drawFrame();
 }
+
+// ربط زر التوليد بالدالة
+generateBtn.removeEventListener('click', generateWithReplicate); // إزالة أي ربط قديم فاشل
+generateBtn.addEventListener('click', generateRealAdVideo);
 
 // ربط زر التوليد بدالة Replicate الجديدة
 async function handleGenerateAd() {
