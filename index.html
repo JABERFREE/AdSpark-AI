@@ -336,7 +336,7 @@
     <div class="modal-card preview-modal-card">
       <button type="button" class="close-modal" data-close="templatePreviewModal">✕</button>
       <h3 id="previewTplTitle" style="margin-bottom: 14px;">معاينة القالب الكامل</h3>
-      <video id="previewTplVideo" controls playsinline crossorigin="anonymous" style="width: 100%; border-radius: 14px; background: #000; max-height: 65vh;"></video>
+      <video id="previewTplVideo" controls playsinline crossorigin="anonymous" style="width: 100%; border-radius: 14px; background: #000; max-height: 65vh; object-fit: contain;"></video>
       <button type="button" id="usePreviewTplBtn" class="btn btn-primary full-width" style="margin-top: 14px;">✨ استخدام هذا القالب للتصميم</button>
     </div>
   </div>
@@ -615,7 +615,7 @@
       productPreviewChip.classList.add('hidden');
     };
 
-    // --- دالة الاتصال بـ Replicate ---
+    // --- دالة الاتصال بـ Replicate الجديدة ---
     async function generateWithReplicate(promptText, imageUrl = null) {
       const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
       const modelVersion = "black-forest-labs/flux-schnell";
@@ -657,7 +657,7 @@
       };
     });
 
-    // ربط زر التوليد بدالة Replicate
+    // ربط زر التوليد في الواجهة بدالة Replicate مع معالجة الفيديو والكانفاس
     generateBtn.onclick = async () => {
       generateBtn.disabled = true;
       generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان عبر Replicate...</span>';
