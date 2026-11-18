@@ -7,6 +7,82 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAN6DVZOf1XfabgYhLftejxCWKS6zFmRM",
+      authDomain: "adspark-ai-97881.firebaseapp.com",
+      projectId: "adspark-ai-97881",
+      storageBucket: "adspark-ai-97881.firebasestorage.app",
+      messagingSenderId: "563881294453",
+      appId: "1:563881294453:web:8100c59b7b2ff9ed50563c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const defaultTemplates = [
+      { id: 'def_1', title: 'إعلان سيروم العناية بالبشرة الفاخر', category: 'beauty', badge: 'GMV $20,000', prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80' },
+      { id: 'def_2', title: 'ترويج حقائب وأزياء عصرية 1-Click', category: 'fashion', badge: '20k+ Likes', prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80' },
+      { id: 'def_3', title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' }
+    ];
+
+    window.fetchCloudTemplates = async function() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "templates"));
+        const cloudTemplates = [];
+        querySnapshot.forEach((docSnap) => {
+          cloudTemplates.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (cloudTemplates.length > 0) {
+          window.templates = cloudTemplates;
+        } else {
+          // إذا كانت قاعدة البيانات فارغة، ندرج القوالب الافتراضية لأول مرة
+          for (let tpl of defaultTemplates) {
+            await addDoc(collection(db, "templates"), tpl);
+          }
+          window.templates = defaultTemplates;
+        }
+        if (typeof window.renderTemplates === 'function') {
+          window.renderTemplates(window.currentFilterCat || 'all');
+          if (window.templates.length > 0 && !window.selectedTemplate) {
+            window.selectTemplate(window.templates[0]);
+          }
+        }
+      } catch (e) {
+        console.log("Fallback to local templates");
+        window.templates = defaultTemplates;
+      }
+    };
+
+    window.saveCloudTemplate = async function(newTpl) {
+      try {
+        await addDoc(collection(db, "templates"), newTpl);
+        await window.fetchCloudTemplates();
+        alert('تمت إضافة القالب وحفظه سحابياً بنجاح وتزامنه مع كل الأجهزة!');
+      } catch (e) {
+        alert('خطأ في الحفظ السحابي: ' + e.message);
+      }
+    };
+
+    window.deleteCloudTemplate = async function(docId) {
+      try {
+        await deleteDoc(doc(db, "templates", docId));
+        await window.fetchCloudTemplates();
+      } catch (e) {
+        alert('خطأ في الحذف السحابي');
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.fetchCloudTemplates();
+    });
+  </script>
+
   <style>
     :root {
       --bg-dark: #0e0f13;
@@ -20,7 +96,7 @@
       --text-muted: #9ca3af;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; pointer-events: auto !important; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
     .hidden { display: none !important; }
     .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #121318; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 12px; }
     .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
@@ -31,10 +107,9 @@
     .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .credit-pill { display: flex; align-items: center; gap: 6px; background: var(--bg-elevated); border: 1px solid var(--primary); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
     .plus-badge { background: var(--primary); color: #fff; width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-weight: bold; }
-    .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; position: relative; pointer-events: auto; }
+    .btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secondary { background: var(--bg-elevated); color: var(--text-main); border: 1px solid var(--border); }
     .btn-secondary:hover { border-color: var(--primary); }
     .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
@@ -48,23 +123,23 @@
     
     .studio-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; gap: 16px; margin-bottom: 28px; }
     .studio-sidebar { display: flex; flex-direction: column; gap: 10px; }
-    .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; pointer-events: auto; }
+    .mode-btn { width: 68px; height: 68px; border-radius: 14px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
     .mode-btn.active { border-color: var(--primary); color: #fff; background: rgba(124, 92, 255, 0.16); }
     .studio-main { flex: 1; display: flex; flex-direction: column; gap: 14px; }
     .template-badge-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-elevated); padding: 8px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
     .badge-viral { background: var(--accent-coral); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     
-    textarea, input[type="text"], input[type="email"], select { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 12px; padding: 12px; font-size: 14px; outline: none; pointer-events: auto; }
+    textarea, input[type="text"], input[type="email"], select { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 12px; padding: 12px; font-size: 14px; outline: none; }
     textarea:focus, input:focus, select:focus { border-color: var(--primary); }
     
     .studio-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .control-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
-    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; pointer-events: auto; transition: 0.2s; }
+    .upload-trigger { background: var(--bg-elevated); border: 1px dashed var(--primary); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
     .upload-trigger.has-file { border-style: solid; border-color: #34d399; background: rgba(16, 185, 129, 0.12); color: #34d399; }
-    .studio-select { width: auto; padding: 9px 12px; pointer-events: auto; }
-    .cta-text-input { max-width: 240px; padding: 9px 12px; pointer-events: auto; }
+    .studio-select { width: auto; padding: 9px 12px; }
+    .cta-text-input { max-width: 240px; padding: 9px 12px; }
     .generate-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; pointer-events: auto; }
+    .btn-generate { padding: 12px 26px; border-radius: 999px; font-size: 15px; }
     .cost-hint { font-size: 11px; color: var(--text-muted); }
 
     .product-preview-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid #34d399; padding: 4px 10px; border-radius: 10px; font-size: 12px; }
@@ -79,19 +154,19 @@
     .result-actions { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
     .section-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
     .pill-hot { background: var(--accent-coral); color: #fff; font-size: 12px; padding: 3px 10px; border-radius: 999px; vertical-align: middle; }
-    .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; pointer-events: auto; }
-    .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; pointer-events: auto; }
+    .category-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 18px; }
+    .cat-tab { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
     .cat-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; pointer-events: auto; }
+    .template-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 9 / 15; background: var(--bg-card); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
     .template-card:hover { transform: translateY(-4px); border-color: var(--primary); }
     .template-card.selected { border-color: var(--primary); }
     .template-card img, .template-card video { width: 100%; height: 100%; object-fit: cover; }
     .card-badge { position: absolute; top: 10px; right: 10px; background: var(--accent-coral); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; pointer-events: none; }
-    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: none; cursor: pointer; pointer-events: auto; }
+    .video-tag-badge { position: absolute; top: 10px; left: 10px; background: rgba(124, 92, 255, 0.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: none; cursor: pointer; }
     .video-tag-badge:hover { background: #5a38f5; }
     .card-admin-controls { position: absolute; top: 44px; left: 10px; display: flex; gap: 6px; }
-    .card-admin-btn { background: rgba(18, 19, 24, 0.88); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; pointer-events: auto; }
+    .card-admin-btn { background: rgba(18, 19, 24, 0.88); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
     .card-admin-btn.del:hover { border-color: #dc2626; background: #dc2626; }
     .card-overlay { position: absolute; inset: auto 0 0 0; padding: 36px 12px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.94)); pointer-events: none; }
     .card-overlay h4 { font-size: 14px; margin-bottom: 4px; }
@@ -101,19 +176,19 @@
     .footer-brand { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
     .footer-brand span { font-size: 12px; color: var(--text-muted); }
     .footer-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .footer-link { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; pointer-events: auto; }
+    .footer-link { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .footer-link:hover { color: var(--text-main); border-color: var(--primary); }
     .footer-link.active { background: rgba(124, 92, 255, 0.2); border-color: var(--primary); color: #fff; }
     .footer-copy { font-size: 12px; color: var(--text-muted); }
-    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); display: grid; place-items: center; padding: 20px; z-index: 10000; pointer-events: auto; }
-    .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 92vh; overflow-y: auto; pointer-events: auto; }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); display: grid; place-items: center; padding: 20px; z-index: 10000; }
+    .modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 960px; width: 100%; position: relative; max-height: 92vh; overflow-y: auto; }
     .admin-modal-card { max-width: 620px; }
     .preview-modal-card { max-width: 440px; text-align: center; }
-    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; pointer-events: auto; }
+    .close-modal { position: absolute; top: 16px; left: 16px; background: var(--bg-elevated); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
     .auth-modal-card { max-width: 440px; text-align: center; background: #14151a; border: 1px solid var(--border); padding: 36px 28px; }
     .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 22px; text-align: right; }
-    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 20px; pointer-events: auto; }
-    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; pointer-events: auto; }
+    .btn-google-auth { width: 100%; background: #1f222c; color: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 20px; }
+    .admin-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .admin-list-box { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
     .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-elevated); padding: 10px 14px; border-radius: 10px; margin-top: 8px; gap: 10px; }
@@ -282,12 +357,12 @@
   <div id="adminModal" class="modal hidden">
     <div class="modal-card admin-modal-card">
       <button type="button" class="close-modal" data-close="adminModal">✕</button>
-      <h2>🛠️ إضافة قالب عبر الرابط المباشر (صيغة .mp4)</h2>
-      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أدخل رابطاً مباشراً صحيحاً يعمل بسلاسة على الهواتف والمتصفحات.</p>
+      <h2>🛠️ لوحة إدارة القوالب (سحابية بالكامل)</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">أضف قالبك الجديد وسيتم مزامنته تلقائياً بين هاتفك والكمبيوتر وللجميع.</p>
 
       <form id="adminTemplateForm" class="admin-form">
         <label>عنوان القالب الإعلاني</label>
-        <input type="text" id="tplTitle" required placeholder="مثال: إعلان ترويجي جديد" />
+        <input type="text" id="tplTitle" required placeholder="مثال: إعلان فستان نسائي" />
         <div class="form-row">
           <div>
             <label>التصنيف</label>
@@ -309,14 +384,14 @@
           <option value="image">صورة (JPG / PNG)</option>
         </select>
         <label>رابط الملف المباشر (URL)</label>
-        <input type="text" id="tplMediaUrl" required placeholder="https://files.catbox.moe/xxxxxx.mp4 أو رابط الصورة" />
+        <input type="text" id="tplMediaUrl" required placeholder="https://files.catbox.moe/xxxxxx.mp4" />
         <label>الكلمات الترويجية للقالب (Prompt الافتراضي)</label>
-        <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الترويجي الذي يظهر على الإعلان..."></textarea>
-        <button type="submit" class="btn btn-primary full-width">➕ إضافة وحفظ القالب فوراً</button>
+        <textarea id="tplPrompt" rows="3" required placeholder="اكتب النص الترويجي..."></textarea>
+        <button type="submit" class="btn btn-primary full-width">➕ إضافة القالب سحابياً</button>
       </form>
 
       <div class="admin-list-box">
-        <h4 style="font-size: 15px; margin-bottom: 6px;">📋 القوالب المنشورة حالياً (حذف):</h4>
+        <h4 style="font-size: 15px; margin-bottom: 6px;">📋 القوالب السحابية الحالية (حذف):</h4>
         <div id="adminTemplatesList"></div>
       </div>
     </div>
@@ -344,8 +419,11 @@
 
     let currentMode = 'video';
     let user = safeGetStorage('adspark_user', { email: 'emadjaber23@gmail.com', credits: 1000, plan: 'مجانية' });
-    let currentFilterCat = 'all';
-    let rawProductImg = null; // تخزين الصورة الأصلية بدون أي تشويه أو تفريغ بقعي
+    window.currentFilterCat = 'all';
+    window.templates = [];
+    window.selectedTemplate = null;
+
+    let rawProductImg = null;
     let lastGeneratedBlobUrl = null;
     let lastGeneratedExt = 'webm';
 
@@ -361,19 +439,6 @@
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    const defaultTemplates = [
-      { id: 1, title: 'إعلان سيروم العناية بالبشرة الفاخر', category: 'beauty', badge: 'GMV $20,000', prompt: 'اكتشفي سر الإشراقة الطبيعية مع تركيبتنا الجديدة • نتائج ملموسة من الأسبوع الأول', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80' },
-      { id: 2, title: 'ترويج حقائب وأزياء عصرية 1-Click', category: 'fashion', badge: '20k+ Likes', prompt: 'أناقة استثنائية تناسب كل إطلالاتك اليومية • تصميم عصري وخامات فاخرة', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80' },
-      { id: 3, title: 'مراجعة UGC منزلية لمنتج ذكي', category: 'tech', badge: '$30,000 GMV', prompt: 'هذا المنتج غير روتيني اليومي بالكامل! عملي وسهل الاستخدام في أي مكان', mediaType: 'image', cover: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' }
-    ];
-
-    let templates = safeGetStorage('adspark_templates', null);
-    if (!Array.isArray(templates) || templates.length === 0) {
-      templates = defaultTemplates;
-      localStorage.setItem('adspark_templates', JSON.stringify(templates));
-    }
-    let selectedTemplate = templates[0];
 
     const gmailLoginBtn = document.getElementById('gmailLoginBtn');
     const userLabel = document.getElementById('userLabel');
@@ -393,7 +458,6 @@
     const productThumbImg = document.getElementById('productThumbImg');
     const clearProductBtn = document.getElementById('clearProductBtn');
 
-    // قراءة صورة المنتج الأصلية بدون تفريغ خلفية لضمان عدم تشوهها
     productImageInput.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -421,11 +485,9 @@
       productPreviewChip.classList.add('hidden');
     };
 
-    // دالة الرسم النقي والاحترافي بدون أي تشوهات
     function autoReplaceProduct(ctx, w, h, bgSource, productImg, promptText, ctaText, progress) {
       ctx.clearRect(0, 0, w, h);
 
-      // أ) رسم خلفية القالب بملء الشاشة
       if (bgSource) {
         const srcW = bgSource.videoWidth || bgSource.naturalWidth || w;
         const srcH = bgSource.videoHeight || bgSource.naturalHeight || h;
@@ -451,14 +513,12 @@
         ctx.fillRect(0, 0, w, h);
       }
 
-      // طبقة تظليل خفيفة لإبراز العناصر
       const overlayGrad = ctx.createLinearGradient(0, h * 0.45, 0, h);
       overlayGrad.addColorStop(0, 'rgba(0,0,0,0.08)');
       overlayGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
       ctx.fillStyle = overlayGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // ب) رسم صورة المنتج الأصلية بنقاء تام داخل إطار احترافي متناسق بدون أي تقطيع أو تشوه
       const imgToRender = productImg || bgSource;
       if (imgToRender && imgToRender !== bgSource) {
         const pulseScale = 1 + Math.sin(progress * Math.PI * 2) * 0.02;
@@ -471,7 +531,6 @@
         const pY = (h * 0.43) - (pH / 2);
 
         ctx.save();
-        // ظل أنيق حول صورة المنتج
         ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
         ctx.shadowBlur = 35;
         ctx.shadowOffsetY = 15;
@@ -479,7 +538,6 @@
         ctx.restore();
       }
 
-      // ج) النصوص وزر الشراء
       if (promptText) {
         ctx.save();
         ctx.fillStyle = '#ffffff';
@@ -540,7 +598,6 @@
       });
     }
 
-    // توليد الفيديو أو الصورة بدقة وسلاسة
     generateBtn.onclick = async () => {
       const cost = currentMode === 'video' ? 250 : 100;
       if (user && user.credits < cost) {
@@ -562,9 +619,9 @@
       const ctaText = document.getElementById('ctaInput').value.trim();
 
       let bgSource = null;
-      if (selectedTemplate.mediaType === 'video') {
+      if (window.selectedTemplate.mediaType === 'video') {
         templateVideoSource.crossOrigin = 'anonymous';
-        templateVideoSource.src = selectedTemplate.cover;
+        templateVideoSource.src = window.selectedTemplate.cover;
         await new Promise((resolve) => {
           templateVideoSource.onloadeddata = () => resolve();
           templateVideoSource.onerror = () => resolve();
@@ -577,7 +634,7 @@
           bgSource = null;
         }
       } else {
-        bgSource = await loadSafeImage(selectedTemplate.cover);
+        bgSource = await loadSafeImage(window.selectedTemplate.cover);
       }
 
       const resultSection = document.getElementById('resultSection');
@@ -624,7 +681,7 @@
         outputImage.classList.add('hidden');
         outputVideo.src = lastGeneratedBlobUrl;
         outputVideo.classList.remove('hidden');
-        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز (بدون تشوه)';
+        document.getElementById('resultTitle').textContent = '🎥 الفيديو الإعلاني الجاهز';
         resultSection.classList.remove('hidden');
         outputVideo.play().catch(() => {});
         resultSection.scrollIntoView({ behavior: 'smooth' });
@@ -704,18 +761,14 @@
       } else {
         openAdminBtn.classList.add('hidden');
       }
-      renderTemplates(currentFilterCat);
+      if (typeof window.renderTemplates === 'function') {
+        window.renderTemplates(window.currentFilterCat || 'all');
+      }
     }
 
     function saveUser() {
       try { localStorage.setItem('adspark_user', JSON.stringify(user)); } catch (e) {}
       updateAuthUI();
-    }
-
-    function saveTemplatesToStorage() {
-      try {
-        localStorage.setItem('adspark_templates', JSON.stringify(templates));
-      } catch (e) {}
     }
 
     gmailLoginBtn.onclick = () => {
@@ -737,8 +790,8 @@
       alert('تم تسجيل الدخول بنجاح عبر Google وحصلت على 1000 نقطة!');
     };
 
-    function selectTemplate(tpl) {
-      selectedTemplate = tpl;
+    window.selectTemplate = function(tpl) {
+      window.selectedTemplate = tpl;
       activeTemplateTitle.textContent = tpl.title;
       promptInput.value = tpl.prompt;
       if (tpl.mediaType === 'video') {
@@ -747,7 +800,7 @@
       } else {
         templateVideoSource.removeAttribute('src');
       }
-      renderTemplates(currentFilterCat);
+      window.renderTemplates(window.currentFilterCat || 'all');
     }
 
     function openTemplatePreview(tpl) {
@@ -762,27 +815,15 @@
       document.getElementById('usePreviewTplBtn').onclick = () => {
         previewVid.pause();
         document.getElementById('templatePreviewModal').classList.add('hidden');
-        selectTemplate(tpl);
+        window.selectTemplate(tpl);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
     }
 
-    function deleteTemplateById(id) {
-      if (!isOwnerLoggedIn()) return;
-      if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً؟')) return;
-      templates = templates.filter(t => t.id !== id);
-      saveTemplatesToStorage();
-      if (selectedTemplate && selectedTemplate.id === id && templates.length > 0) {
-        selectTemplate(templates[0]);
-      }
-      renderTemplates(currentFilterCat);
-      renderAdminTemplatesList();
-    }
-
-    function renderAdminTemplatesList() {
+    window.renderAdminTemplatesList = function() {
       const listEl = document.getElementById('adminTemplatesList');
       listEl.innerHTML = '';
-      templates.forEach(tpl => {
+      window.templates.forEach(tpl => {
         const row = document.createElement('div');
         row.className = 'admin-list-item';
         row.innerHTML = '<span>' + (tpl.mediaType === 'video' ? '🎬 ' : '🖼️ ') + tpl.title + '</span>';
@@ -791,21 +832,25 @@
         delBtn.className = 'btn btn-danger';
         delBtn.style.padding = '5px 12px';
         delBtn.textContent = '🗑️ حذف';
-        delBtn.onclick = () => deleteTemplateById(tpl.id);
+        delBtn.onclick = async () => {
+          if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً من السحابة؟')) return;
+          await window.deleteCloudTemplate(tpl.id);
+          window.renderAdminTemplatesList();
+        };
         row.appendChild(delBtn);
         listEl.appendChild(row);
       });
     }
 
-    function renderTemplates(filterCat = 'all') {
-      currentFilterCat = filterCat;
+    window.renderTemplates = function(filterCat = 'all') {
+      window.currentFilterCat = filterCat;
       templatesGrid.innerHTML = '';
-      const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
+      const filtered = filterCat === 'all' ? window.templates : window.templates.filter(t => t.category === filterCat);
       const adminActive = isOwnerLoggedIn();
 
       filtered.forEach(tpl => {
         const card = document.createElement('div');
-        card.className = 'template-card ' + (selectedTemplate && selectedTemplate.id === tpl.id ? 'selected' : '');
+        card.className = 'template-card ' + (window.selectedTemplate && window.selectedTemplate.id === tpl.id ? 'selected' : '');
         const isVideo = tpl.mediaType === 'video';
 
         const badgeSpan = document.createElement('span');
@@ -857,9 +902,11 @@
           delBtn.type = 'button';
           delBtn.className = 'card-admin-btn del';
           delBtn.textContent = '🗑️ حذف';
-          delBtn.onclick = (e) => {
+          delBtn.onclick = async (e) => {
             e.stopPropagation();
-            deleteTemplateById(tpl.id);
+            if (!confirm('هل أنت متأكد من حذف هذا القالب نهائياً من السحابة؟')) return;
+            await window.deleteCloudTemplate(tpl.id);
+            window.renderAdminTemplatesList();
           };
           adminControls.appendChild(delBtn);
           card.appendChild(adminControls);
@@ -871,7 +918,7 @@
         card.appendChild(overlay);
 
         card.onclick = () => {
-          selectTemplate(tpl);
+          window.selectTemplate(tpl);
           switchPage('home');
         };
 
@@ -884,11 +931,11 @@
       tab.onclick = () => {
         catTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        renderTemplates(tab.dataset.cat);
+        window.renderTemplates(tab.dataset.cat);
       };
     });
 
-    document.getElementById('adminTemplateForm').onsubmit = (e) => {
+    document.getElementById('adminTemplateForm').onsubmit = async (e) => {
       e.preventDefault();
       if (!isOwnerLoggedIn()) return;
 
@@ -905,7 +952,6 @@
       }
 
       const newTpl = {
-        id: Date.now(),
         title,
         category,
         badge,
@@ -914,15 +960,9 @@
         cover: mediaUrl
       };
 
-      templates.unshift(newTpl);
-      selectTemplate(newTpl);
-      saveTemplatesToStorage();
-      renderTemplates(currentFilterCat);
-      renderAdminTemplatesList();
-
+      await window.saveCloudTemplate(newTpl);
+      window.renderAdminTemplatesList();
       document.getElementById('adminTemplateForm').reset();
-      document.getElementById('adminModal').classList.add('hidden');
-      alert('تمت إضافة القالب وتحديث القائمة بنجاح!');
     };
 
     openAdminBtn.onclick = () => {
@@ -931,7 +971,7 @@
         return;
       }
       document.getElementById('adminTemplateForm').reset();
-      renderAdminTemplatesList();
+      window.renderAdminTemplatesList();
       document.getElementById('adminModal').classList.remove('hidden');
     };
 
@@ -945,7 +985,6 @@
       };
     });
 
-    selectTemplate(selectedTemplate);
     updateAuthUI();
   </script>
 </body>
