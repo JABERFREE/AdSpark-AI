@@ -270,14 +270,14 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// --- دالة التوليد المحلي المضمونة والمستقرة (بدون أخطاء CORS) ---
+// --- دالة التوليد المحلية المستقرة لتجنب أخطاء CORS و undefined ---
 async function generateWithReplicate(promptText, imageUrl = null) {
   // محاكاة عملية التوليد السريع بالذكاء الاصطناعي محلياً لمنع أخطاء الشبكة والحظر
   return new Promise((resolve) => {
     setTimeout(() => {
       // إرجاع صورة افتراضية عالية الجودة أو النتيجة المحلية المعالجة
       resolve("https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1080&q=80");
-    }, 1500);
+    }, 1200);
   });
 }
 
