@@ -270,20 +270,20 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// --- دالة الاتصال المباشر والمحدثة بـ Replicate ---
 async function generateWithReplicate(promptText, imageUrl = null) {
   const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
   const targetUrl = "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions";
   
-  // استخدام وسيط (Proxy) موثوق لتجاوز قيود CORS في المتصفح
   const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
-  const requestBody = {
-    input: {
-      prompt: promptText,
-      ...(imageUrl && { image: imageUrl })
-    }
+  // التأكد من أن مدخلات الصورة صالحة وليست undefined أو فارغة
+  const inputPayload = {
+    prompt: promptText
   };
+  
+  if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
+    inputPayload.image = imageUrl;
+  }
 
   try {
     const res = await fetch(proxyUrl, {
@@ -293,22 +293,20 @@ async function generateWithReplicate(promptText, imageUrl = null) {
         "Content-Type": "application/json",
         "Prefer": "wait"
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({ input: inputPayload })
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Replicate Error Response:", errorText);
-      throw new Error(`خطأ من خادم Replicate: ${res.status}`);
+      const errText = await res.text();
+      console.error("Replicate Error:", errText);
+      throw new Error(`خطأ من الخادم: ${res.status}`);
     }
 
     const data = await res.json();
-    
-    // إرجاع النتيجة (سواء رابط مباشر أو مصفوفة مخرجات)
     return data.output;
   } catch (error) {
     console.error("خطأ التوليد:", error);
-    alert("فشل توليد الإعلان. تأكد من اتصال الإنترنت وصحة مفتاح الـ API.");
+    alert("فشل توليد الإعلان. تأكد من اتصال الإنترنت ورصيد الحساب.");
     return null;
   }
 }
