@@ -984,7 +984,53 @@
         document.getElementById(targetId).classList.add('hidden');
       };
     });
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.onclick = () => {
+        const targetId = btn.dataset.close;
+        if (targetId === 'templatePreviewModal') {
+            document.getElementById('previewTplVideo').pause();
+        }
+        document.getElementById(targetId).classList.add('hidden');
+    };
+});
 
+// ==========================================
+// ضع كود Replicate هنا:
+// ==========================================
+async function generateWithReplicate(promptText, imageUrl = null) {
+    const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
+    const modelVersion = "black-forest-labs/flux-schnell";
+
+    const inputData = {
+        prompt: promptText,
+        ...(imageUrl && { image: imageUrl })
+    };
+
+    try {
+        const response = `https://api.replicate.com/v1/models/${modelVersion}/predictions`;
+        const res = await fetch(response, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json",
+                "Prefer": "wait"
+            },
+            body: JSON.stringify({ input: inputData })
+        });
+
+        if (!res.ok) throw new Error(`خطأ في الاتصال: ${res.statusText}`);
+        const result = await res.json();
+        return result.output;
+    } catch (error) {
+        console.error("خطأ التوليد:", error);
+        alert("فشل توليد الإعلان.");
+    }
+}
+
+updateAuthUI();
+</script>
+</body>
+</html>
     updateAuthUI();
   </script>
 </body>
