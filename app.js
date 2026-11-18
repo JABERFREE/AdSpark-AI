@@ -276,12 +276,12 @@ async function generateWithReplicate(promptText, imageUrl = null) {
   
   const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
-  // التأكد من أن مدخلات الصورة صالحة وليست undefined أو فارغة
+  // إعداد البيانات وتصفية أي قيم فارغة أو undefined لمنع خطأ 404
   const inputPayload = {
-    prompt: promptText
+    prompt: promptText || "Professional commercial product advertisement"
   };
   
-  if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
+  if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http') && !imageUrl.includes('undefined')) {
     inputPayload.image = imageUrl;
   }
 
@@ -306,7 +306,7 @@ async function generateWithReplicate(promptText, imageUrl = null) {
     return data.output;
   } catch (error) {
     console.error("خطأ التوليد:", error);
-    alert("فشل توليد الإعلان. تأكد من اتصال الإنترنت ورصيد الحساب.");
+    alert("فشل توليد الإعلان. تحقق من المدخلات ورصيد حساب Replicate.");
     return null;
   }
 }
