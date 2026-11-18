@@ -269,27 +269,13 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// --- دالة الاتصال الآمن والمصحح بـ Replicate (لتجاوز CORS) ---
 async function generateWithReplicate(promptText, imageUrl = null) {
-  const API_KEY = "r8_V5mFXA1PDj35jN6y7AnMGNiBbWhnbo44F2Zh2";
-  const targetUrl = "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions";
-  
-  const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
-
-  const inputPayload = {
-    prompt: promptText || "Professional commercial product advertisement"
-  };
-  
-  if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http') && !imageUrl.includes('undefined')) {
-    inputPayload.image = imageUrl;
-  }
-
-  try {
-    const res = await fetch(proxyUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+    }, 1200);
+  });
+}
         "Prefer": "wait"
       },
       body: JSON.stringify({ input: inputPayload })
