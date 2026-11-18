@@ -3,7 +3,7 @@ const GENERATION_COST = 250;
 
 let user = JSON.parse(localStorage.getItem('adspark_user')) || null;
 let uploadedProductImg = null;
-let outputMediaType = 'video'; // 'video' or 'image'
+let outputMediaType = 'video'; // 'video' or 'image' 
 let lastDownloadUrl = null;
 
 // مكتبة قوالب غنية ومتنوعة (صور عالية الدقة تظهر فوراً بدون شاشات سوداء)
