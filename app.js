@@ -270,17 +270,19 @@ productImageInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// --- دالة الاتصال بمنصة Replicate عبر Proxy لتجاوز حظر CORS ---
+// --- دالة الاتصال المباشر والمحدثة بـ Replicate ---
 async function generateWithReplicate(promptText, imageUrl = null) {
   const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
-  const targetUrl = `https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions`;
+  const targetUrl = "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions";
   
-  // استخدام وسيط بديل ومستقر لتجاوز حظر CORS
-  const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
+  // استخدام وسيط (Proxy) موثوق لتجاوز قيود CORS في المتصفح
+  const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
-  const inputData = {
-    prompt: promptText,
-    ...(imageUrl && { image: imageUrl })
+  const requestBody = {
+    input: {
+      prompt: promptText,
+      ...(imageUrl && { image: imageUrl })
+    }
   };
 
   try {
@@ -291,20 +293,22 @@ async function generateWithReplicate(promptText, imageUrl = null) {
         "Content-Type": "application/json",
         "Prefer": "wait"
       },
-      body: JSON.stringify({ input: inputData })
+      body: JSON.stringify(requestBody)
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      console.error("Replicate API Error:", errText);
-      throw new Error(`خطأ من الخادم: ${res.statusText}`);
+      const errorText = await res.text();
+      console.error("Replicate Error Response:", errorText);
+      throw new Error(`خطأ من خادم Replicate: ${res.status}`);
     }
 
-    const result = await res.json();
-    return result.output;
+    const data = await res.json();
+    
+    // إرجاع النتيجة (سواء رابط مباشر أو مصفوفة مخرجات)
+    return data.output;
   } catch (error) {
     console.error("خطأ التوليد:", error);
-    alert("فشل التوليد بسبب قيود الشبكة. تحقق من الـ Console.");
+    alert("فشل توليد الإعلان. تأكد من اتصال الإنترنت وصحة مفتاح الـ API.");
     return null;
   }
 }
