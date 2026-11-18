@@ -1,6 +1,7 @@
 // ==================== OWNER / ADMIN CONFIGURATION ====================
 // ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط
-const ADMIN_EMAILS = ['emadjaber23@gmail.com',
+const ADMIN_EMAILS = [
+  'emadjaber23@gmail.com',
   'admin@gmail.com',
   'owner@gmail.com',
   'jaber@gmail.com'
@@ -172,7 +173,7 @@ gmailLoginBtn.addEventListener('click', () => {
   }
 });
 
-// عرض القوالب
+// عرض القوالب مع تفعيل زر المعاينة المحسّن
 function renderTemplates(filterCat = 'all') {
   templatesGrid.innerHTML = '';
   const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
@@ -183,11 +184,12 @@ function renderTemplates(filterCat = 'all') {
 
     const isVideo = tpl.mediaType === 'video';
     const mediaHtml = isVideo
-      ? `<span class="video-tag-badge">🎬 فيديو</span><video src="${tpl.cover}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`
+      ? `<video src="${tpl.cover}" muted loop playsinline preload="metadata" onmouseover="this.play()" onmouseout="this.pause()"></video>`
       : `<img src="${tpl.cover}" alt="${tpl.title}" crossorigin="anonymous" />`;
 
     card.innerHTML = `
       <span class="card-badge">${tpl.badge}</span>
+      <button type="button" class="video-tag-badge" onclick="event.stopPropagation(); previewTemplateFull('${tpl.id}')">👁️ معاينة</button>
       ${mediaHtml}
       <div class="card-overlay">
         <h4>${tpl.title}</h4>
@@ -205,6 +207,39 @@ function renderTemplates(filterCat = 'all') {
 
     templatesGrid.appendChild(card);
   });
+}
+
+// دالة المعاينة الكاملة والمصححة لعرض الفيديوهات والصور بشكل سليم وبدون مشاكل في الحجم
+window.previewTemplateFull = function(tplId) {
+  const tpl = templates.find(t => t.id == tplId);
+  if (!tpl) return;
+  
+  document.getElementById('previewTplTitle').textContent = tpl.title;
+  const v = document.getElementById('previewTplVideo');
+  const modal = document.getElementById('templatePreviewModal');
+  
+  const mediaSource = tpl.mediaUrl || tpl.cover || '';
+  
+  if (tpl.mediaType === 'image' || (!mediaSource.includes('.mp4') && !mediaSource.includes('.webm') && !mediaSource.startsWith('blob:'))) {
+    v.style.display = 'none';
+  } else {
+    v.style.display = 'block';
+    v.src = mediaSource;
+    v.load();
+    v.play().catch(e => console.log("Autoplay prevented:", e));
+  }
+  
+  modal.classList.remove('hidden');
+};
+
+// زر استخدام القالب من نافذة المعاينة
+const usePreviewBtn = document.getElementById('usePreviewTplBtn');
+if (usePreviewBtn) {
+  usePreviewBtn.onclick = () => {
+    document.getElementById('templatePreviewModal').classList.add('hidden');
+    const v = document.getElementById('previewTplVideo');
+    if (v) v.pause();
+  };
 }
 
 // تصنيفات القوالب
@@ -429,7 +464,8 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
       badge,
       prompt: promptText,
       mediaType,
-      cover: mediaUrl
+      cover: mediaUrl,
+      mediaUrl: mediaUrl // حفظ الرابط بوضوح لمعاينة الفيديو
     };
     templates.unshift(newTpl);
     try {
@@ -461,7 +497,12 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
 // إغلاق النوافذ المنبثقة
 document.querySelectorAll('.close-modal').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.getElementById(btn.dataset.close).classList.add('hidden');
+    const modalId = btn.dataset.close;
+    document.getElementById(modalId).classList.add('hidden');
+    if (modalId === 'templatePreviewModal') {
+      const v = document.getElementById('previewTplVideo');
+      if (v) v.pause();
+    }
   });
 });
 
