@@ -275,7 +275,8 @@ async function generateWithReplicate(promptText, imageUrl = null) {
   const API_KEY = "r8_V5mFXAPdj35jN6y7AnMGNiBbWhnbo44F2Zh2";
   const targetUrl = `https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions`;
   
-  const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+  // استخدام وسيط بديل ومستقر لتجاوز حظر CORS
+  const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
 
   const inputData = {
     prompt: promptText,
@@ -303,7 +304,7 @@ async function generateWithReplicate(promptText, imageUrl = null) {
     return result.output;
   } catch (error) {
     console.error("خطأ التوليد:", error);
-    alert("فشل توليد الإعلان عبر الذكاء الاصطناعي. تأكد من صحة الاتصال والمفاتيح.");
+    alert("فشل التوليد بسبب قيود الشبكة. تحقق من الـ Console.");
     return null;
   }
 }
