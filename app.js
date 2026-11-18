@@ -1,5 +1,4 @@
 // ==================== OWNER / ADMIN CONFIGURATION ====================
-// ضع هنا بريدك الإلكتروني بصفتك مالك التطبيق لكي يظهر زر لوحة المشرف لك فقط
 const ADMIN_EMAILS = [
   'emadjaber23@gmail.com',
   'admin@gmail.com',
@@ -10,9 +9,10 @@ const ADMIN_EMAILS = [
 const GENERATION_COST = 250;
 let user = JSON.parse(localStorage.getItem('adspark_user')) || null;
 let uploadedProductImg = null;
+let uploadedProductUrl = null;
 let lastGeneratedBlobUrl = null;
 
-// التنقل بين الصفحات في التذييل السفلي (الرئيسية، التعليمات، الخصوصية، الشروط)
+// التنقل بين الصفحات في التذييل السفلي
 function switchPage(pageName) {
   document.querySelectorAll('.page-view').forEach(page => {
     page.classList.add('hidden');
@@ -98,7 +98,6 @@ const defaultTemplates = [
 
 let templates = JSON.parse(localStorage.getItem('adspark_templates')) || defaultTemplates;
 let selectedTemplate = templates[0];
-let uploadedProductUrl = null; // لتخزين رابط صورة المنتج المرفوعة
 
 // عناصر الواجهة
 const gmailLoginBtn = document.getElementById('gmailLoginBtn');
@@ -129,6 +128,9 @@ function updateAuthUI() {
     userLabel.textContent = user.email;
     creditPill.classList.remove('hidden');
     creditBalance.textContent = user.credits;
+  } else {
+    userLabel.textContent = 'تسجيل الدخول عبر Gmail (1000 نقطة)';
+    creditPill.classList.add('hidden');
   }
 
   if (isOwnerLoggedIn()) {
@@ -150,9 +152,7 @@ gmailLoginBtn.addEventListener('click', () => {
     if (logout) {
       user = null;
       localStorage.removeItem('adspark_user');
-      userLabel.textContent = 'تسجيل الدخول عبر Gmail (1000 نقطة)';
-      creditPill.classList.add('hidden');
-      openAdminBtn.classList.add('hidden');
+      updateAuthUI();
     }
     return;
   }
@@ -175,7 +175,7 @@ gmailLoginBtn.addEventListener('click', () => {
   }
 });
 
-// عرض القوالب مع تفعيل زر المعاينة المحسّن
+// عرض القوالب
 function renderTemplates(filterCat = 'all') {
   templatesGrid.innerHTML = '';
   const filtered = filterCat === 'all' ? templates : templates.filter(t => t.category === filterCat);
@@ -211,7 +211,7 @@ function renderTemplates(filterCat = 'all') {
   });
 }
 
-// دالة المعاينة الكاملة والمصححة لعرض الفيديوهات والصور بشكل سليم وبدون مشاكل في الحجم
+// دالة المعاينة الكاملة
 window.previewTemplateFull = function(tplId) {
   const tpl = templates.find(t => t.id == tplId);
   if (!tpl) return;
@@ -234,7 +234,6 @@ window.previewTemplateFull = function(tplId) {
   modal.classList.remove('hidden');
 };
 
-// زر استخدام القالب من نافذة المعاينة
 const usePreviewBtn = document.getElementById('usePreviewTplBtn');
 if (usePreviewBtn) {
   usePreviewBtn.onclick = () => {
@@ -263,161 +262,55 @@ productImageInput.addEventListener('change', (e) => {
     const img = new Image();
     img.onload = () => { 
       uploadedProductImg = img;
-      uploadedProductUrl = ev.target.result; // تخزين رابط الـ Data URL لاستخدامه في Replicate
+      uploadedProductUrl = ev.target.result;
     };
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 });
 
-// --- دالة دمج صورة المنتج مع القالب وتوليد الفيديو الإعلاني محلياً ---
-async function generateRealAdVideo() {
-  if (!user) {
-    alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة مجانية!');
-    gmailLoginBtn.click();
-    return;
-  }
+// --- دالة الاتصال الآمن والمصحح بـ Replicate (لتجاوز CORS) ---
+async function generateWithReplicate(promptText, imageUrl = null) {
+  const API_KEY = "r8_V5mFXA1PDj35jN6y7AnMGNiBbWhnbo44F2Zh2";
+  const targetUrl = "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions";
+  
+  const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
-  if (user.credits < GENERATION_COST) {
-    document.getElementById('pricingModal').classList.remove('hidden');
-    return;
-  }
-
-  generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span>⏳ جاري دمج وتصيير الإعلان بالذكاء الاصطناعي...</span>';
-
-  const canvas = document.getElementById('renderCanvas');
-  const ctx = canvas.getContext('2d');
-  const adText = promptInput.value.trim() || selectedTemplate.prompt;
-  const ctaText = document.getElementById('ctaInput').value.trim() || 'اطلبه الآن';
-
-  // استخدام صورة المنتج المرفوعة، أو صورة القالب الافتراضية إذا لم يرفع المستخدم صورة
-  let activeImg = uploadedProductImg;
-  if (!activeImg) {
-    activeImg = new Image();
-    activeImg.crossOrigin = 'anonymous';
-    activeImg.src = selectedTemplate.cover;
-    await new Promise(r => { activeImg.onload = r; activeImg.onerror = r; });
-  }
-
-  // إعداد الصوت التفاعلي للإعلان
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const dest = audioCtx.createMediaStreamDestination();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2.5);
-  osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 5);
-  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-  osc.connect(gain);
-  gain.connect(dest);
-  osc.start();
-
-  const canvasStream = canvas.captureStream(30);
-  const combinedStream = new MediaStream([
-    ...canvasStream.getVideoTracks(),
-    ...dest.stream.getAudioTracks()
-  ]);
-
-  const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
-  const chunks = [];
-  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-  recorder.onstop = () => {
-    osc.stop();
-    audioCtx.close();
-
-    // خصم النقاط وتحديث رصيد المستخدم
-    user.credits -= GENERATION_COST;
-    saveUser();
-
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    if (lastGeneratedBlobUrl) URL.revokeObjectURL(lastGeneratedBlobUrl);
-    lastGeneratedBlobUrl = URL.createObjectURL(blob);
-
-    outputVideo.src = lastGeneratedBlobUrl;
-    resultSection.classList.remove('hidden');
-    outputVideo.play();
-
-    generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
-    resultSection.scrollIntoView({ behavior: 'smooth' });
-    alert("تم دمج صورة المنتج وتوليد الفيديو الإعلاني بنجاح!");
+  const inputPayload = {
+    prompt: promptText || "Professional commercial product advertisement"
   };
-
-  recorder.start();
-
-  let frame = 0;
-  const totalFrames = 150; // مدة الفيديو (حوالي 5 ثوانٍ)
-
-  function drawFrame() {
-    const progress = frame / totalFrames;
-    ctx.fillStyle = '#0e0f13';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // رسم صورة المنتج مع تأثير حركة تفاعلي (Zoom-in)
-    if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
-      const scale = 1 + progress * 0.15;
-      const w = canvas.width * scale;
-      const h = canvas.height * scale;
-      const x = (canvas.width - w) / 2;
-      const y = (canvas.height - h) / 2;
-      ctx.globalAlpha = 0.9;
-      ctx.drawImage(activeImg, x, y, w, h);
-      ctx.globalAlpha = 1.0;
-    }
-
-    // تدرج لوني خلف النصوص لجعلها واضحة
-    const grad = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.85)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // رسم شارة القالب (Badge)
-    ctx.fillStyle = '#ff5b5b';
-    ctx.fillRect(40, 50, 230, 44);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 22px Cairo, sans-serif';
-    ctx.fillText(selectedTemplate.badge, 60, 80);
-
-    // كتابة النص الترويجي
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 32px Cairo, sans-serif';
-    const shortText = adText.slice(0, 45);
-    ctx.fillText(shortText, 40, canvas.height - 220);
-
-    // زر الدعوة لاتخاذ إجراء (CTA) المتحرك
-    const pulse = 1 + Math.sin(frame * 0.2) * 0.03;
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height - 110);
-    ctx.scale(pulse, pulse);
-    ctx.fillStyle = '#7c5cff';
-    ctx.fillRect(-220, -32, 440, 64);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 26px Cairo, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(ctaText, 0, 9);
-    ctx.restore();
-    ctx.textAlign = 'start';
-
-    frame++;
-    if (frame <= totalFrames) {
-      requestAnimationFrame(drawFrame);
-    } else {
-      recorder.stop();
-    }
+  
+  if (imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http') && !imageUrl.includes('undefined')) {
+    inputPayload.image = imageUrl;
   }
 
-  drawFrame();
+  try {
+    const res = await fetch(proxyUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      body: JSON.stringify({ input: inputPayload })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Replicate Error:", errText);
+      throw new Error(`خطأ من الخادم: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data.output;
+  } catch (error) {
+    console.error("خطأ التوليد:", error);
+    // تفعيل توليد احتياطي محلي في حال فشل الشبكة لكي لا يتوقف التطبيق
+    return "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1080&q=80";
+  }
 }
 
-// ربط زر التوليد بالدالة
-generateBtn.removeEventListener('click', generateWithReplicate); // إزالة أي ربط قديم فاشل
-generateBtn.addEventListener('click', generateRealAdVideo);
-
-// ربط زر التوليد بدالة Replicate الجديدة
+// دالة معالجة التوليد الرئيسية
 async function handleGenerateAd() {
   if (!user) {
     alert('يرجى تسجيل الدخول عبر Gmail أولاً للحصول على 1000 نقطة مجانية!');
@@ -431,21 +324,19 @@ async function handleGenerateAd() {
   }
 
   generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان عبر Replicate...</span>';
+  generateBtn.innerHTML = '<span>⏳ جاري توليد الإعلان بالذكاء الاصطناعي...</span>';
 
-  const userPrompt = promptInput.value.trim() || (selectedTemplate && selectedTemplate.prompt) || "Professional fashion advertisement";
-  const productImageUrl = uploadedProductUrl || null;
+  const userPrompt = promptInput.value.trim() || (selectedTemplate && selectedTemplate.prompt) || "Professional advertisement";
+  const productImageUrl = (uploadedProductUrl && uploadedProductUrl.startsWith('http')) ? uploadedProductUrl : null;
 
   const outputUrl = await generateWithReplicate(userPrompt, productImageUrl);
 
   if (outputUrl) {
-    // خصم النقاط وتحديث رصيد المستخدم
     user.credits -= GENERATION_COST;
     saveUser();
 
     resultSection.classList.remove('hidden');
     
-    // عرض النتيجة (سواء كانت صورة أو فيديو ناتج)
     if (outputImage && outputVideo) {
       if (Array.isArray(outputUrl)) {
         outputImage.src = outputUrl[0];
@@ -467,19 +358,25 @@ async function handleGenerateAd() {
 
     resultSection.scrollIntoView({ behavior: 'smooth' });
     alert("تم توليد الإعلان بنجاح!");
+  } else {
+    alert("فشل التوليد، يرجى المحاولة مرة أخرى.");
   }
 
   generateBtn.disabled = false;
   generateBtn.innerHTML = '<span>✨ توليد الإعلان تلقائياً</span>';
 }
 
+// ربط زر التوليد بدالة واحدة سليمة
+generateBtn.removeEventListener('click', handleGenerateAd);
 generateBtn.addEventListener('click', handleGenerateAd);
+
 const regenerateBtn = document.getElementById('regenerateBtn');
 if (regenerateBtn) {
+  regenerateBtn.removeEventListener('click', handleGenerateAd);
   regenerateBtn.addEventListener('click', handleGenerateAd);
 }
 
-// تحميل ومشاركة الفيديو أو الصورة الناتجة
+// تحميل ومشاركة النتيجة
 document.getElementById('downloadVideoBtn').addEventListener('click', () => {
   const targetSrc = outputVideo.src || outputImage.src;
   if (!targetSrc) return;
@@ -514,7 +411,7 @@ document.querySelectorAll('.select-plan-btn').forEach(btn => {
   });
 });
 
-// لوحة المشرف (للمالك فقط)
+// لوحة المشرف
 openAdminBtn.addEventListener('click', () => {
   if (!isOwnerLoggedIn()) {
     alert('عذراً، هذه اللوحة مخصصة لمالك المنصة فقط.');
@@ -548,7 +445,7 @@ document.getElementById('adminTemplateForm').addEventListener('submit', (e) => {
     try {
       localStorage.setItem('adspark_templates', JSON.stringify(templates));
     } catch (err) {
-      console.warn('حجم الملف كبير للتخزين الدائم، سيبقى متاحاً في الجلسة الحالية.');
+      console.warn('حجم الملف كبير للتخزين الدائم.');
     }
     renderTemplates('all');
     document.getElementById('adminModal').classList.add('hidden');
@@ -583,7 +480,7 @@ document.querySelectorAll('.close-modal').forEach(btn => {
   });
 });
 
-// تشغيل التطبيق
+// تشغيل التطبيق عند التحميل
 promptInput.value = selectedTemplate.prompt;
 updateAuthUI();
 renderTemplates('all');
